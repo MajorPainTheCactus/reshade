@@ -80,10 +80,15 @@ static const char *addon_event_to_string(reshade::addon_event ev)
 		CASE(dispatch);
 		CASE(draw_or_dispatch_indirect);
 		CASE(copy_resource);
+		CASE(post_copy_resource);
 		CASE(copy_buffer_region);
+		CASE(post_copy_buffer_region);
 		CASE(copy_buffer_to_texture);
+		CASE(post_copy_buffer_to_texture);
 		CASE(copy_texture_region);
+		CASE(post_copy_texture_region);
 		CASE(copy_texture_to_buffer);
+		CASE(post_copy_texture_to_buffer);
 		CASE(resolve_texture_region);
 		CASE(clear_depth_stencil_view);
 		CASE(clear_render_target_view);
@@ -98,6 +103,7 @@ static const char *addon_event_to_string(reshade::addon_event ev)
 		CASE(execute_command_list);
 		CASE(execute_secondary_command_list);
 		CASE(present);
+		CASE(start_frame);
 		CASE(reshade_present);
 		CASE(reshade_begin_effects);
 		CASE(reshade_finish_effects);

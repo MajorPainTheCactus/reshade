@@ -169,3 +169,11 @@ bool reshade::d3d12::swapchain_impl::on_present(ID3D12Resource *source, HWND hwn
 	on_present();
 	return true;
 }
+
+void reshade::d3d12::swapchain_impl::on_start_frame()
+{
+	if (!is_initialized())
+		return;
+
+	runtime::on_start_frame();
+}

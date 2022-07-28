@@ -383,7 +383,13 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice9::Present(const RECT *pSourceRect, cons
 	if (Direct3DSwapChain9::is_presenting_entire_surface(pSourceRect, hDestWindowOverride))
 		_implicit_swapchain->on_present();
 
-	return _orig->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+	HRESULT hr = _orig->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+
+#if RESHADE_ADDON
+	reshade::invoke_addon_event<reshade::addon_event::start_frame>(this);
+#endif
+
+	return hr;
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice9::GetBackBuffer(UINT iSwapChain, UINT iBackBuffer, D3DBACKBUFFER_TYPE Type, IDirect3DSurface9 **ppBackBuffer)
 {
@@ -2072,7 +2078,13 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice9::PresentEx(const RECT *pSourceRect, co
 	if (Direct3DSwapChain9::is_presenting_entire_surface(pSourceRect, hDestWindowOverride))
 		_implicit_swapchain->on_present();
 
-	return static_cast<IDirect3DDevice9Ex *>(_orig)->PresentEx(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion, dwFlags);
+	HRESULT hr = static_cast<IDirect3DDevice9Ex *>(_orig)->PresentEx(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion, dwFlags);
+	
+#if RESHADE_ADDON
+	reshade::invoke_addon_event<reshade::addon_event::start_frame>(this);
+#endif
+
+	return hr;
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice9::GetGPUThreadPriority(INT *pPriority)
 {

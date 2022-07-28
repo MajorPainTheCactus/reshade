@@ -419,6 +419,22 @@ struct imgui_function_table
 	void(*ImFont_RenderChar)(const ImFont *_this, ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, ImWchar c);
 	void(*ImFont_RenderText)(const ImFont *_this, ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip);
 
+	void(*ConstructImFontConfig)(ImFontConfig *_this);
+	void(*ConstructImFontAtlas)(ImFontAtlas *_this);
+	void(*DestructImFontAtlas)(ImFontAtlas *_this);
+	ImFont* (*ImFontAtlas_AddFontFromFileTTF)(ImFontAtlas *_this, const char* filename, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges);
+	ImFont* (*ImFontAtlas_AddFontFromMemoryTTF)(ImFontAtlas *_this, void* font_data, int font_size, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges);
+	ImFont* (*ImFontAtlas_AddFontFromMemoryCompressedBase85TTF)(ImFontAtlas *_this, const char* compressed_font_data_base85, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges);
+	void (*ImFontAtlas_Clear) (ImFontAtlas *_this);
+	bool (*ImFontAtlas_Build) (ImFontAtlas *_this);
+
+	struct ImGuiWindow* (*FindWindowByName)(const char* name);
+	struct ImGuiContext* (*GetCurrentContext)();
+	void(*TableEndRow)(struct ImGuiTable* table);
+
+	ImGuiID(*ImGuiWindow_GetID)(ImGuiWindow *_this, const char* str, const char* str_end);
+	void(*OpenPopupEx)(ImGuiID id, ImGuiPopupFlags popup_flags);
+	bool(*BeginPopupEx)(ImGuiID id, ImGuiWindowFlags extra_flags);
 };
 
 inline const imgui_function_table *&imgui_function_table_instance()
@@ -781,6 +797,12 @@ namespace ImGui
 	inline void* MemAlloc(size_t size) { return imgui_function_table_instance()->MemAlloc(size); }
 	inline void MemFree(void* ptr) { imgui_function_table_instance()->MemFree(ptr); }
 
+	inline ImGuiWindow* FindWindowByName(const char* name) { return imgui_function_table_instance()->FindWindowByName(name); }
+	inline ImGuiContext* GetCurrentContext() { return imgui_function_table_instance()->GetCurrentContext(); }
+	inline void TableEndRow(ImGuiTable* table) { return imgui_function_table_instance()->TableEndRow(table); }
+	
+	inline void OpenPopupEx(ImGuiID id, ImGuiPopupFlags popup_flags) { return imgui_function_table_instance()->OpenPopupEx(id, popup_flags); }
+	inline bool BeginPopupEx(ImGuiID id, ImGuiWindowFlags extra_flags) { return imgui_function_table_instance()->BeginPopupEx(id, extra_flags); }
 }
 
 inline int ImGuiStorage::GetInt(ImGuiID key, int default_val) const { return imgui_function_table_instance()->ImGuiStorage_GetInt(this, key, default_val); }
@@ -851,6 +873,16 @@ inline const char* ImFont::CalcWordWrapPositionA(float scale, const char* text, 
 inline void ImFont::RenderChar(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, ImWchar c) const { imgui_function_table_instance()->ImFont_RenderChar(this, draw_list, size, pos, col, c); }
 inline void ImFont::RenderText(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) const { imgui_function_table_instance()->ImFont_RenderText(this, draw_list, size, pos, col, clip_rect, text_begin, text_end, wrap_width, cpu_fine_clip); }
 
+inline ImFontConfig::ImFontConfig() { imgui_function_table_instance()->ConstructImFontConfig(this); }
+inline ImFontAtlas::ImFontAtlas() { imgui_function_table_instance()->ConstructImFontAtlas(this); }
+inline ImFontAtlas::~ImFontAtlas() { imgui_function_table_instance()->DestructImFontAtlas(this); }
+inline ImFont* ImFontAtlas::AddFontFromFileTTF(const char* filename, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges) { return imgui_function_table_instance()->ImFontAtlas_AddFontFromFileTTF(this, filename, size_pixels, font_cfg, glyph_ranges); }
+inline ImFont* ImFontAtlas::AddFontFromMemoryTTF(void* font_data, int font_size, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges) { return imgui_function_table_instance()->ImFontAtlas_AddFontFromMemoryTTF(this, font_data, font_size, size_pixels, font_cfg, glyph_ranges); }
+inline ImFont* ImFontAtlas::AddFontFromMemoryCompressedBase85TTF(const char* compressed_ttf_data_base85, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges) { return imgui_function_table_instance()->ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(this, compressed_ttf_data_base85, size_pixels, font_cfg, glyph_ranges); }
+inline void ImFontAtlas::Clear() { imgui_function_table_instance()->ImFontAtlas_Clear(this); }
+inline bool ImFontAtlas::Build() { return imgui_function_table_instance()->ImFontAtlas_Build(this); }
+
+inline ImGuiID ImGuiWindow::GetID(const char* str, const char* str_end) { return imgui_function_table_instance()->ImGuiWindow_GetID(this, str, str_end); }
 
 #endif
 

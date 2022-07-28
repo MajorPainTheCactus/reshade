@@ -65,5 +65,13 @@ HRESULT STDMETHODCALLTYPE D3D12CommandQueueDownlevel::Present(ID3D12GraphicsComm
 		SUCCEEDED(pOpenCommandList->QueryInterface(&command_list_proxy)))
 		pOpenCommandList = command_list_proxy->_orig;
 
-	return _orig->Present(pOpenCommandList, pSourceTex2D, hWindow, Flags);
+	HRESULT hr = _orig->Present(pOpenCommandList, pSourceTex2D, hWindow, Flags);
+
+#if RESHADE_ADDON
+	// Do not call 'start_frame' event before 'init_swapchain' event
+	if (_width != 0 && _height != 0)
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(_device);
+#endif
+
+	return hr;
 }

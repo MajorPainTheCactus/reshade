@@ -141,7 +141,8 @@ namespace reshade::api
 		read_only = 1,
 		write_only,
 		read_write,
-		write_discard
+		write_discard,
+		write_no_overwrite
 	};
 
 	/// <summary>
@@ -422,6 +423,8 @@ namespace reshade::api
 		constexpr uint32_t width() const { return right - left; }
 		constexpr uint32_t height() const { return bottom - top; }
 		constexpr uint32_t depth() const { return back - front; }
+
+		constexpr bool operator == (const subresource_box& other) const { return left == other.left && top == other.top && front == other.front && right == other.right && bottom == other.bottom && back == other.back; }
 	};
 
 	/// <summary>
@@ -523,4 +526,10 @@ namespace reshade::api
 		/// </summary>
 		float clear_color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	};
+
+	/// <summary>
+	/// An opaque handle to a font atlas object .
+	/// <para>This maps to an ImFontAtlas handle.</para>
+	/// </summary>
+	RESHADE_DEFINE_HANDLE(font_atlas);
 }

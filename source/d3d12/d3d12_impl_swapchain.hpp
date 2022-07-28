@@ -31,6 +31,7 @@ namespace reshade::d3d12
 
 		void on_present();
 		bool on_present(ID3D12Resource *source, HWND hwnd);
+		void on_start_frame();
 
 	private:
 		UINT _swap_index = 0;

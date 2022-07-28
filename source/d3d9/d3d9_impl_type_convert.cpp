@@ -313,6 +313,8 @@ auto reshade::d3d9::convert_access_flags(api::map_access access) -> DWORD
 		return D3DLOCK_READONLY;
 	case api::map_access::write_discard:
 		return D3DLOCK_DISCARD;
+	case api::map_access::write_no_overwrite:
+		return D3DLOCK_NOOVERWRITE;
 	}
 	return 0;
 }
@@ -322,6 +324,8 @@ reshade::api::map_access reshade::d3d9::convert_access_flags(DWORD lock_flags)
 		return reshade::api::map_access::read_only;
 	else if ((lock_flags & D3DLOCK_DISCARD) != 0)
 		return reshade::api::map_access::write_discard;
+	else if ((lock_flags & D3DLOCK_NOOVERWRITE) != 0)
+		return reshade::api::map_access::write_no_overwrite;
 	return reshade::api::map_access::read_write;
 }
 
@@ -1112,6 +1116,8 @@ auto reshade::d3d9::convert_query_type(api::query_type value) -> D3DQUERYTYPE
 		return D3DQUERYTYPE_OCCLUSION;
 	case api::query_type::timestamp:
 		return D3DQUERYTYPE_TIMESTAMP;
+	case api::query_type::timestamp_disjoint:
+		return D3DQUERYTYPE_TIMESTAMPDISJOINT;
 	default:
 		assert(false);
 		return static_cast<D3DQUERYTYPE>(UINT32_MAX);

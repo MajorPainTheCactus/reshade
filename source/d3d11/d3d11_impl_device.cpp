@@ -1292,7 +1292,8 @@ bool reshade::d3d11::device_impl::get_query_pool_results(api::query_pool pool, u
 
 	for (size_t i = 0; i < count; ++i)
 	{
-		if (FAILED(immediate_context->GetData(impl->queries[first + i].get(), static_cast<uint8_t *>(results) + i * stride, stride, D3D11_ASYNC_GETDATA_DONOTFLUSH)))
+		HRESULT hr = immediate_context->GetData(impl->queries[first + i].get(), static_cast<uint8_t *>(results) + i * stride, stride, D3D11_ASYNC_GETDATA_DONOTFLUSH);
+		if (FAILED(hr))
 			return false;
 	}
 
@@ -1313,4 +1314,25 @@ void reshade::d3d11::device_impl::set_resource_view_name(api::resource_view hand
 	assert(handle.handle != 0);
 
 	reinterpret_cast<ID3D11DeviceChild *>(handle.handle)->SetPrivateData(s_debug_object_name_guid, static_cast<UINT>(strlen(name)), name);
+}
+void reshade::d3d11::device_impl::set_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t size, void* data)
+{
+	assert(handle != 0);
+
+	reinterpret_cast<ID3D11DeviceChild *>(handle)->SetPrivateData(*reinterpret_cast<const GUID*>(&guid), size, data);
+}
+void reshade::d3d11::device_impl::get_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t* size, void* data)
+{
+	assert(handle != 0);
+
+	reinterpret_cast<ID3D11DeviceChild *>(handle)->GetPrivateData(*reinterpret_cast<const GUID*>(&guid), size, data);
+}
+
+void reshade::d3d11::device_impl::set_resource_data(api::resource resource, const uint8_t (&guid)[16], uint32_t size, void* data)
+{
+	set_object_data(resource.handle, guid, size, data);
+}
+void reshade::d3d11::device_impl::get_resource_data(api::resource resource, const uint8_t (&guid)[16], uint32_t* size, void* data)
+{
+	get_object_data(resource.handle, guid, size, data);
 }

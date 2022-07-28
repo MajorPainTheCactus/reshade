@@ -74,6 +74,10 @@ namespace reshade::d3d10
 
 		void set_resource_name(api::resource handle, const char *name) final;
 		void set_resource_view_name(api::resource_view handle, const char *name) final;
+		void set_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t size, void* data) final;
+		void get_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t* size, void* data) final;
+		void set_resource_data(api::resource handle, const uint8_t (&guid)[16], uint32_t size, void* data) final;
+		void get_resource_data(api::resource handle, const uint8_t (&guid)[16], uint32_t* size, void* data) final;
 
 		api::device *get_device() final { return this; }
 

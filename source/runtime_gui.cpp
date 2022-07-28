@@ -109,6 +109,12 @@ void reshade::runtime::build_font_atlas()
 		}
 	}
 
+	if(has_addon_event<addon_event::reshade_add_font>())
+	{
+		api::font_atlas font_atlas = { reinterpret_cast<uint64_t>(atlas) };
+		invoke_addon_event<addon_event::reshade_add_font>(this,font_atlas);
+	}
+
 	// If unable to build font atlas due to an invalid font, revert to the default font
 	if (!atlas->Build())
 	{
@@ -555,6 +561,82 @@ void reshade::runtime::save_custom_style() const
 	}
 }
 
+void reshade::runtime::begin_frame()
+{
+	auto &imgui_io = _imgui_context->IO;
+	imgui_io.DeltaTime = _last_frame_duration.count() * 1e-9f;
+	imgui_io.DisplaySize.x = static_cast<float>(_width);
+	imgui_io.DisplaySize.y = static_cast<float>(_height);
+	imgui_io.Fonts->TexID = _font_atlas_srv.handle;
+
+	if (_input != nullptr)
+	{
+		imgui_io.MouseDrawCursor = _show_overlay && (!_should_save_screenshot || !_screenshot_save_gui);
+		imgui_io.MousePos.x = static_cast<float>(_input->mouse_position_x());
+		imgui_io.MousePos.y = static_cast<float>(_input->mouse_position_y());
+
+		// Add wheel delta to the current absolute mouse wheel position
+		imgui_io.MouseWheel += _input->mouse_wheel_delta();
+
+		// Scale mouse position in case render resolution does not match the window size
+		if (_window_width != 0 && _window_height != 0)
+		{
+			imgui_io.MousePos.x *= imgui_io.DisplaySize.x / _window_width;
+			imgui_io.MousePos.y *= imgui_io.DisplaySize.y / _window_height;
+		}
+
+		// Update all the button states
+		imgui_io.KeyAlt = _input->is_key_down(0x12); // VK_MENU
+		imgui_io.KeyCtrl = _input->is_key_down(0x11); // VK_CONTROL
+		imgui_io.KeyShift = _input->is_key_down(0x10); // VK_SHIFT
+		for (unsigned int i = 0; i < 256; i++)
+			imgui_io.KeysDown[i] = _input->is_key_down(i);
+		for (unsigned int i = 0; i < 5; i++)
+			imgui_io.MouseDown[i] = _input->is_mouse_button_down(i);
+		for (wchar_t c : _input->text_input())
+			imgui_io.AddInputCharacter(c);
+	}
+
+	ImGui::NewFrame();
+}
+
+void reshade::runtime::end_frame()
+{
+	// Disable keyboard shortcuts while typing into input boxes
+	_ignore_shortcuts |= ImGui::IsAnyItemActive();
+
+	// Render ImGui widgets and windows
+	ImGui::Render();
+
+	if (_input != nullptr)
+	{
+		auto &imgui_io = _imgui_context->IO;
+
+		_input->block_mouse_input(_input_processing_mode != 0 && _show_overlay && (imgui_io.WantCaptureMouse || _input_processing_mode == 2));
+		_input->block_keyboard_input(_input_processing_mode != 0 && _show_overlay && (imgui_io.WantCaptureKeyboard || _input_processing_mode == 2));
+	}
+
+	if (ImDrawData *const draw_data = ImGui::GetDrawData();
+		draw_data != nullptr && draw_data->CmdListsCount != 0 && draw_data->TotalVtxCount != 0)
+	{
+		api::command_list *const cmd_list = _graphics_queue->get_immediate_command_list();
+
+		if (_back_buffer_resolved != 0)
+		{
+			render_imgui_draw_data(cmd_list, draw_data, _back_buffer_targets[0]);
+		}
+		else
+		{
+			uint32_t back_buffer_index = get_current_back_buffer_index();
+			const api::resource back_buffer_resource = get_back_buffer(back_buffer_index);
+
+			cmd_list->barrier(back_buffer_resource, api::resource_usage::present, api::resource_usage::render_target);
+			render_imgui_draw_data(cmd_list, draw_data, _back_buffer_targets[back_buffer_index * 2]);
+			cmd_list->barrier(back_buffer_resource, api::resource_usage::render_target, api::resource_usage::present);
+		}
+	}
+}
+
 void reshade::runtime::draw_gui()
 {
 	assert(_is_initialized);
@@ -607,41 +689,9 @@ void reshade::runtime::draw_gui()
 	ImGuiContext *const backup_context = ImGui::GetCurrentContext();
 	ImGui::SetCurrentContext(_imgui_context);
 
+	begin_frame();
+
 	auto &imgui_io = _imgui_context->IO;
-	imgui_io.DeltaTime = _last_frame_duration.count() * 1e-9f;
-	imgui_io.DisplaySize.x = static_cast<float>(_width);
-	imgui_io.DisplaySize.y = static_cast<float>(_height);
-	imgui_io.Fonts->TexID = _font_atlas_srv.handle;
-
-	if (_input != nullptr)
-	{
-		imgui_io.MouseDrawCursor = _show_overlay && (!_should_save_screenshot || !_screenshot_save_gui);
-		imgui_io.MousePos.x = static_cast<float>(_input->mouse_position_x());
-		imgui_io.MousePos.y = static_cast<float>(_input->mouse_position_y());
-
-		// Add wheel delta to the current absolute mouse wheel position
-		imgui_io.MouseWheel += _input->mouse_wheel_delta();
-
-		// Scale mouse position in case render resolution does not match the window size
-		if (_window_width != 0 && _window_height != 0)
-		{
-			imgui_io.MousePos.x *= imgui_io.DisplaySize.x / _window_width;
-			imgui_io.MousePos.y *= imgui_io.DisplaySize.y / _window_height;
-		}
-
-		// Update all the button states
-		imgui_io.KeyAlt = _input->is_key_down(0x12); // VK_MENU
-		imgui_io.KeyCtrl = _input->is_key_down(0x11); // VK_CONTROL
-		imgui_io.KeyShift = _input->is_key_down(0x10); // VK_SHIFT
-		for (unsigned int i = 0; i < 256; i++)
-			imgui_io.KeysDown[i] = _input->is_key_down(i);
-		for (unsigned int i = 0; i < 5; i++)
-			imgui_io.MouseDown[i] = _input->is_mouse_button_down(i);
-		for (wchar_t c : _input->text_input())
-			imgui_io.AddInputCharacter(c);
-	}
-
-	ImGui::NewFrame();
 
 	ImVec2 viewport_offset = ImVec2(0, 0);
 
@@ -819,7 +869,7 @@ void reshade::runtime::draw_gui()
 		ImGui::PopStyleColor();
 	}
 
-	if (_show_overlay)
+	if(false) //(_show_overlay)
 	{
 		// Change font size if user presses the control key and moves the mouse wheel
 		if (imgui_io.KeyCtrl && imgui_io.MouseWheel != 0 && !_no_font_scaling)
@@ -945,9 +995,16 @@ void reshade::runtime::draw_gui()
 				if (widget.title == "OSD" ? show_splash || (!show_stats_window && !_show_overlay) : !_show_overlay)
 					continue;
 
-				if (ImGui::Begin(widget.title.c_str(), nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+				if(widget.title.empty())
+				{
 					widget.callback(this);
-				ImGui::End();
+				}
+				else
+				{
+					if (ImGui::Begin(widget.title.c_str(), nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+						widget.callback(this);
+					ImGui::End();
+				}
 			}
 		}
 	}
@@ -997,37 +1054,7 @@ void reshade::runtime::draw_gui()
 	}
 #endif
 
-	// Disable keyboard shortcuts while typing into input boxes
-	_ignore_shortcuts |= ImGui::IsAnyItemActive();
-
-	// Render ImGui widgets and windows
-	ImGui::Render();
-
-	if (_input != nullptr)
-	{
-		_input->block_mouse_input(_input_processing_mode != 0 && _show_overlay && (imgui_io.WantCaptureMouse || _input_processing_mode == 2));
-		_input->block_keyboard_input(_input_processing_mode != 0 && _show_overlay && (imgui_io.WantCaptureKeyboard || _input_processing_mode == 2));
-	}
-
-	if (ImDrawData *const draw_data = ImGui::GetDrawData();
-		draw_data != nullptr && draw_data->CmdListsCount != 0 && draw_data->TotalVtxCount != 0)
-	{
-		api::command_list *const cmd_list = _graphics_queue->get_immediate_command_list();
-
-		if (_back_buffer_resolved != 0)
-		{
-			render_imgui_draw_data(cmd_list, draw_data, _back_buffer_targets[0]);
-		}
-		else
-		{
-			uint32_t back_buffer_index = get_current_back_buffer_index();
-			const api::resource back_buffer_resource = get_back_buffer(back_buffer_index);
-
-			cmd_list->barrier(back_buffer_resource, api::resource_usage::present, api::resource_usage::render_target);
-			render_imgui_draw_data(cmd_list, draw_data, _back_buffer_targets[back_buffer_index * 2]);
-			cmd_list->barrier(back_buffer_resource, api::resource_usage::render_target, api::resource_usage::present);
-		}
-	}
+	end_frame();
 
 	ImGui::SetCurrentContext(backup_context);
 }
@@ -1787,6 +1814,62 @@ void reshade::runtime::draw_gui_settings()
 	if (modified_custom_style)
 		save_custom_style();
 }
+
+static inline const char* dump_format(reshade::api::format value)
+{
+	// Only need to handle swap chain formats
+	switch (value)
+	{
+	case reshade::api::format::b5g6r5_unorm:
+		return "b5g6r5_unorm";
+	case reshade::api::format::b5g5r5a1_unorm:
+		return "b5g5r5a1_unorm";
+	case reshade::api::format::r8g8b8a8_unorm:
+		return "r8g8b8a8_unorm";
+	case reshade::api::format::r8g8b8a8_unorm_srgb:
+		return "r8g8b8a8_unorm_srgb";
+	case reshade::api::format::r8g8b8x8_unorm:
+		return "r8g8b8x8_unorm";
+	case reshade::api::format::r8g8b8x8_unorm_srgb:
+		return "r8g8b8x8_unorm_srgb";
+	case reshade::api::format::b8g8r8a8_unorm:
+		return "b8g8r8a8_unorm";
+	case reshade::api::format::b8g8r8a8_unorm_srgb:
+		return "b8g8r8a8_unorm_srgb";
+	case reshade::api::format::b8g8r8x8_unorm:
+		return "b8g8r8x8_unorm";
+	case reshade::api::format::b8g8r8x8_unorm_srgb:
+		return "b8g8r8x8_unorm_srgb";
+	case reshade::api::format::r10g10b10a2_unorm:
+		return "r10g10b10a2_unorm";
+	case reshade::api::format::r10g10b10a2_xr_bias:
+		return "r10g10b10a2_xr_bias";
+	case reshade::api::format::b10g10r10a2_unorm:
+		return "b10g10r10a2_unorm";
+	case reshade::api::format::r16g16b16a16_float:
+		return "r16g16b16a16_float";
+	default:
+		return "null";
+	}
+}
+
+static inline const char* dump_color_space(reshade::api::color_space color_space)
+{
+	switch (color_space)
+	{
+	case reshade::api::color_space::srgb_nonlinear:
+		return "srgb_nonlinear";
+	case reshade::api::color_space::extended_srgb_linear:
+		return "extended_srgb_linear";
+	case reshade::api::color_space::hdr10_st2084:
+		return "hdr10_st2084";
+	case reshade::api::color_space::hdr10_hlg:
+		return "hdr10_hlg";
+	default:
+		return "null";
+	}
+}
+
 void reshade::runtime::draw_gui_statistics()
 {
 	unsigned int gpu_digits = 1;
@@ -1830,6 +1913,8 @@ void reshade::runtime::draw_gui_statistics()
 		ImGui::TextUnformatted("Application:");
 		ImGui::TextUnformatted("Time:");
 		ImGui::Text("Frame %llu:", _framecount + 1);
+		ImGui::TextUnformatted("Format:");
+		ImGui::TextUnformatted("Colour Space:");
 #if RESHADE_FX
 		ImGui::TextUnformatted("Post-Processing:");
 #endif
@@ -1869,6 +1954,8 @@ void reshade::runtime::draw_gui_statistics()
 		ImGui::TextUnformatted(g_target_executable_path.filename().u8string().c_str());
 		ImGui::Text("%d-%d-%d %d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec);
 		ImGui::Text("%.2f fps", _imgui_context->IO.Framerate);
+		ImGui::Text("%s", dump_format(_back_buffer_format));
+		ImGui::Text("%s", dump_color_space(_back_buffer_color_space));
 #if RESHADE_FX
 		ImGui::Text("%*.3f ms CPU", cpu_digits + 4, post_processing_time_cpu * 1e-6f);
 #endif
@@ -1885,6 +1972,8 @@ void reshade::runtime::draw_gui_statistics()
 		ImGui::Text("0x%X", std::hash<std::string>()(g_target_executable_path.stem().u8string()) & 0xFFFFFFFF);
 		ImGui::Text("%.0f ms", std::chrono::duration_cast<std::chrono::nanoseconds>(_last_present_time - _start_time).count() * 1e-6f);
 		ImGui::Text("%*.3f ms", gpu_digits + 4, _last_frame_duration.count() * 1e-6f);
+		ImGui::Text("N/A");
+		ImGui::Text("N/A");
 #if RESHADE_FX
 		if (_gather_gpu_statistics && post_processing_time_gpu != 0)
 			ImGui::Text("%*.3f ms GPU", gpu_digits + 4, (post_processing_time_gpu * 1e-6f));
@@ -3511,10 +3600,10 @@ bool reshade::runtime::init_imgui_resources()
 	if (_imgui_sampler_state == 0)
 	{
 		api::sampler_desc sampler_desc = {};
-		sampler_desc.filter = api::filter_mode::min_mag_mip_linear;
-		sampler_desc.address_u = api::texture_address_mode::wrap;
-		sampler_desc.address_v = api::texture_address_mode::wrap;
-		sampler_desc.address_w = api::texture_address_mode::wrap;
+		sampler_desc.filter = api::filter_mode::min_mag_mip_point; // api::filter_mode::min_mag_mip_linear;
+		sampler_desc.address_u = api::texture_address_mode::clamp;
+		sampler_desc.address_v = api::texture_address_mode::clamp;
+		sampler_desc.address_w = api::texture_address_mode::clamp;
 
 		if (!_device->create_sampler(sampler_desc, &_imgui_sampler_state))
 		{
@@ -3693,7 +3782,7 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 	}
 
 	if (ImDrawIdx *idx_dst;
-		_device->map_buffer_region(_imgui_indices[buffer_index], 0, UINT64_MAX, api::map_access::write_only, reinterpret_cast<void **>(&idx_dst)))
+		_device->map_buffer_region(_imgui_indices[buffer_index], 0, UINT64_MAX, api::map_access::write_no_overwrite, reinterpret_cast<void **>(&idx_dst)))
 	{
 		for (int n = 0; n < draw_data->CmdListsCount; ++n)
 		{
@@ -3705,7 +3794,7 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 		_device->unmap_buffer_region(_imgui_indices[buffer_index]);
 	}
 	if (ImDrawVert *vtx_dst;
-		_device->map_buffer_region(_imgui_vertices[buffer_index], 0, UINT64_MAX, api::map_access::write_only, reinterpret_cast<void **>(&vtx_dst)))
+		_device->map_buffer_region(_imgui_vertices[buffer_index], 0, UINT64_MAX, api::map_access::write_no_overwrite, reinterpret_cast<void **>(&vtx_dst)))
 	{
 		for (int n = 0; n < draw_data->CmdListsCount; ++n)
 		{

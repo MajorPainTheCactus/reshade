@@ -872,7 +872,8 @@ namespace reshade::api
 		stream_output_statistics_0 = 4,
 		stream_output_statistics_1,
 		stream_output_statistics_2,
-		stream_output_statistics_3
+		stream_output_statistics_3,
+		timestamp_disjoint			= 11
 	};
 
 	/// <summary>

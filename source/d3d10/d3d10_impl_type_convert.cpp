@@ -177,12 +177,13 @@ auto reshade::d3d10::convert_access_flags(api::map_access access) -> D3D10_MAP
 	case api::map_access::read_only:
 		return D3D10_MAP_READ;
 	case api::map_access::write_only:
-		// Use no overwrite flag to simulate D3D12 behavior of there only being one allocation that backs a buffer (instead of the runtime managing multiple ones behind the scenes)
-		return D3D10_MAP_WRITE_NO_OVERWRITE;
+		return D3D10_MAP_WRITE;
 	case api::map_access::read_write:
 		return D3D10_MAP_READ_WRITE;
 	case api::map_access::write_discard:
 		return D3D10_MAP_WRITE_DISCARD;
+	case api::map_access::write_no_overwrite:
+		return D3D10_MAP_WRITE_NO_OVERWRITE;
 	}
 	return static_cast<D3D10_MAP>(0);
 }
@@ -193,12 +194,13 @@ reshade::api::map_access reshade::d3d10::convert_access_flags(D3D10_MAP map_type
 	case D3D10_MAP_READ:
 		return api::map_access::read_only;
 	case D3D10_MAP_WRITE:
-	case D3D10_MAP_WRITE_NO_OVERWRITE:
 		return api::map_access::write_only;
 	case D3D10_MAP_READ_WRITE:
 		return api::map_access::read_write;
 	case D3D10_MAP_WRITE_DISCARD:
 		return api::map_access::write_discard;
+	case D3D10_MAP_WRITE_NO_OVERWRITE:
+		return api::map_access::write_no_overwrite;
 	}
 	return static_cast<api::map_access>(0);
 }
@@ -1118,6 +1120,8 @@ auto reshade::d3d10::convert_query_type(api::query_type value) -> D3D10_QUERY
 		return D3D10_QUERY_PIPELINE_STATISTICS;
 	case api::query_type::stream_output_statistics_0: // D3D10 only supports a single stream
 		return D3D10_QUERY_SO_STATISTICS;
+	case api::query_type::timestamp_disjoint:
+		return D3D10_QUERY_TIMESTAMP_DISJOINT;
 	default:
 		assert(false);
 		return static_cast<D3D10_QUERY>(UINT_MAX);

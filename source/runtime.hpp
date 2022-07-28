@@ -247,6 +247,22 @@ namespace reshade
 		/// Defines a global preprocessor definition to the specified <paramref name="value"/>.
 		/// </summary>
 		void set_preprocessor_definition(const char *name, const char *value) final;
+		/// <summary>
+		/// Does the work for the begin of frame like begin ImGui so that the add-on can take control of updating the frame
+		/// </summary>
+		void begin_frame() final;
+		/// <summary>
+		/// Does all the work for the end of frame like render ImGui so that the add-on can take control of updating the frame
+		/// </summary>
+		void end_frame() final;
+		/// <summary>
+		/// Update the input so that the add-on can take control of updating the frame
+		/// </summary>
+		void update_input() final;
+		/// <summary>
+		/// Allow a addon to hide the overlay
+		/// </summary>
+		void hide_overlay() final;
 
 	protected:
 		runtime(api::device *device, api::command_queue *graphics_queue);
@@ -255,6 +271,7 @@ namespace reshade
 		bool on_init(void *window);
 		void on_reset();
 		void on_present();
+		void on_start_frame();
 
 		api::device *const _device;
 		api::command_queue *const _graphics_queue;

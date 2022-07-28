@@ -1084,6 +1084,7 @@ GLbitfield reshade::opengl::convert_access_flags(reshade::api::map_access flags)
 	case api::map_access::read_only:
 		return GL_MAP_READ_BIT;
 	case api::map_access::write_only:
+	case api::map_access::write_no_overwrite:
 		return GL_MAP_WRITE_BIT;
 	case api::map_access::read_write:
 		return GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;

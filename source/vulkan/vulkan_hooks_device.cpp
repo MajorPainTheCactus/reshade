@@ -990,6 +990,11 @@ VkResult VKAPI_CALL vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPr
 					dirty_rect_count != 0 ? dirty_rects.p : nullptr);
 #endif
 				swapchain_impl->on_present(queue, pPresentInfo->pImageIndices[i], const_cast<VkSemaphore *>(present_info.pWaitSemaphores), present_info.waitSemaphoreCount);
+
+#if RESHADE_ADDON
+				// TODO: Call 'start_frame' event for both submits
+				reshade::invoke_addon_event<reshade::addon_event::start_frame>(queue_impl->get_device());
+#endif
 			}
 		}
 

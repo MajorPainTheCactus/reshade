@@ -8,6 +8,7 @@
 
 #include <new>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include "reshade_overlay.hpp"
 
 imgui_function_table g_imgui_function_table = {
@@ -417,6 +418,22 @@ imgui_function_table g_imgui_function_table = {
 	[](const ImFont *_this, ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, ImWchar c) -> void { _this->RenderChar(draw_list, size, pos, col, c); },
 	[](const ImFont *_this, ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) -> void { _this->RenderText(draw_list, size, pos, col, clip_rect, text_begin, text_end, wrap_width, cpu_fine_clip); },
 
+	[](ImFontConfig *_this) -> void { new(_this) ImFontConfig(); },
+	[](ImFontAtlas *_this) -> void { new(_this) ImFontAtlas(); },
+	[](ImFontAtlas *_this) -> void { _this->~ImFontAtlas(); },
+	[](ImFontAtlas *_this, const char* filename, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges) -> ImFont* { return _this->AddFontFromFileTTF(filename, size_pixels, font_cfg, glyph_ranges); },
+	[](ImFontAtlas *_this, void* font_data, int font_size, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges) -> ImFont* { return _this->AddFontFromMemoryTTF(font_data, font_size, size_pixels, font_cfg, glyph_ranges); },
+	[](ImFontAtlas *_this, const char* compressed_ttf_data_base85, float size_pixels, const ImFontConfig* font_cfg, const ImWchar* glyph_ranges) -> ImFont* { return _this->AddFontFromMemoryCompressedBase85TTF(compressed_ttf_data_base85, size_pixels, font_cfg, glyph_ranges); },
+	[](ImFontAtlas *_this) -> void { _this->Clear(); },
+	[](ImFontAtlas *_this) -> bool { return _this->Build(); },
+
+	ImGui::FindWindowByName,
+	ImGui::GetCurrentContext,
+	ImGui::TableEndRow,
+
+	[](ImGuiWindow *_this, const char* str, const char* str_end) -> ImGuiID { return _this->GetID(str, str_end); },
+	ImGui::OpenPopupEx,
+	ImGui::BeginPopupEx,
 };
 
 #endif

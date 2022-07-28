@@ -86,6 +86,10 @@ namespace reshade::vulkan
 
 		void set_resource_name(api::resource handle, const char *name) final;
 		void set_resource_view_name(api::resource_view handle, const char *name) final;
+		void set_object_data(uint64_t, const uint8_t (&)[16], uint32_t , void* ) final {}
+		void get_object_data(uint64_t, const uint8_t (&)[16], uint32_t* , void* ) final {}
+		void set_resource_data(api::resource , const uint8_t (&)[16], uint32_t , void* ) final {}
+		void get_resource_data(api::resource , const uint8_t (&)[16], uint32_t* , void* ) final {}
 
 		void advance_transient_descriptor_pool();
 

@@ -93,6 +93,19 @@ void reshade::d3d10::swapchain_impl::on_present()
 	_app_state.apply_and_release();
 }
 
+void reshade::d3d10::swapchain_impl::on_start_frame()
+{
+	if (!is_initialized())
+		return;
+
+	//_app_state.capture();
+
+	runtime::on_start_frame();
+
+	// Apply previous state from application
+	//_app_state.apply_and_release();
+}
+
 #if RESHADE_ADDON && RESHADE_FX
 void reshade::d3d10::swapchain_impl::render_effects(api::command_list *cmd_list, api::resource_view rtv, api::resource_view rtv_srgb)
 {

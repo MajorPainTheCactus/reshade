@@ -547,6 +547,18 @@ void reshade::runtime::on_reset()
 	LOG(INFO) << "Destroyed runtime environment on runtime " << this << '.';
 #endif
 }
+
+void reshade::runtime::update_input()
+{
+	if (_input != nullptr)
+		_input->next_frame();
+}
+
+void reshade::runtime::hide_overlay()
+{
+	_show_overlay = false;
+}
+
 void reshade::runtime::on_present()
 {
 	assert(is_initialized());
@@ -712,9 +724,7 @@ void reshade::runtime::on_present()
 #endif
 	_effects_rendered_this_frame = false;
 
-	// Reset input status
-	if (_input != nullptr)
-		_input->next_frame();
+	update_input();
 
 	// Save modified INI files
 	if (!ini_file::flush_cache())
@@ -756,6 +766,11 @@ void reshade::runtime::on_present()
 	if (std::numeric_limits<long>::max() != g_network_traffic)
 		g_network_traffic = 0;
 #endif
+}
+
+void reshade::runtime::on_start_frame()
+{
+	assert(is_initialized());
 }
 
 void reshade::runtime::load_config()

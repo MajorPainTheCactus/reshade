@@ -475,6 +475,40 @@ namespace reshade::api
 		/// <param name="handle">Resource view to associate a name with.</param>
 		/// <param name="name">Null-terminated name string.</param>
 		virtual void set_resource_view_name(resource_view handle, const char *name) = 0;
+
+		/// <summary>
+		/// Registers a piece of data with a resource under a particular guid
+		/// </summary>
+		/// <param name="handle">Resource to associate a name with.</param>
+		/// <param name="guid">guid to be used as a key to find the data</param>
+		/// <param name="size">size of data in bytes</param>
+		/// <param name="data">raw pointer to data</param>
+		virtual void set_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t size, void* data) = 0;
+		/// <summary>
+		/// Retrieves a piece of data for a particular guid registered under a device object
+		/// </summary>
+		/// <param name="handle">handle to associate a name with.</param>
+		/// <param name="guid">guid to be used as a key to find the data</param>
+		/// <param name="size">size of data in bytes, passed back number of bytes read</param>
+		/// <param name="data">raw pointer to data</param>
+		virtual void get_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t* size, void* data) = 0;
+
+		/// <summary>
+		/// Registers a piece of data with a device object under a particular guid
+		/// </summary>
+		/// <param name="handle">handle to associate a name with.</param>
+		/// <param name="guid">guid to be used as a key to find the data</param>
+		/// <param name="size">size of data in bytes</param>
+		/// <param name="data">raw pointer to data</param>
+		virtual void set_resource_data(resource resource, const uint8_t (&guid)[16], uint32_t size, void* data) = 0;
+		/// <summary>
+		/// Retrieves a piece of data for a particular guid registered under a resource
+		/// </summary>
+		/// <param name="handle">Resource to associate a name with.</param>
+		/// <param name="guid">guid to be used as a key to find the data</param>
+		/// <param name="size">size of data in bytes, passed back number of bytes read</param>
+		/// <param name="data">raw pointer to data</param>
+		virtual void get_resource_data(resource resource, const uint8_t (&guid)[16], uint32_t* size, void* data) = 0;
 	};
 
 	/// <summary>

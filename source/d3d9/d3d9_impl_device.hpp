@@ -70,6 +70,10 @@ namespace reshade::d3d9
 
 		void set_resource_name(api::resource, const char *) final {}
 		void set_resource_view_name(api::resource_view, const char *) final {}
+		void set_object_data(uint64_t, const uint8_t (&)[16], uint32_t , void* ) final {}
+		void get_object_data(uint64_t, const uint8_t (&)[16], uint32_t* , void* ) final {}
+		void set_resource_data(api::resource, const uint8_t (&)[16], uint32_t , void* ) final {}
+		void get_resource_data(api::resource, const uint8_t (&)[16], uint32_t* , void* ) final {}
 
 		api::device *get_device() final { return this; }
 

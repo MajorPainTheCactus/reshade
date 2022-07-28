@@ -888,6 +888,10 @@ HOOK_EXPORT BOOL  WINAPI wglSwapBuffers(HDC hdc)
 
 		// Assume that the correct OpenGL context is still current here
 		runtime->on_present();
+
+#if RESHADE_ADDON
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(runtime);
+#endif
 	}
 
 	return trampoline(hdc);

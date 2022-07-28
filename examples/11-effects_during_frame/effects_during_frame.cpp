@@ -6,6 +6,7 @@
 #define ImTextureID unsigned long long
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <reshade.hpp>
 
 using namespace reshade::api;

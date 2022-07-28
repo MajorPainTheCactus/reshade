@@ -108,6 +108,21 @@ void reshade::d3d11::swapchain_impl::on_present()
 	_app_state.apply_and_release();
 }
 
+void reshade::d3d11::swapchain_impl::on_start_frame()
+{
+	if (!is_initialized())
+		return;
+
+	//ID3D11DeviceContext *const immediate_context = static_cast<device_context_impl *>(_graphics_queue)->_orig;
+	//_app_state.capture(immediate_context);
+
+	runtime::on_start_frame();
+
+	// Apply previous state from application
+	//_app_state.apply_and_release();
+}
+
+
 #if RESHADE_ADDON && RESHADE_FX
 void reshade::d3d11::swapchain_impl::render_effects(api::command_list *cmd_list, api::resource_view rtv, api::resource_view rtv_srgb)
 {

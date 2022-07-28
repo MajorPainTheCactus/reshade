@@ -19,6 +19,36 @@ extern bool modify_swapchain_desc(DXGI_SWAP_CHAIN_DESC1 &desc, HWND hwnd);
 
 extern UINT query_device(IUnknown *&device, com_ptr<IUnknown> &device_proxy);
 
+const char *dump_format(DXGI_FORMAT format)
+{
+	switch (format)
+	{
+	case DXGI_FORMAT_UNKNOWN:
+		return "DXGI_FORMAT_UNKNOWN";
+		break;
+	case DXGI_FORMAT_R8G8B8A8_UNORM:
+		return "DXGI_FORMAT_R8G8B8A8_UNORM";
+		break;
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+		return "DXGI_FORMAT_R8G8B8A8_UNORM_SRGB";
+		break;
+	case DXGI_FORMAT_B8G8R8A8_UNORM:
+		return "DXGI_FORMAT_B8G8R8A8_UNORM";
+		break;
+	case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+		return "DXGI_FORMAT_B8G8R8A8_UNORM_SRGB";
+		break;
+	case DXGI_FORMAT_R10G10B10A2_UNORM:
+		return "DXGI_FORMAT_R10G10B10A2_UNORM";
+		break;
+	case DXGI_FORMAT_R16G16B16A16_FLOAT:
+		return "DXGI_FORMAT_R16G16B16A16_FLOAT";
+		break;
+	}
+
+	return "DXGI_FORMAT_NOT_SUPPORTED";
+}
+
 // Needs to be set whenever a DXGI call can end up in 'CDXGISwapChain::EnsureChildDeviceInternal', to avoid hooking internal D3D device creation
 thread_local bool g_in_dxgi_runtime = false;
 
@@ -174,6 +204,45 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 #endif
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_present();
 		static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->flush_immediate_command_list();
+		break;
+	}
+}
+
+void DXGISwapChain::runtime_start_frame()
+{
+	// Synchronize access to effect runtime to avoid race conditions between 'load_effects' and 'destroy_effects' causing crashes
+	// This is necessary because Resident Evil 3 calls DXGI functions simultaneously from multiple threads (which is technically illegal)
+	// In case of D3D12, also synchronize access to the command queue while events are invoked and the immediate command list may be accessed
+	const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);
+
+	switch (_direct3d_version)
+	{
+	case 10:
+#if RESHADE_ADDON
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
+			static_cast<D3D10Device *>(static_cast<ID3D10Device *>(_direct3d_device)));
+#else
+		UNREFERENCED_PARAMETER(params);
+#endif
+		static_cast<reshade::d3d10::swapchain_impl *>(_impl)->on_start_frame();
+		break;
+	case 11:
+#if RESHADE_ADDON
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
+			static_cast<D3D11Device *>(static_cast<ID3D11Device *>(_direct3d_device)));
+#else
+		UNREFERENCED_PARAMETER(params);
+#endif
+		static_cast<reshade::d3d11::swapchain_impl *>(_impl)->on_start_frame();
+		break;
+	case 12:
+#if RESHADE_ADDON
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
+			static_cast<D3D12Device *>(static_cast<ID3D12Device *>(_direct3d_device)));
+#else
+		UNREFERENCED_PARAMETER(params);
+#endif
+		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_start_frame();
 		break;
 	}
 }
@@ -355,6 +424,8 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::Present(UINT SyncInterval, UINT Flags)
 
 	handle_device_loss(hr);
 
+	runtime_start_frame();
+
 	return hr;
 }
 HRESULT STDMETHODCALLTYPE DXGISwapChain::GetBuffer(UINT Buffer, REFIID riid, void **ppSurface)
@@ -396,7 +467,7 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::ResizeBuffers(UINT BufferCount, UINT Wi
 		<< ", BufferCount = " << BufferCount
 		<< ", Width = " << Width
 		<< ", Height = " << Height
-		<< ", NewFormat = " << NewFormat
+		<< ", NewFormat = " << dump_format(NewFormat)
 		<< ", SwapChainFlags = " << std::hex << SwapChainFlags << std::dec
 		<< ')' << " ...";
 
@@ -420,11 +491,21 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::ResizeBuffers(UINT BufferCount, UINT Wi
 		SwapChainFlags = desc.Flags;
 	}
 
+	LOG(INFO) << "Modified " << "IDXGISwapChain::ResizeBuffers" << '('
+		<< "this = " << this
+		<< ", BufferCount = " << BufferCount
+		<< ", Width = " << Width
+		<< ", Height = " << Height
+		<< ", NewFormat = " << dump_format(NewFormat)
+		<< ", SwapChainFlags = " << std::hex << SwapChainFlags << std::dec
+		<< ')' << " ...";
+
 	g_in_dxgi_runtime = true;
 	const HRESULT hr = _orig->ResizeBuffers(BufferCount, Width, Height, NewFormat, SwapChainFlags);
 	g_in_dxgi_runtime = false;
 	if (SUCCEEDED(hr))
 	{
+		LOG(INFO) << "IDXGISwapChain::ResizeBuffers" << " successful.";
 		runtime_resize();
 	}
 	else if (hr == DXGI_ERROR_INVALID_CALL) // Ignore invalid call errors since the device is still in a usable state afterwards
@@ -598,7 +679,7 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::ResizeBuffers1(UINT BufferCount, UINT W
 		<< ", BufferCount = " << BufferCount
 		<< ", Width = " << Width
 		<< ", Height = " << Height
-		<< ", Format = " << Format
+		<< ", Format = " << dump_format(Format)
 		<< ", SwapChainFlags = " << std::hex << SwapChainFlags << std::dec
 		<< ", pCreationNodeMask = " << pCreationNodeMask
 		<< ", ppPresentQueue = " << ppPresentQueue

@@ -481,7 +481,7 @@ bool reshade::d3d12::device_impl::map_buffer_region(api::resource resource, uint
 
 	const D3D12_RANGE no_read = { 0, 0 };
 
-	if (SUCCEEDED(ID3D12Resource_Map(reinterpret_cast<ID3D12Resource *>(resource.handle), 0, access == api::map_access::write_only || access == api::map_access::write_discard ? &no_read : nullptr, out_data)))
+	if (SUCCEEDED(ID3D12Resource_Map(reinterpret_cast<ID3D12Resource *>(resource.handle), 0, access == api::map_access::write_only || access == api::map_access::write_discard || access == api::map_access::write_no_overwrite ? &no_read : nullptr, out_data)))
 	{
 		*out_data = static_cast<uint8_t *>(*out_data) + offset;
 		return true;
@@ -521,7 +521,7 @@ bool reshade::d3d12::device_impl::map_texture_region(api::resource resource, uin
 	out_data->slice_pitch *= layout.Footprint.RowPitch;
 
 	return SUCCEEDED(ID3D12Resource_Map(reinterpret_cast<ID3D12Resource *>(resource.handle),
-		subresource, access == api::map_access::write_only || access == api::map_access::write_discard ? &no_read : nullptr, &out_data->data));
+		subresource, access == api::map_access::write_only || access == api::map_access::write_discard || access == api::map_access::write_no_overwrite ? &no_read : nullptr, &out_data->data));
 }
 void reshade::d3d12::device_impl::unmap_texture_region(api::resource resource, uint32_t subresource)
 {
@@ -1239,6 +1239,28 @@ void reshade::d3d12::device_impl::set_resource_name(api::resource handle, const 
 	utf8::unchecked::utf8to16(name, name + debug_name_len, std::back_inserter(debug_name_wide));
 
 	reinterpret_cast<ID3D12Resource *>(handle.handle)->SetName(debug_name_wide.c_str());
+}
+
+void reshade::d3d12::device_impl::set_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t size, void* data)
+{
+	assert(handle != 0);
+
+	reinterpret_cast<ID3D12Object *>(handle)->SetPrivateData(*reinterpret_cast<const GUID*>(&guid), size, data);
+}
+void reshade::d3d12::device_impl::get_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t* size, void* data)
+{
+	assert(handle != 0);
+
+	reinterpret_cast<ID3D12Object *>(handle)->GetPrivateData(*reinterpret_cast<const GUID*>(&guid), size, data);
+}
+
+void reshade::d3d12::device_impl::set_resource_data(api::resource resource, const uint8_t (&guid)[16], uint32_t size, void* data)
+{
+	set_object_data(resource.handle, guid, size, data);
+}
+void reshade::d3d12::device_impl::get_resource_data(api::resource resource, const uint8_t (&guid)[16], uint32_t* size, void* data)
+{
+	get_object_data(resource.handle, guid, size, data);
 }
 
 void reshade::d3d12::device_impl::register_resource(ID3D12Resource *resource)

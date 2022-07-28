@@ -1143,6 +1143,10 @@ namespace reshade
 		/// Destination resource will be in the <see cref="api::resource_usage::copy_dest"/> state.
 		/// </remarks>
 		copy_resource,
+		/// <summary>
+		/// Same as above but called after copy:
+		/// </summary>
+		post_copy_resource,
 
 		/// <summary>
 		/// Called before:
@@ -1161,6 +1165,10 @@ namespace reshade
 		/// Destination resource will be in the <see cref="api::resource_usage::copy_dest"/> state.
 		/// </remarks>
 		copy_buffer_region,
+		/// <summary>
+		/// Same as above but called after copy:
+		/// </summary>
+		post_copy_buffer_region,
 
 		/// <summary>
 		/// Called before:
@@ -1177,6 +1185,10 @@ namespace reshade
 		/// Destination resource will be in the <see cref="api::resource_usage::copy_dest"/> state.
 		/// </remarks>
 		copy_buffer_to_texture,
+		/// <summary>
+		/// Same as above but called after copy:
+		/// </summary>
+		post_copy_buffer_to_texture,
 
 		/// <summary>
 		/// Called before:
@@ -1208,6 +1220,10 @@ namespace reshade
 		/// Destination resource will be in the <see cref="api::resource_usage::copy_dest"/> state.
 		/// </remarks>
 		copy_texture_region,
+		/// <summary>
+		/// Same as above but called after copy:
+		/// </summary>
+		post_copy_texture_region,
 
 		/// <summary>
 		/// Called before:
@@ -1224,6 +1240,10 @@ namespace reshade
 		/// Destination resource will be in the <see cref="api::resource_usage::copy_dest"/> state.
 		/// </remarks>
 		copy_texture_to_buffer,
+		/// <summary>
+		/// Same as above but called after copy:
+		/// </summary>
+		post_copy_texture_to_buffer,
 
 		/// <summary>
 		/// Called before:
@@ -1449,6 +1469,23 @@ namespace reshade
 		present,
 
 		/// <summary>
+		/// Called just after:
+		/// <list type="bullet">
+		/// <item><description>IDirect3DDevice9::Present</description></item>
+		/// <item><description>IDirect3DDevice9Ex::PresentEx</description></item>
+		/// <item><description>IDirect3DSwapChain9::Present</description></item>
+		/// <item><description>IDXGISwapChain::Present</description></item>
+		/// <item><description>IDXGISwapChain3::Present1</description></item>
+		/// <item><description>ID3D12CommandQueueDownlevel::Present</description></item>
+		/// <item><description>wglSwapBuffers</description></item>
+		/// <item><description>vkQueuePresentKHR</description></item>
+		/// <item><description>IVRCompositor::Submit</description></item>
+		/// </list>
+		/// <para>Callback function signature: <c>void (api::device *device)</c></para>
+		/// </summary>
+		start_frame,
+
+		/// <summary>
 		/// Called after ReShade has rendered its overlay.
 		/// <para>Callback function signature: <c>void (api::effect_runtime *runtime)</c></para>
 		/// </summary>
@@ -1505,6 +1542,12 @@ namespace reshade
 		/// <para>Callback function signature: <c>void (api::effect_runtime *runtime, const char *filename)</c></para>
 		/// </summary>
 		reshade_screenshot,
+			
+		/// <summary>
+		/// Called during build font atlas to be able to add fonts for addons
+		/// <para>Callback function signature: <c>void (api::effect_runtime *runtime, ImFontAtlas *atlas)</c></para>
+		/// </summary>
+		reshade_add_font,
 
 #ifdef RESHADE_ADDON
 		max // Last value used internally by ReShade to determine number of events in this enum
@@ -1597,10 +1640,15 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::draw_or_dispatch_indirect, bool, api::command_list *cmd_list, api::indirect_command type, api::resource buffer, uint64_t offset, uint32_t draw_count, uint32_t stride);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::copy_resource, bool, api::command_list *cmd_list, api::resource source, api::resource dest);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_copy_resource, bool, api::command_list *cmd_list, api::resource source, api::resource dest);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::copy_buffer_region, bool, api::command_list *cmd_list, api::resource source, uint64_t source_offset, api::resource dest, uint64_t dest_offset, uint64_t size);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_copy_buffer_region, bool, api::command_list *cmd_list, api::resource source, uint64_t source_offset, api::resource dest, uint64_t dest_offset, uint64_t size);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::copy_buffer_to_texture, bool, api::command_list *cmd_list, api::resource source, uint64_t source_offset, uint32_t row_length, uint32_t slice_height, api::resource dest, uint32_t dest_subresource, const api::subresource_box *dest_box);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_copy_buffer_to_texture, bool, api::command_list *cmd_list, api::resource source, uint64_t source_offset, uint32_t row_length, uint32_t slice_height, api::resource dest, uint32_t dest_subresource, const api::subresource_box *dest_box);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::copy_texture_region, bool, api::command_list *cmd_list, api::resource source, uint32_t source_subresource, const api::subresource_box *source_box, api::resource dest, uint32_t dest_subresource, const api::subresource_box *dest_box, api::filter_mode filter);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_copy_texture_region, bool, api::command_list *cmd_list, api::resource source, uint32_t source_subresource, const api::subresource_box *source_box, api::resource dest, uint32_t dest_subresource, const api::subresource_box *dest_box, api::filter_mode filter);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::copy_texture_to_buffer, bool, api::command_list *cmd_list, api::resource source, uint32_t source_subresource, const api::subresource_box *source_box, api::resource dest, uint64_t dest_offset, uint32_t row_length, uint32_t slice_height);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_copy_texture_to_buffer, bool, api::command_list *cmd_list, api::resource source, uint32_t source_subresource, const api::subresource_box *source_box, api::resource dest, uint64_t dest_offset, uint32_t row_length, uint32_t slice_height);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::resolve_texture_region, bool, api::command_list *cmd_list, api::resource source, uint32_t source_subresource, const api::subresource_box *source_box, api::resource dest, uint32_t dest_subresource, int32_t dest_x, int32_t dest_y, int32_t dest_z, api::format format);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::clear_depth_stencil_view, bool, api::command_list *cmd_list, api::resource_view dsv, const float *depth, const uint8_t *stencil, uint32_t rect_count, const api::rect *rects);
@@ -1621,6 +1669,7 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::execute_secondary_command_list, void, api::command_list *cmd_list, api::command_list *secondary_cmd_list);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::present, void, api::command_queue *queue, api::swapchain *swapchain, const api::rect *source_rect, const api::rect *dest_rect, uint32_t dirty_rect_count, const api::rect *dirty_rects);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::start_frame, void, api::device *device);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_present, void, api::effect_runtime *runtime);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_begin_effects, void, api::effect_runtime *runtime, api::command_list *cmd_list, api::resource_view rtv, api::resource_view rtv_srgb);
@@ -1632,4 +1681,6 @@ namespace reshade
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_overlay, void, api::effect_runtime *runtime);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_screenshot, void, api::effect_runtime *runtime, const char *filename);
+
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_add_font, void, api::effect_runtime *runtime, api::font_atlas atlas);
 }

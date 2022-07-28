@@ -1076,3 +1076,25 @@ void reshade::d3d10::device_impl::set_resource_view_name(api::resource_view hand
 
 	reinterpret_cast<ID3D10DeviceChild *>(handle.handle)->SetPrivateData(s_debug_object_name_guid, static_cast<UINT>(strlen(name)), name);
 }
+
+void reshade::d3d10::device_impl::set_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t size, void* data)
+{
+	assert(handle != 0);
+
+	reinterpret_cast<ID3D10DeviceChild *>(handle)->SetPrivateData(*reinterpret_cast<const GUID*>(&guid), size, data);
+}
+void reshade::d3d10::device_impl::get_object_data(uint64_t handle, const uint8_t (&guid)[16], uint32_t* size, void* data)
+{
+	assert(handle != 0);
+
+	reinterpret_cast<ID3D10DeviceChild *>(handle)->GetPrivateData(*reinterpret_cast<const GUID*>(&guid), size, data);
+}
+
+void reshade::d3d10::device_impl::set_resource_data(api::resource resource, const uint8_t (&guid)[16], uint32_t size, void* data)
+{
+	set_object_data(resource.handle, guid, size, data);
+}
+void reshade::d3d10::device_impl::get_resource_data(api::resource resource, const uint8_t (&guid)[16], uint32_t* size, void* data)
+{
+	get_object_data(resource.handle, guid, size, data);
+}
