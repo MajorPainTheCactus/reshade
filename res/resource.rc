@@ -17,7 +17,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
-#pragma code_page(65001)
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,6 @@ END
 // RCDATA
 //
 
-#if !defined(RESHADE_FXC)
 IDR_COPY_PS             RCDATA                  "shaders\\copy_ps.cso"
 
 IDR_FULLSCREEN_VS       RCDATA                  "shaders\\fullscreen_vs.cso"
@@ -89,9 +88,27 @@ IDR_LICENSE_VULKAN      RCDATA                  "..\\deps\\vulkan\\LICENSE.txt"
 
 IDB_MAIN_ICON           RCDATA                  "main_icon_small.png"
 
-#endif
-
 #endif    // Neutral (Default) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United Kingdom) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// ADDON
+//
+
+IDR_ADDON2              ADDON                   "..\\bin\\Win32\\Release\\vugger32.addon"
+
+IDR_ADDON3              ADDON                   "..\\bin\\x64\\Release\\vugger64.addon"
+
+#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

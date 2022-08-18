@@ -58,6 +58,9 @@
     <Filter Include="resources\shaders">
       <UniqueIdentifier>{9232c43b-559d-4435-b309-c8bbf4e6477b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources\addons">
+      <UniqueIdentifier>{2ca0cf79-44b1-4914-b6f8-84fb1dc0b80d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\dll_log.cpp">
@@ -633,6 +636,21 @@
     <None Include="tools\update_version.ps1">
       <Filter>resources</Filter>
     </None>
+    <None Include="res\addon1.bin" />
+    <None Include="res\shaders\copy_ps.cso" />
+    <None Include="res\shaders\fullscreen_vs.cso" />
+    <None Include="res\shaders\imgui_ps_3_0.cso" />
+    <None Include="res\shaders\imgui_ps_4_0.cso" />
+    <None Include="res\shaders\imgui_ps.spv" />
+    <None Include="res\shaders\imgui_vs_3_0.cso" />
+    <None Include="res\shaders\imgui_vs_4_0.cso" />
+    <None Include="res\shaders\imgui_vs.spv" />
+    <None Include="res\shaders\mipmap_cs.cso" />
+    <None Include="deps\gl3w\UNLICENSE" />
+    <None Include="LICENSE.md" />
+    <None Include="deps\spirv\LICENSE" />
+    <None Include="deps\stb\LICENSE" />
+    <None Include="deps\utfcpp\LICENSE" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="res\shaders\copy_ps.hlsl">
@@ -664,5 +682,22 @@
     <CustomBuild Include="res\shaders\imgui_vs.glsl">
       <Filter>resources\shaders</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="deps\imgui\LICENSE.txt" />
+    <Text Include="deps\minhook\LICENSE.txt" />
+    <Text Include="deps\vma\LICENSE.txt" />
+    <Text Include="deps\vulkan\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\main_icon_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <_EmbedManagedResourceFile Include="bin\x64\Debug\vugger64.addon">
+      <Filter>resources\addons</Filter>
+    </_EmbedManagedResourceFile>
+    <_EmbedManagedResourceFile Include="bin\Win32\Debug\vugger32.addon">
+      <Filter>resources\addons</Filter>
+    </_EmbedManagedResourceFile>
   </ItemGroup>
 </Project>

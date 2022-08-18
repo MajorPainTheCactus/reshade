@@ -10,6 +10,10 @@
 #include "dll_log.hpp"
 #include "ini_file.hpp"
 
+#include "resource.h"
+
+#include <fstream>
+
 extern void register_addon_depth();
 extern void unregister_addon_depth();
 
@@ -125,6 +129,10 @@ std::vector<void *> reshade::addon_event_list[static_cast<uint32_t>(reshade::add
 std::vector<reshade::addon_info> reshade::addon_loaded_info;
 static unsigned long s_reference_count = 0;
 
+#if VUGGER_ADDON
+static bool g_vugger_addon_written = false;
+#endif // VUGGER_ADDON
+
 void reshade::load_addons()
 {
 	// Only load add-ons the first time a reference is added
@@ -141,7 +149,7 @@ void reshade::load_addons()
 	std::vector<std::string> disabled_addons;
 	global_config().get("ADDON", "DisabledAddons", disabled_addons);
 
-#if 1
+#if 0
 	{	addon_info &info = addon_loaded_info.emplace_back();
 		info.name = "Generic Depth";
 		info.description = "Automatic depth buffer detection that works in the majority of games.";
@@ -160,8 +168,47 @@ void reshade::load_addons()
 #if !RESHADE_ADDON_LITE
 	// Get directory from where to load add-ons from
 	std::filesystem::path addon_search_path = g_reshade_base_path;
+
+#if VUGGER_ADDON
+	if(!g_vugger_addon_written)
+	{
+		std::filesystem::path vugger_addon_path = addon_search_path / L"vugger.addon";
+
+		std::error_code ec;
+		std::filesystem::remove(vugger_addon_path, ec);
+
+		LPVOID data = nullptr;
+		SIZE_T size = 0;
+#if _WIN64
+		HRSRC hResource = FindResource(g_module_handle, MAKEINTRESOURCE(IDR_ADDON3), L"ADDON");
+#else
+		HRSRC hResource = FindResource(g_module_handle, MAKEINTRESOURCE(IDR_ADDON2), L"ADDON");
+#endif // _WIN32
+		HGLOBAL hMemory = LoadResource(g_module_handle, hResource);
+
+		size = SizeofResource(g_module_handle, hResource);
+		data = LockResource(hMemory);
+
+		std::vector<unsigned char> addon;
+
+		addon.resize(size);
+		memcpy(addon.data(), data, size);
+
+		FreeResource(hResource);
+
+		std::ofstream ofs(vugger_addon_path, std::ifstream::binary);
+		if (ofs.is_open())
+		{
+			std::copy(addon.begin(), addon.end(), std::ostream_iterator<unsigned char>(ofs));
+			ofs.close();
+
+			g_vugger_addon_written = true;
+		}
+	}
+#else
 	if (global_config().get("INSTALL", "AddonPath", addon_search_path))
 		addon_search_path = g_reshade_base_path / addon_search_path;
+#endif // VUGGER_ADDON
 
 	LOG(INFO) << "Searching for add-ons (*.addon) in " << addon_search_path << " ...";
 
@@ -233,7 +280,7 @@ void reshade::unload_addons()
 	LOG(INFO) << "Unloading built-in add-ons ...";
 #endif
 
-	unregister_addon_depth();
+	//unregister_addon_depth();
 
 #ifndef NDEBUG
 	// All events should have been unregistered at this point

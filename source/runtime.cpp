@@ -617,11 +617,13 @@ void reshade::runtime::on_present()
 	const auto current_time = std::chrono::high_resolution_clock::now();
 	_last_frame_duration = current_time - _last_present_time; _last_present_time = current_time;
 
+#if !VUGGER_ADDON
 #ifdef NDEBUG
 	// Lock input so it cannot be modified by other threads while we are reading it here
 	const std::unique_lock<std::shared_mutex> input_lock = (_input != nullptr) ?
 		_input->lock() : std::unique_lock<std::shared_mutex>();
 #endif
+#endif // VUGGER_ADDON
 
 #if RESHADE_GUI
 	// Draw overlay
@@ -3248,12 +3250,14 @@ void reshade::runtime::render_effects(api::command_list *cmd_list, api::resource
 	if (!update_effect_color_tex(_device->get_resource_desc(back_buffer_resource).texture.format))
 		return;
 
+#if !VUGGER_ADDON
 #ifdef NDEBUG
 	// Lock input so it cannot be modified by other threads while we are reading it here
 	// TODO: This does not catch input happening between now and 'on_present'
 	const std::unique_lock<std::shared_mutex> input_lock = (_input != nullptr) ?
 		_input->lock() : std::unique_lock<std::shared_mutex>();
 #endif
+#endif // !VUGGER_ADDON
 
 	// Update special uniform variables
 	for (effect &effect : _effects)

@@ -554,7 +554,11 @@ namespace reshade
 		bool _was_preprocessor_popup_edited = false;
 		size_t _focused_effect = std::numeric_limits<size_t>::max();
 		size_t _selected_technique = std::numeric_limits<size_t>::max();
+#if VUGGER_ADDON
+		unsigned int _tutorial_index = 4;
+#else
 		unsigned int _tutorial_index = 0;
+#endif // VUGGER_ADDON
 		unsigned int _effects_expanded_state = 2;
 		float _variable_editor_height = 300.0f;
 #endif
