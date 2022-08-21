@@ -144,7 +144,7 @@ void reshade::d3d11::device_context_impl::bind_render_targets_and_depth_stencil(
 
 void reshade::d3d11::device_context_impl::bind_pipeline(api::pipeline_stage stages, api::pipeline pipeline)
 {
-	assert(pipeline.handle != 0);
+	//assert(pipeline.handle != 0);
 
 	if (pipeline.handle & 1)
 	{
@@ -628,6 +628,11 @@ void reshade::d3d11::device_context_impl::generate_mipmaps(api::resource_view sr
 	assert(srv.handle != 0);
 
 	_orig->GenerateMips(reinterpret_cast<ID3D11ShaderResourceView *>(srv.handle));
+}
+
+void reshade::d3d11::device_context_impl::clear_state()
+{
+	_orig->ClearState();
 }
 
 void reshade::d3d11::device_context_impl::begin_query(api::query_pool pool, api::query_type, uint32_t index)

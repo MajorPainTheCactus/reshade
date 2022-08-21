@@ -1423,6 +1423,15 @@ namespace reshade
 		close_command_list,
 
 		/// <summary>
+		/// Called before:
+		/// <list type="bullet">
+		/// <item><description>ID3D11DeviceContext::ClearState</description></item>
+		/// </list>
+		/// <para>Callback function signature: <c>void (api::command_list *cmd_list)</c></para>
+		/// </summary>
+		clear_state,
+
+		/// <summary>
 		/// Called when a command list is submitted to a command queue (or an immediate command list is flushed), before:
 		/// <list type="bullet">
 		/// <item><description>IDirect3DDevice9::EndScene</description></item>
@@ -1664,6 +1673,8 @@ namespace reshade
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reset_command_list, void, api::command_list *cmd_list);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::close_command_list, void, api::command_list *cmd_list);
+
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::clear_state, void, api::command_list *cmd_list);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::execute_command_list, void, api::command_queue *queue, api::command_list *cmd_list);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::execute_secondary_command_list, void, api::command_list *cmd_list, api::command_list *secondary_cmd_list);

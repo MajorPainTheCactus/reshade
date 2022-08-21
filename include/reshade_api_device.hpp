@@ -877,6 +877,14 @@ namespace reshade::api
 		virtual void generate_mipmaps(resource_view srv) = 0;
 
 		/// <summary>
+		/// Clears the state - only does anything in DX11 and DX10
+		/// </summary>
+		/// <remarks>
+		/// This will clear out the current state"/>.
+		/// </remarks>
+		virtual void clear_state() = 0;
+
+		/// <summary>
 		/// Begins a query.
 		/// </summary>
 		/// <param name="pool">Query pool that will manage the results of the query.</param>

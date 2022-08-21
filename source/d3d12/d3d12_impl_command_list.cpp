@@ -800,6 +800,11 @@ void reshade::d3d12::command_list_impl::generate_mipmaps(api::resource_view srv)
 		_orig->SetDescriptorHeaps(_current_descriptor_heaps[1] != nullptr ? 2 : 1, _current_descriptor_heaps);
 }
 
+void reshade::d3d12::command_list_impl::clear_state()
+{
+	assert(0);
+}
+
 void reshade::d3d12::command_list_impl::begin_query(api::query_pool pool, api::query_type type, uint32_t index)
 {
 	_has_commands = true;

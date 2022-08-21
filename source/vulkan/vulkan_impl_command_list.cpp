@@ -994,6 +994,11 @@ void reshade::vulkan::command_list_impl::generate_mipmaps(api::resource_view srv
 	vk.CmdPipelineBarrier(_orig, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 }
 
+void reshade::vulkan::command_list_impl::clear_state()
+{
+	assert(0);
+}
+
 void reshade::vulkan::command_list_impl::begin_query(api::query_pool pool, api::query_type type, uint32_t index)
 {
 	_has_commands = true;

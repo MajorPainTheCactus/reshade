@@ -104,6 +104,7 @@ static const char *addon_event_to_string(reshade::addon_event ev)
 		CASE(copy_query_pool_results);
 		CASE(reset_command_list);
 		CASE(close_command_list);
+		CASE(clear_state);
 		CASE(execute_command_list);
 		CASE(execute_secondary_command_list);
 		CASE(present);

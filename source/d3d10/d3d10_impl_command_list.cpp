@@ -488,6 +488,11 @@ void reshade::d3d10::device_impl::generate_mipmaps(api::resource_view srv)
 	_orig->GenerateMips(reinterpret_cast<ID3D10ShaderResourceView *>(srv.handle));
 }
 
+void reshade::d3d10::device_impl::clear_state()
+{
+	_orig->ClearState();
+}
+
 void reshade::d3d10::device_impl::begin_query(api::query_pool pool, api::query_type, uint32_t index)
 {
 	assert(pool.handle != 0);

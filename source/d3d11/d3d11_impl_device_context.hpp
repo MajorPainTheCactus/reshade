@@ -54,6 +54,7 @@ namespace reshade::d3d11
 		void clear_unordered_access_view_float(api::resource_view, const float[4], uint32_t, const api::rect *) final { assert(false); }
 
 		void generate_mipmaps(api::resource_view) final { assert(false); }
+		void clear_state() final { assert(false); }
 
 		void begin_query(api::query_pool, api::query_type, uint32_t) final { assert(false); }
 		void end_query(api::query_pool, api::query_type, uint32_t) final { assert(false); }
@@ -127,6 +128,8 @@ namespace reshade::d3d11
 		void clear_unordered_access_view_float(api::resource_view uav, const float values[4], uint32_t rect_count, const api::rect *rects) final;
 
 		void generate_mipmaps(api::resource_view srv) final;
+
+		void clear_state() final;
 
 		void begin_query(api::query_pool pool, api::query_type type, uint32_t index) final;
 		void end_query(api::query_pool pool, api::query_type type, uint32_t index) final;

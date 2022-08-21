@@ -1346,6 +1346,11 @@ void reshade::opengl::device_impl::generate_mipmaps(api::resource_view srv)
 #endif
 }
 
+void reshade::opengl::device_impl::clear_state()
+{
+	assert(0);
+}
+
 void reshade::opengl::device_impl::begin_query(api::query_pool pool, api::query_type type, uint32_t index)
 {
 	assert(pool.handle != 0);

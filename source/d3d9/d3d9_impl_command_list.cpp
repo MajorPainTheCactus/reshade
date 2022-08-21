@@ -814,6 +814,11 @@ void reshade::d3d9::device_impl::generate_mipmaps(api::resource_view srv)
 	texture->GenerateMipSubLevels();
 }
 
+void reshade::d3d9::device_impl::clear_state()
+{
+	assert(0);
+}
+
 void reshade::d3d9::device_impl::begin_query(api::query_pool pool, api::query_type, uint32_t index)
 {
 	assert(pool.handle != 0);

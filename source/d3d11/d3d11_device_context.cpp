@@ -1185,8 +1185,11 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::CSGetConstantBuffers(UINT StartSlo
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::ClearState()
 {
+#if RESHADE_ADDON
+	reshade::invoke_addon_event<reshade::addon_event::clear_state>(this);
+#endif
+
 	_orig->ClearState();
-	// TODO: Call events with cleared state
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::Flush()
 {
