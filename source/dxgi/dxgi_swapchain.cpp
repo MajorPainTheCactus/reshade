@@ -113,7 +113,7 @@ DXGISwapChain::DXGISwapChain(D3D12CommandQueue *command_queue, IDXGISwapChain3 *
 
 void DXGISwapChain::runtime_reset()
 {
-	const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);
+	//const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);	// VUGGER_ADDON
 
 	switch (_direct3d_version)
 	{
@@ -130,7 +130,7 @@ void DXGISwapChain::runtime_reset()
 }
 void DXGISwapChain::runtime_resize()
 {
-	const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);
+	//const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex); // VUGGER_ADDON
 
 	switch (_direct3d_version)
 	{
@@ -155,7 +155,10 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 	// Synchronize access to effect runtime to avoid race conditions between 'load_effects' and 'destroy_effects' causing crashes
 	// This is necessary because Resident Evil 3 calls DXGI functions simultaneously from multiple threads (which is technically illegal)
 	// In case of D3D12, also synchronize access to the command queue while events are invoked and the immediate command list may be accessed
-	const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);
+	//const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);	// VUGGER_ADDON
+
+	if ((_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex.try_lock() : _impl_mutex.try_lock()) == false)	// VUGGER_ADDON
+		return;
 
 	switch (_direct3d_version)
 	{
@@ -206,6 +209,8 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 		static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->flush_immediate_command_list();
 		break;
 	}
+
+	_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex.unlock() : _impl_mutex.unlock();	// VUGGER_ADDON
 }
 
 void DXGISwapChain::runtime_start_frame()
@@ -213,7 +218,10 @@ void DXGISwapChain::runtime_start_frame()
 	// Synchronize access to effect runtime to avoid race conditions between 'load_effects' and 'destroy_effects' causing crashes
 	// This is necessary because Resident Evil 3 calls DXGI functions simultaneously from multiple threads (which is technically illegal)
 	// In case of D3D12, also synchronize access to the command queue while events are invoked and the immediate command list may be accessed
-	const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);
+	//const std::unique_lock<std::shared_mutex> lock(_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex : _impl_mutex);
+
+	if ((_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex.try_lock() : _impl_mutex.try_lock()) == false)		// VUGGER_ADDON
+		return;
 
 	switch (_direct3d_version)
 	{
@@ -245,6 +253,8 @@ void DXGISwapChain::runtime_start_frame()
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_start_frame();
 		break;
 	}
+
+	_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex.unlock() : _impl_mutex.unlock();		// VUGGER_ADDON
 }
 
 void DXGISwapChain::handle_device_loss(HRESULT hr)

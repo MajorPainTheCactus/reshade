@@ -3782,7 +3782,7 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 	}
 
 	if (ImDrawIdx *idx_dst;
-		_device->map_buffer_region(_imgui_indices[buffer_index], 0, UINT64_MAX, api::map_access::write_no_overwrite, reinterpret_cast<void **>(&idx_dst)))
+		_device->map_buffer_region(_imgui_indices[buffer_index], 0, UINT64_MAX, api::map_access::write_discard, reinterpret_cast<void **>(&idx_dst)))
 	{
 		for (int n = 0; n < draw_data->CmdListsCount; ++n)
 		{
@@ -3794,7 +3794,7 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 		_device->unmap_buffer_region(_imgui_indices[buffer_index]);
 	}
 	if (ImDrawVert *vtx_dst;
-		_device->map_buffer_region(_imgui_vertices[buffer_index], 0, UINT64_MAX, api::map_access::write_no_overwrite, reinterpret_cast<void **>(&vtx_dst)))
+		_device->map_buffer_region(_imgui_vertices[buffer_index], 0, UINT64_MAX, api::map_access::write_discard, reinterpret_cast<void **>(&vtx_dst)))
 	{
 		for (int n = 0; n < draw_data->CmdListsCount; ++n)
 		{

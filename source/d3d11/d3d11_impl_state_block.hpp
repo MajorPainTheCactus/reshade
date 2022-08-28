@@ -73,5 +73,7 @@ namespace reshade::d3d11
 		ID3D11ShaderResourceView *_cs_shader_resources[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 		ID3D11UnorderedAccessView *_cs_unordered_access_views[D3D11_1_UAV_SLOT_COUNT];
 		ID3D11ComputeShader *_cs;
+
+		bool _captured = false;	// VUGGER_ADDON
 	};
 }

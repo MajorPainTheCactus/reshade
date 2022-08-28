@@ -91,9 +91,15 @@ void reshade::d3d11::state_block::capture(ID3D11DeviceContext *device_context)
 			_device_feature_level >= D3D_FEATURE_LEVEL_11_1 ? D3D11_1_UAV_SLOT_COUNT :
 			_device_feature_level == D3D_FEATURE_LEVEL_11_0 ? D3D11_PS_CS_UAV_REGISTER_COUNT : D3D11_CS_4_X_UAV_REGISTER_COUNT, _cs_unordered_access_views);
 	}
+
+	_captured = true; // VUGGER_ADDON
 }
 void reshade::d3d11::state_block::apply_and_release()
 {
+	if (_captured == false) return; // VUGGER_ADDON
+
+	_captured = false; // VUGGER_ADDON
+
 	_device_context->IASetPrimitiveTopology(_ia_primitive_topology);
 	_device_context->IASetInputLayout(_ia_input_layout);
 

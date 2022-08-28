@@ -81,6 +81,8 @@ void reshade::d3d11::swapchain_impl::on_reset()
 	if (_backbuffer == nullptr)
 		return;
 
+	_app_state.apply_and_release();			// VUGGER_ADDON
+
 	runtime::on_reset();
 
 #if RESHADE_ADDON
