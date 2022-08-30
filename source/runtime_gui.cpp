@@ -661,6 +661,14 @@ void reshade::runtime::draw_gui()
 			_show_overlay = !_show_overlay;
 	}
 
+	// VUGGER ADDON
+	if (_show_overlay_next)
+	{
+		_show_overlay = true;
+		_show_overlay_next = false;
+	}
+	// VUGGER ADDON
+
 	_ignore_shortcuts = false;
 	_gather_gpu_statistics = false;
 #if RESHADE_FX

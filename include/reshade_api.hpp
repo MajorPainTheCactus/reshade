@@ -573,6 +573,7 @@ namespace reshade::api
 		/// <param name="rtv_srgb">Render target view to use for passes that write to the back buffer with <c>SRGBWriteEnabled</c> state set to <see langword="true"/>, or zero in which case the view from <paramref name="rtv"/> is used.</param>
 		virtual void render_technique(effect_technique technique, command_list *cmd_list, resource_view rtv, resource_view rtv_srgb = { 0 }) = 0;
 
+		// VUGGER ADDON
 		/// <summary>
 		/// Does the work for the begin of frame like begin ImGui so that the add-on can take control of updating the frame
 		/// </summary>
@@ -589,5 +590,10 @@ namespace reshade::api
 		/// Allow a addon to hide the overlay
 		/// </summary>
 		virtual void hide_overlay() = 0;
+		/// <summary>
+		/// Allow a addon to show the overlay
+		/// </summary>
+		virtual void show_overlay() = 0;
+		// VUGGER ADDON
 	};
 }

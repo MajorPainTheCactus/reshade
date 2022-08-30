@@ -554,10 +554,17 @@ void reshade::runtime::update_input()
 		_input->next_frame();
 }
 
+// VUGGER ADDON
 void reshade::runtime::hide_overlay()
 {
 	_show_overlay = false;
 }
+
+void reshade::runtime::show_overlay()
+{
+	_show_overlay_next = true;
+}
+// VUGGER ADDON
 
 void reshade::runtime::on_present()
 {

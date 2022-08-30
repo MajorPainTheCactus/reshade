@@ -259,10 +259,17 @@ namespace reshade
 		/// Update the input so that the add-on can take control of updating the frame
 		/// </summary>
 		void update_input() final;
+
+		// VUGGER ADDON
 		/// <summary>
 		/// Allow a addon to hide the overlay
 		/// </summary>
 		void hide_overlay() final;
+		/// <summary>
+		/// Allow a addon to show the overlay
+		/// </summary>
+		void show_overlay() final;
+		// VUGGER ADDON
 
 	protected:
 		runtime(api::device *device, api::command_queue *graphics_queue);
@@ -516,6 +523,8 @@ namespace reshade
 		bool _show_frametime = false;
 		bool _show_screenshot_message = true;
 		bool _rebuild_font_atlas = true;
+
+		bool _show_overlay_next = false; // VUGGER_ADDON
 #if RESHADE_FX
 		unsigned int _reload_count = 0;
 #endif
