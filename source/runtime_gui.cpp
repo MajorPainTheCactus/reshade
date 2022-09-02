@@ -3608,7 +3608,7 @@ bool reshade::runtime::init_imgui_resources()
 	if (_imgui_sampler_state == 0)
 	{
 		api::sampler_desc sampler_desc = {};
-		sampler_desc.filter = api::filter_mode::min_mag_mip_point; // api::filter_mode::min_mag_mip_linear;
+		sampler_desc.filter = api::filter_mode::min_mag_mip_point; // VUGGER ADDON: api::filter_mode::min_mag_mip_linear;
 		sampler_desc.address_u = api::texture_address_mode::clamp;
 		sampler_desc.address_v = api::texture_address_mode::clamp;
 		sampler_desc.address_w = api::texture_address_mode::clamp;
@@ -3854,7 +3854,13 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 		for (const ImDrawCmd &cmd : draw_list->CmdBuffer)
 		{
 			assert(cmd.TextureId != 0);
-			assert(cmd.UserCallback == nullptr);
+
+			// VUGGER ADDON
+			if (cmd.UserCallback != nullptr)
+			{
+				cmd.UserCallback(draw_list, &cmd);
+			}
+			// VUGGER ADDON
 
 			const api::rect scissor_rect = {
 				static_cast<int32_t>(cmd.ClipRect.x - draw_data->DisplayPos.x),
