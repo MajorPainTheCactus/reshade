@@ -310,12 +310,12 @@ bool reshade::d3d12::device_impl::create_resource(const api::resource_desc &desc
 
 				if (desc.type == api::resource_type::buffer)
 				{
-					update_buffer_region(initial_data->data, *out_handle, 0, desc.buffer.size);
+					update_buffer_region(nullptr, initial_data->data, *out_handle, 0, desc.buffer.size);			// VUGGER_ADDON:
 				}
 				else
 				{
 					for (uint32_t subresource = 0; subresource < static_cast<uint32_t>(desc.texture.depth_or_layers) * desc.texture.levels; ++subresource)
-						update_texture_region(initial_data[subresource], *out_handle, subresource, nullptr);
+						update_texture_region(nullptr, initial_data[subresource], *out_handle, subresource, nullptr);		// VUGGER_ADDON:
 				}
 
 				const api::resource_usage states_finalize[2] = { api::resource_usage::copy_dest, initial_state };
@@ -472,7 +472,7 @@ reshade::api::resource_view_desc reshade::d3d12::device_impl::get_resource_view_
 		return assert(false), api::resource_view_desc();
 }
 
-bool reshade::d3d12::device_impl::map_buffer_region(api::resource resource, uint64_t offset, uint64_t, api::map_access access, void **out_data)
+bool reshade::d3d12::device_impl::map_buffer_region(api::command_list*, api::resource resource, uint64_t offset, uint64_t, api::map_access access, void **out_data)		// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -491,13 +491,13 @@ bool reshade::d3d12::device_impl::map_buffer_region(api::resource resource, uint
 		return false;
 	}
 }
-void reshade::d3d12::device_impl::unmap_buffer_region(api::resource resource)
+void reshade::d3d12::device_impl::unmap_buffer_region(api::command_list *, api::resource resource)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
 	ID3D12Resource_Unmap(reinterpret_cast<ID3D12Resource *>(resource.handle), 0, nullptr);
 }
-bool reshade::d3d12::device_impl::map_texture_region(api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data)
+bool reshade::d3d12::device_impl::map_texture_region(api::command_list *, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data)		// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -523,14 +523,14 @@ bool reshade::d3d12::device_impl::map_texture_region(api::resource resource, uin
 	return SUCCEEDED(ID3D12Resource_Map(reinterpret_cast<ID3D12Resource *>(resource.handle),
 		subresource, access == api::map_access::write_only || access == api::map_access::write_discard || access == api::map_access::write_no_overwrite ? &no_read : nullptr, &out_data->data));
 }
-void reshade::d3d12::device_impl::unmap_texture_region(api::resource resource, uint32_t subresource)
+void reshade::d3d12::device_impl::unmap_texture_region(api::command_list *, api::resource resource, uint32_t subresource)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
 	ID3D12Resource_Unmap(reinterpret_cast<ID3D12Resource *>(resource.handle), subresource, nullptr);
 }
 
-void reshade::d3d12::device_impl::update_buffer_region(const void *data, api::resource resource, uint64_t offset, uint64_t size)
+void reshade::d3d12::device_impl::update_buffer_region(api::command_list *, const void *data, api::resource resource, uint64_t offset, uint64_t size)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
@@ -572,7 +572,7 @@ void reshade::d3d12::device_impl::update_buffer_region(const void *data, api::re
 		immediate_command_list->flush_and_wait();
 	}
 }
-void reshade::d3d12::device_impl::update_texture_region(const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)
+void reshade::d3d12::device_impl::update_texture_region(api::command_list *, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 

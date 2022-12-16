@@ -38,13 +38,15 @@ namespace reshade::d3d9
 		api::resource get_resource_from_view(api::resource_view view, uint32_t *out_subresource, uint32_t *out_levels = nullptr) const;
 		api::resource_view_desc get_resource_view_desc(api::resource_view view) const final;
 
-		bool map_buffer_region(api::resource resource, uint64_t offset, uint64_t size, api::map_access access, void **out_data) final;
-		void unmap_buffer_region(api::resource resource) final;
-		bool map_texture_region(api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data) final;
-		void unmap_texture_region(api::resource resource, uint32_t subresource) final;
+		// VUGGER_ADDON: BEGIN
+		bool map_buffer_region(api::command_list *, api::resource resource, uint64_t offset, uint64_t size, api::map_access access, void **out_data) final;
+		void unmap_buffer_region(api::command_list *, api::resource resource) final;
+		bool map_texture_region(api::command_list *, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data) final;
+		void unmap_texture_region(api::command_list *, api::resource resource, uint32_t subresource) final;
 
-		void update_buffer_region(const void *data, api::resource resource, uint64_t offset, uint64_t size) final;
-		void update_texture_region(const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box) final;
+		void update_buffer_region(api::command_list *, const void *data, api::resource resource, uint64_t offset, uint64_t size) final;
+		void update_texture_region(api::command_list *, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box) final;
+		// VUGGER_ADDON: END
 
 		bool create_pipeline(api::pipeline_layout layout, uint32_t subobject_count, const api::pipeline_subobject *subobjects, api::pipeline *out_handle) final;
 		bool create_input_layout(uint32_t count, const api::input_element *desc, api::pipeline *out_handle);
@@ -132,6 +134,11 @@ namespace reshade::d3d9
 		void begin_debug_event(const char *label, const float color[4]) final;
 		void end_debug_event() final;
 		void insert_debug_marker(const char *label, const float color[4]) final;
+
+		// VUGGER_ADDON: BEGIN
+		void execute_command_lists(uint32_t, api::command_list **, bool) final { assert(false); }
+		void finish_command_list(api::command_list **, bool) final { assert(false); }
+		// VUGGER_ADDON: END
 
 	protected:
 		void on_init();

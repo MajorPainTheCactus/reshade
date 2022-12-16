@@ -68,6 +68,12 @@ namespace reshade::d3d12
 		void end_debug_event() final;
 		void insert_debug_marker(const char *label, const float color[4]) final;
 
+		// VUGGER_ADDON: BEGIN
+		//void execute_command_lists(uint32_t count, api::command_list **command_lists, bool restore_state) final;
+		void execute_command_lists(uint32_t, api::command_list **, bool) final { assert(false); }
+		void finish_command_list(api::command_list **, bool) final { assert(false); }
+		// VUGGER_ADDON: END
+
 	protected:
 		device_impl *const _device_impl;
 		bool _has_commands = false;

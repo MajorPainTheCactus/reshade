@@ -17,6 +17,13 @@ ini_file &reshade::global_config()
 	return ini_file::load_cache(g_target_executable_path.parent_path() / L"ReShade.ini");
 }
 
+// VUGGER_ADDON: BEGIN
+ini_file &reshade::system_global_config()
+{
+	return ini_file::load_cache(g_app_local_path / L"vugger\\config.ini");
+}
+// VUGGER_ADDON: END
+
 ini_file::ini_file(const std::filesystem::path &path) : _path(path)
 {
 	load();

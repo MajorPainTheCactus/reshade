@@ -411,7 +411,7 @@ bool reshade::vulkan::device_impl::create_resource(const api::resource_desc &des
 
 				if (initial_data != nullptr)
 				{
-					update_buffer_region(initial_data->data, *out_handle, 0, desc.buffer.size);
+					update_buffer_region(nullptr, initial_data->data, *out_handle, 0, desc.buffer.size);		// VUGGER_ADDON:
 				}
 				return true;
 			}
@@ -516,7 +516,7 @@ bool reshade::vulkan::device_impl::create_resource(const api::resource_desc &des
 							immediate_command_list->barrier(1, out_handle, &states_upload[0], &states_upload[1]);
 
 							for (uint32_t subresource = 0; subresource < static_cast<uint32_t>(desc.texture.depth_or_layers) * desc.texture.levels; ++subresource)
-								update_texture_region(initial_data[subresource], *out_handle, subresource, nullptr);
+								update_texture_region(nullptr, initial_data[subresource], *out_handle, subresource, nullptr);			// VUGGER_ADDON:
 
 							const api::resource_usage states_finalize[2] = { api::resource_usage::copy_dest, initial_state };
 							immediate_command_list->barrier(1, out_handle, &states_finalize[0], &states_finalize[1]);
@@ -692,7 +692,7 @@ reshade::api::resource_view_desc reshade::vulkan::device_impl::get_resource_view
 		return convert_resource_view_desc(reinterpret_cast<const object_data<VK_OBJECT_TYPE_BUFFER_VIEW> *>(data)->create_info);
 }
 
-bool reshade::vulkan::device_impl::map_buffer_region(api::resource resource, uint64_t offset, uint64_t size, api::map_access, void **out_data)
+bool reshade::vulkan::device_impl::map_buffer_region(api::command_list*, api::resource resource, uint64_t offset, uint64_t size, api::map_access, void **out_data)			// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -717,7 +717,7 @@ bool reshade::vulkan::device_impl::map_buffer_region(api::resource resource, uin
 
 	return false;
 }
-void reshade::vulkan::device_impl::unmap_buffer_region(api::resource resource)
+void reshade::vulkan::device_impl::unmap_buffer_region(api::command_list *, api::resource resource)			// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
@@ -731,7 +731,7 @@ void reshade::vulkan::device_impl::unmap_buffer_region(api::resource resource)
 		vk.UnmapMemory(_orig, data->memory);
 	}
 }
-bool reshade::vulkan::device_impl::map_texture_region(api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access, api::subresource_data *out_data)
+bool reshade::vulkan::device_impl::map_texture_region(api::command_list *, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access, api::subresource_data *out_data)		// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -770,7 +770,7 @@ bool reshade::vulkan::device_impl::map_texture_region(api::resource resource, ui
 
 	return false;
 }
-void reshade::vulkan::device_impl::unmap_texture_region(api::resource resource, uint32_t subresource)
+void reshade::vulkan::device_impl::unmap_texture_region(api::command_list *, api::resource resource, uint32_t subresource)				// VUGGER_ADDON:
 {
 	if (subresource != 0)
 		return;
@@ -788,7 +788,7 @@ void reshade::vulkan::device_impl::unmap_texture_region(api::resource resource, 
 	}
 }
 
-void reshade::vulkan::device_impl::update_buffer_region(const void *data, api::resource resource, uint64_t offset, uint64_t size)
+void reshade::vulkan::device_impl::update_buffer_region(api::command_list *, const void *data, api::resource resource, uint64_t offset, uint64_t size)			// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
@@ -801,7 +801,7 @@ void reshade::vulkan::device_impl::update_buffer_region(const void *data, api::r
 		immediate_command_list->flush_and_wait();
 	}
 }
-void reshade::vulkan::device_impl::update_texture_region(const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)
+void reshade::vulkan::device_impl::update_texture_region(api::command_list *, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)			// VUGGER_ADDON:
 {
 	const auto resource_data = get_private_data_for_object<VK_OBJECT_TYPE_IMAGE>((VkImage)resource.handle);
 

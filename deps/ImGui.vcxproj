@@ -43,6 +43,8 @@
       <Optimization>Disabled</Optimization>
       <ConformanceMode>true</ConformanceMode>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <PreprocessorDefinitions>ImTextureID=unsigned long long;IMGUI_ENABLE_FREETYPE;IMGUI_DEFINE_MATH_OPERATORS;IMGUI_DISABLE_OBSOLETE_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\freetype-2.12.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -51,42 +53,48 @@
       <Optimization>Disabled</Optimization>
       <ConformanceMode>true</ConformanceMode>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <PreprocessorDefinitions>ImTextureID=unsigned long long;IMGUI_ENABLE_FREETYPE;IMGUI_DEFINE_MATH_OPERATORS;IMGUI_DISABLE_OBSOLETE_FUNCTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\freetype-2.12.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>NDEBUG;IMGUI_DISABLE_DEMO_WINDOWS;IMGUI_DISABLE_METRICS_WINDOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;IMGUI_ENABLE_FREETYPE;IMGUI_DISABLE_DEMO_WINDOWS;IMGUI_DISABLE_METRICS_WINDOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\freetype-2.12.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>NDEBUG;IMGUI_DISABLE_DEMO_WINDOWS;IMGUI_DISABLE_METRICS_WINDOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;IMGUI_ENABLE_FREETYPE;IMGUI_DISABLE_DEMO_WINDOWS;IMGUI_DISABLE_METRICS_WINDOW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <ExceptionHandling>false</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\freetype-2.12.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\misc\freetype\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="imgui\misc\freetype\imgui_freetype.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

@@ -276,6 +276,9 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::DrawIndexed(UINT IndexCount, UINT 
 		return;
 #endif
 	_orig->DrawIndexed(IndexCount, StartIndexLocation, BaseVertexLocation);
+#if RESHADE_ADDON		// VUGGER_ADDON:
+	reshade::invoke_addon_event<reshade::addon_event::post_draw_indexed>(this);
+#endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::Draw(UINT VertexCount, UINT StartVertexLocation)
 {
@@ -284,6 +287,9 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::Draw(UINT VertexCount, UINT StartV
 		return;
 #endif
 	_orig->Draw(VertexCount, StartVertexLocation);
+#if RESHADE_ADDON		// VUGGER_ADDON:
+	reshade::invoke_addon_event<reshade::addon_event::post_draw>(this);
+#endif
 }
 HRESULT STDMETHODCALLTYPE D3D11DeviceContext::Map(ID3D11Resource *pResource, UINT Subresource, D3D11_MAP MapType, UINT MapFlags, D3D11_MAPPED_SUBRESOURCE *pMappedResource)
 {
@@ -303,6 +309,7 @@ HRESULT STDMETHODCALLTYPE D3D11DeviceContext::Map(ID3D11Resource *pResource, UIN
 
 			reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 				_device,
+				this,						// VUGGER_ADDON: 
 				to_handle(pResource),
 				0,
 				UINT64_MAX,
@@ -314,6 +321,7 @@ HRESULT STDMETHODCALLTYPE D3D11DeviceContext::Map(ID3D11Resource *pResource, UIN
 		{
 			reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 				_device,
+				this,						// VUGGER_ADDON: 
 				to_handle(pResource),
 				Subresource,
 				nullptr,
@@ -339,11 +347,11 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::Unmap(ID3D11Resource *pResource, U
 		{
 			assert(Subresource == 0);
 
-			reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(_device, to_handle(pResource));
+			reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(_device, this, to_handle(pResource));		// VUGGER_ADDON:
 		}
 		else
 		{
-			reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(_device, to_handle(pResource), Subresource);
+			reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(_device, this, to_handle(pResource), Subresource);		// VUGGER_ADDON:
 		}
 	}
 #endif
@@ -614,6 +622,10 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::Dispatch(UINT ThreadGroupCountX, U
 		return;
 #endif
 	_orig->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+
+#if RESHADE_ADDON		// VUGGER_ADDON:
+	reshade::invoke_addon_event<reshade::addon_event::post_dispatch>(this);
+#endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::DispatchIndirect(ID3D11Buffer *pBufferForArgs, UINT AlignedByteOffsetForArgs)
 {
@@ -816,6 +828,7 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::UpdateSubresource(ID3D11Resource *
 
 			if (reshade::invoke_addon_event<reshade::addon_event::update_buffer_region>(
 					_device,
+					this, 				// VUGGER_ADDON:
 					pSrcData,
 					to_handle(pDstResource),
 					pDstBox != nullptr ? pDstBox->left : 0,
@@ -826,6 +839,7 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::UpdateSubresource(ID3D11Resource *
 		{
 			if (reshade::invoke_addon_event<reshade::addon_event::update_texture_region>(
 					_device,
+					this,				// VUGGER_ADDON:
 					reshade::api::subresource_data { const_cast<void *>(pSrcData), SrcRowPitch, SrcDepthPitch },
 					to_handle(pDstResource),
 					DstSubresource,
@@ -1217,8 +1231,9 @@ HRESULT STDMETHODCALLTYPE D3D11DeviceContext::FinishCommandList(BOOL RestoreDefe
 		const auto command_list_proxy = new D3D11CommandList(_device, *ppCommandList);
 		*ppCommandList = command_list_proxy;
 
+		// VUGGER_ADDON:
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::execute_secondary_command_list>(command_list_proxy, this);
+		reshade::invoke_addon_event<reshade::addon_event::finish_command_list>(command_list_proxy, this);
 #endif
 	}
 
@@ -1387,6 +1402,7 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::UpdateSubresource1(ID3D11Resource 
 
 			if (reshade::invoke_addon_event<reshade::addon_event::update_buffer_region>(
 					_device,
+					this,				// VUGGER_ADDON:
 					pSrcData,
 					to_handle(pDstResource),
 					pDstBox != nullptr ? pDstBox->left : 0,
@@ -1397,6 +1413,7 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::UpdateSubresource1(ID3D11Resource 
 		{
 			if (reshade::invoke_addon_event<reshade::addon_event::update_texture_region>(
 					_device,
+					this,				// VUGGER_ADDON:
 					reshade::api::subresource_data { const_cast<void *>(pSrcData), SrcRowPitch, SrcDepthPitch },
 					to_handle(pDstResource),
 					DstSubresource,

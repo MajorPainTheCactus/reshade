@@ -870,3 +870,18 @@ void reshade::d3d12::command_list_impl::insert_debug_marker(const char *label, c
 	_orig->SetMarker(2, pix3blob, sizeof(pix3blob));
 #endif
 }
+
+// VUGGER_ADDON: BEGIN
+//void reshade::d3d12::command_list_impl::execute_command_lists(uint32_t count, api::command_list **command_lists, bool restore_state)
+//{
+//	assert(restore_state == false);
+//
+//	temp_mem<ID3D12CommandList*, D3D12_SO_BUFFER_SLOT_COUNT> temp_command_lists(count);
+//	for (uint32_t i = 0; i < count; ++i)
+//	{
+//		temp_command_lists[i] = reinterpret_cast<ID3D12CommandList *>(command_lists[0]->get_native());
+//	}
+//
+//	_orig->ExecuteCommandLists(count, temp_command_lists);
+//}
+// VUGGER_ADDON: END

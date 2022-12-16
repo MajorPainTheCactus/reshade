@@ -90,7 +90,7 @@ static void init_resource(GLenum target, GLuint object, const reshade::api::reso
 	if (update_texture && initial_data != nullptr)
 	{
 		assert(base_target != GL_BUFFER);
-		g_current_context->update_texture_region(*initial_data, resource, 0, nullptr);
+		g_current_context->update_texture_region(nullptr, *initial_data, resource, 0, nullptr);		// VUGGER_ADDON:
 	}
 
 	reshade::invoke_addon_event<reshade::addon_event::init_resource>(
@@ -391,7 +391,7 @@ static bool update_buffer_region(GLenum target, GLuint object, GLintptr offset, 
 
 	reshade::api::resource dst = reshade::opengl::make_resource_handle(GL_BUFFER, object);
 
-	return reshade::invoke_addon_event<reshade::addon_event::update_buffer_region>(g_current_context, data, dst, static_cast<uint64_t>(offset), static_cast<uint64_t>(size));
+	return reshade::invoke_addon_event<reshade::addon_event::update_buffer_region>(g_current_context, nullptr, data, dst, static_cast<uint64_t>(offset), static_cast<uint64_t>(size));		// VUGGER_ADDON:
 }
 static bool update_texture_region(GLenum target, GLuint object, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels)
 {
@@ -431,7 +431,7 @@ static bool update_texture_region(GLenum target, GLuint object, GLint level, GLi
 	const reshade::api::subresource_box dst_box = { xoffset, yoffset, zoffset, xoffset + width, yoffset + height, zoffset + depth };
 
 	std::vector<uint8_t> temp_data;
-	return reshade::invoke_addon_event<reshade::addon_event::update_texture_region>(g_current_context, convert_mapped_subresource(format, type, pixels, &temp_data, dst_desc.texture.format, width, height, depth), dst, subresource, &dst_box);
+	return reshade::invoke_addon_event<reshade::addon_event::update_texture_region>(g_current_context, nullptr, convert_mapped_subresource(format, type, pixels, &temp_data, dst_desc.texture.format, width, height, depth), dst, subresource, &dst_box);		// VUGGER_ADDON:
 }
 
 #endif
@@ -1487,6 +1487,7 @@ auto APIENTRY glMapBuffer(GLenum target, GLenum access) -> void *
 
 		reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 			g_current_context,
+			nullptr,				// VUGGER_ADDON:
 			reshade::opengl::make_resource_handle(GL_BUFFER, object),
 			0,
 			UINT64_MAX,
@@ -1508,6 +1509,7 @@ void APIENTRY glUnmapBuffer(GLenum target)
 
 		reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(
 			g_current_context,
+			nullptr,				// VUGGER_ADDON:
 			reshade::opengl::make_resource_handle(GL_BUFFER, object));
 	}
 #endif
@@ -1973,6 +1975,7 @@ auto APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length
 
 		reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 			g_current_context,
+			nullptr,				// VUGGER_ADDON:
 			reshade::opengl::make_resource_handle(GL_BUFFER, object),
 			offset,
 			length,
@@ -3899,6 +3902,7 @@ auto APIENTRY glMapNamedBuffer(GLuint buffer, GLenum access) -> void *
 	{
 		reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 			g_current_context,
+			nullptr,				// VUGGER_ADDON:
 			reshade::opengl::make_resource_handle(GL_BUFFER, buffer),
 			0,
 			UINT64_MAX,
@@ -3920,6 +3924,7 @@ auto APIENTRY glMapNamedBufferRange(GLuint buffer, GLintptr offset, GLsizeiptr l
 	{
 		reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 			g_current_context,
+			nullptr,				// VUGGER_ADDON:
 			reshade::opengl::make_resource_handle(GL_BUFFER, buffer),
 			offset,
 			length,
@@ -3938,6 +3943,7 @@ void APIENTRY glUnmapNamedBuffer(GLuint buffer)
 	{
 		reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(
 			g_current_context,
+			nullptr,				// VUGGER_ADDON:
 			reshade::opengl::make_resource_handle(GL_BUFFER, buffer));
 	}
 #endif

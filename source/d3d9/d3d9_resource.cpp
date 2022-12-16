@@ -162,6 +162,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DSurface9_LockRect(IDirect3DSurface9 *pSurface
 
 			reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 				device_proxy,
+				nullptr,				// VUGGER_ADDON:
 				device_proxy->get_resource_from_view(to_handle(pSurface), &subresource),
 				subresource,
 				convert_rect_to_box(pRect, box),
@@ -183,6 +184,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DSurface9_UnlockRect(IDirect3DSurface9 *pSurfa
 
 		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(
 			device_proxy,
+			nullptr,				// VUGGER_ADDON:
 			device_proxy->get_resource_from_view(to_handle(pSurface), &subresource),
 			subresource);
 	}
@@ -207,6 +209,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DVolume9_LockBox(IDirect3DVolume9 *pVolume, D3
 
 			reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 				device_proxy,
+				nullptr,				// VUGGER_ADDON:
 				device_proxy->get_resource_from_view(to_handle(pVolume), &subresource),
 				subresource,
 				reinterpret_cast<const reshade::api::subresource_box *>(pBox),
@@ -229,6 +232,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DVolume9_UnlockBox(IDirect3DVolume9 *pVolume)
 
 		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(
 			device_proxy,
+			nullptr,				// VUGGER_ADDON:
 			device_proxy->get_resource_from_view(to_handle(pVolume), &subresource),
 			subresource);
 	}
@@ -253,6 +257,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DTexture9_LockRect(IDirect3DTexture9 *pTexture
 
 			reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 				device_proxy,
+				nullptr,				// VUGGER_ADDON:
 				to_handle(pTexture),
 				Level,
 				convert_rect_to_box(pRect, box),
@@ -270,7 +275,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DTexture9_UnlockRect(IDirect3DTexture9 *pTextu
 {
 	if (const auto device_proxy = get_private_pointer_d3d9<Direct3DDevice9>(pTexture))
 	{
-		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, to_handle(pTexture), Level);
+		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, nullptr, to_handle(pTexture), Level);			// VUGGER_ADDON:
 	}
 
 	return reshade::hooks::call(IDirect3DTexture9_UnlockRect, vtable_from_instance(pTexture) + 20)(pTexture, Level);
@@ -292,6 +297,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DVolumeTexture9_LockBox(IDirect3DVolumeTexture
 
 			reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 				device_proxy,
+				nullptr,					// VUGGER_ADDON:
 				to_handle(pTexture),
 				Level,
 				reinterpret_cast<const reshade::api::subresource_box *>(pBox),
@@ -310,7 +316,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DVolumeTexture9_UnlockBox(IDirect3DVolumeTextu
 {
 	if (const auto device_proxy = get_private_pointer_d3d9<Direct3DDevice9>(pTexture))
 	{
-		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, to_handle(pTexture), Level);
+		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, nullptr, to_handle(pTexture), Level);			// VUGGER_ADDON:
 	}
 
 	return reshade::hooks::call(IDirect3DVolumeTexture9_UnlockBox, vtable_from_instance(pTexture) + 20)(pTexture, Level);
@@ -334,6 +340,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DCubeTexture9_LockRect(IDirect3DCubeTexture9 *
 
 			reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 				device_proxy,
+				nullptr,					// VUGGER_ADDON:
 				to_handle(pTexture),
 				subresource,
 				convert_rect_to_box(pRect, box),
@@ -353,7 +360,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DCubeTexture9_UnlockRect(IDirect3DCubeTexture9
 	{
 		const uint32_t subresource = Level + static_cast<uint32_t>(FaceType) * pTexture->GetLevelCount();
 
-		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, to_handle(pTexture), subresource);
+		reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, nullptr, to_handle(pTexture), subresource);			// VUGGER_ADDON:
 	}
 
 	return reshade::hooks::call(IDirect3DCubeTexture9_UnlockRect, vtable_from_instance(pTexture) + 20)(pTexture, FaceType, Level);
@@ -370,6 +377,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DVertexBuffer9_Lock(IDirect3DVertexBuffer9 *pV
 		{
 			reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 				device_proxy,
+				nullptr,							// VUGGER_ADDON:
 				to_handle(pVertexBuffer),
 				OffsetToLock,
 				SizeToLock != 0 ? SizeToLock : UINT64_MAX,
@@ -384,7 +392,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DVertexBuffer9_Unlock(IDirect3DVertexBuffer9 *
 {
 	if (const auto device_proxy = get_private_pointer_d3d9<Direct3DDevice9>(pVertexBuffer))
 	{
-		reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(device_proxy, to_handle(pVertexBuffer));
+		reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(device_proxy, nullptr, to_handle(pVertexBuffer));			// VUGGER_ADDON:
 	}
 
 	return reshade::hooks::call(IDirect3DVertexBuffer9_Unlock, vtable_from_instance(pVertexBuffer) + 12)(pVertexBuffer);
@@ -401,6 +409,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DIndexBuffer9_Lock(IDirect3DIndexBuffer9 *pInd
 		{
 			reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 				device_proxy,
+				nullptr,							// VUGGER_ADDON:
 				to_handle(pIndexBuffer),
 				OffsetToLock,
 				SizeToLock != 0 ? SizeToLock : UINT64_MAX,
@@ -415,7 +424,7 @@ HRESULT STDMETHODCALLTYPE IDirect3DIndexBuffer9_Unlock(IDirect3DIndexBuffer9 *pI
 {
 	if (const auto device_proxy = get_private_pointer_d3d9<Direct3DDevice9>(pIndexBuffer))
 	{
-		reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(device_proxy, to_handle(pIndexBuffer));
+		reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(nullptr, device_proxy, to_handle(pIndexBuffer));			// VUGGER_ADDON:
 	}
 
 	return reshade::hooks::call(IDirect3DIndexBuffer9_Unlock, vtable_from_instance(pIndexBuffer) + 12)(pIndexBuffer);

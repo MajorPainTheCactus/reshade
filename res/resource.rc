@@ -104,9 +104,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // ADDON
 //
 
-IDR_ADDON2              ADDON                   "..\\bin\\Win32\\Release\\vugger32.addon"
+IDR_ADDON2              ADDON                   "..\\bin\\Win32\\Debug\\vugger32.addon"
 
-IDR_ADDON3              ADDON                   "..\\bin\\x64\\Release\\vugger64.addon"
+IDR_ADDON3              ADDON                   "..\\bin\\x64\\Debug\\vugger64.addon"
 
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////

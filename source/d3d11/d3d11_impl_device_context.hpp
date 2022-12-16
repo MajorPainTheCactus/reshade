@@ -13,7 +13,7 @@ namespace reshade::d3d11
 	{
 	public:
 		command_list_impl(device_impl *device, ID3D11CommandList *cmd_list);
-		~command_list_impl();
+		virtual ~command_list_impl();		// VUGGER_ADDON:
 
 		api::device *get_device() final;
 
@@ -64,8 +64,74 @@ namespace reshade::d3d11
 		void end_debug_event() final { assert(false); }
 		void insert_debug_marker(const char *, const float[4]) final { assert(false); }
 
+		// VUGGER_ADDON: BEGIN
+		void execute_command_lists(uint32_t, api::command_list **, bool) final { assert(false); }
+		void finish_command_list(api::command_list **, bool ) final { assert(false); }
+		// VUGGER_ADDON: END
+
+		// VUGGER_ADDON: TODO: REMOVE
+		//void barrier(uint32_t, const api::resource *, const api::resource_usage *, const api::resource_usage *) final;
+
+		//void begin_render_pass(uint32_t, const api::render_pass_render_target_desc *, const api::render_pass_depth_stencil_desc *) final;
+		//void end_render_pass() final { assert(false); }
+		//void bind_render_targets_and_depth_stencil(uint32_t, const api::resource_view *, api::resource_view) final;
+
+		//void bind_pipeline(api::pipeline_stage, api::pipeline) final;
+		//void bind_pipeline_states(uint32_t, const api::dynamic_state *, const uint32_t *) final;
+		//void bind_viewports(uint32_t, uint32_t, const api::viewport *) final;
+		//void bind_scissor_rects(uint32_t, uint32_t, const api::rect *) final;
+
+		//void bind_samplers(api::shader_stage stages, uint32_t first, uint32_t count, const api::sampler *samplers);
+		//void bind_shader_resource_views(api::shader_stage stages, uint32_t first, uint32_t count, const api::resource_view *views);
+		//void bind_unordered_access_views(api::shader_stage stages, uint32_t first, uint32_t count, const api::resource_view *views);
+		//void bind_constant_buffers(api::shader_stage stages, uint32_t first, uint32_t count, const api::buffer_range *buffer_ranges);
+
+		//void push_constants(api::shader_stage, api::pipeline_layout, uint32_t, uint32_t, uint32_t, const void *) final;
+		//void push_descriptors(api::shader_stage, api::pipeline_layout, uint32_t, const api::descriptor_set_update &) final;
+		//void bind_descriptor_sets(api::shader_stage, api::pipeline_layout, uint32_t, uint32_t, const api::descriptor_set *) final;
+
+		//void bind_index_buffer(api::resource, uint64_t, uint32_t) final;
+		//void bind_vertex_buffers(uint32_t, uint32_t, const api::resource *, const uint64_t *, const uint32_t *) final;
+		//void bind_stream_output_buffers(uint32_t, uint32_t, const api::resource *, const uint64_t *, const uint64_t *) final;
+
+		//void draw(uint32_t, uint32_t, uint32_t, uint32_t) final;
+		//void draw_indexed(uint32_t, uint32_t, uint32_t, int32_t, uint32_t) final;
+		//void dispatch(uint32_t, uint32_t, uint32_t) final;
+		//void draw_or_dispatch_indirect(api::indirect_command, api::resource, uint64_t, uint32_t, uint32_t) final;
+
+		//void copy_resource(api::resource, api::resource) final;
+		//void copy_buffer_region(api::resource, uint64_t, api::resource, uint64_t, uint64_t) final;
+		//void copy_buffer_to_texture(api::resource, uint64_t, uint32_t, uint32_t, api::resource, uint32_t, const api::subresource_box *) final;
+		//void copy_texture_region(api::resource, uint32_t, const api::subresource_box *, api::resource, uint32_t, const api::subresource_box *, api::filter_mode) final;
+		//void copy_texture_to_buffer(api::resource, uint32_t, const api::subresource_box *, api::resource, uint64_t, uint32_t, uint32_t) final;
+		//void resolve_texture_region(api::resource, uint32_t, const api::subresource_box *, api::resource, uint32_t, int32_t, int32_t, int32_t, api::format) final;
+
+		//void clear_depth_stencil_view(api::resource_view, const float *, const uint8_t *, uint32_t, const api::rect *) final;
+		//void clear_render_target_view(api::resource_view, const float[4], uint32_t, const api::rect *) final;
+		//void clear_unordered_access_view_uint(api::resource_view, const uint32_t[4], uint32_t, const api::rect *) final;
+		//void clear_unordered_access_view_float(api::resource_view, const float[4], uint32_t, const api::rect *) final;
+
+		//void generate_mipmaps(api::resource_view) final;
+		//void clear_state() final;
+
+		//void begin_query(api::query_pool, api::query_type, uint32_t) final;
+		//void end_query(api::query_pool, api::query_type, uint32_t) final;
+		//void copy_query_pool_results(api::query_pool, api::query_type, uint32_t, uint32_t, api::resource, uint64_t, uint32_t) final;
+
+		//void begin_debug_event(const char *, const float[4]) final;
+		//void end_debug_event() final;
+		//void insert_debug_marker(const char *, const float[4]) final;
+		// VUGGER_ADDON: END
+
 	private:
 		device_impl *const _device_impl;
+		
+		// VUGGER_ADDON: BEGIN
+		com_ptr<ID3DUserDefinedAnnotation> _annotations;
+
+		UINT _push_constants_size = 0;
+		com_ptr<ID3D11Buffer> _push_constants;
+		// VUGGER_ADDON: END
 	};
 
 	class device_context_impl : public api::api_object_impl<ID3D11DeviceContext *, api::command_queue, api::command_list>
@@ -138,6 +204,11 @@ namespace reshade::d3d11
 		void begin_debug_event(const char *label, const float color[4]) final;
 		void end_debug_event() final;
 		void insert_debug_marker(const char *label, const float color[4]) final;
+
+		// VUGGER_ADDON: BEGIN
+		void execute_command_lists(uint32_t count, api::command_list **command_lists, bool restore_state) final;
+		void finish_command_list(api::command_list **command_list, bool restore_state) final;
+		// VUGGER_ADDON: END
 
 	private:
 		device_impl *const _device_impl;

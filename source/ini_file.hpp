@@ -13,6 +13,7 @@
 extern std::filesystem::path g_reshade_dll_path;
 extern std::filesystem::path g_reshade_base_path;
 extern std::filesystem::path g_target_executable_path;
+extern std::filesystem::path g_app_local_path;				// VUGGER ADDON
 
 inline void trim(std::string &str, const char chars[] = " \t")
 {
@@ -314,4 +315,11 @@ namespace reshade
 	/// Global configuration that can be used for general settings that are not specific to an effect runtime instance.
 	/// </summary>
 	ini_file &global_config();
+
+	// VUGGER_ADDON: BEGIN
+	/// <summary>
+	/// System Global configuration that can be used for general settings that are not specific to an effect runtime instance.
+	/// </summary>
+	ini_file &system_global_config();
+	// VUGGER_ADDON: END
 }

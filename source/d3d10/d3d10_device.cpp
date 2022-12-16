@@ -612,6 +612,7 @@ void    STDMETHODCALLTYPE D3D10Device::UpdateSubresource(ID3D10Resource *pDstRes
 			assert(DstSubresource == 0);
 
 			if (reshade::invoke_addon_event<reshade::addon_event::update_buffer_region>(
+					nullptr,		// VUGGER_ADDON:
 					this,
 					pSrcData,
 					to_handle(pDstResource),
@@ -622,6 +623,7 @@ void    STDMETHODCALLTYPE D3D10Device::UpdateSubresource(ID3D10Resource *pDstRes
 		else
 		{
 			if (reshade::invoke_addon_event<reshade::addon_event::update_texture_region>(
+					nullptr,		// VUGGER_ADDON:
 					this,
 					reshade::api::subresource_data { const_cast<void *>(pSrcData), SrcRowPitch, SrcDepthPitch },
 					to_handle(pDstResource),

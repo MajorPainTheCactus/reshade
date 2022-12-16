@@ -172,6 +172,8 @@ namespace reshade::api
 	/// </summary>
 	RESHADE_DEFINE_INTERFACE(api_object)
 	{
+		virtual ~api_object() {}		// VUGGER_ADDON
+
 		/// <summary>
 		/// Gets the underlying native object for this API object.
 		/// </summary>
@@ -234,6 +236,8 @@ namespace reshade::api
 	/// </remarks>
 	RESHADE_DEFINE_INTERFACE_WITH_BASE(device, api_object)
 	{
+		virtual ~device() {}		// VUGGER_ADDON
+
 		/// <summary>
 		/// Gets the underlying render API used by this device.
 		/// </summary>
@@ -313,12 +317,12 @@ namespace reshade::api
 		/// <param name="access">Hint on how the returned data pointer will be accessed.</param>
 		/// <param name="out_data">Pointer to a variable that is set to a pointer to the memory of the buffer resource.</param>
 		/// <returns><see langword="true"/> if the memory of the buffer resource was successfully mapped, <see langword="false"/> otherwise (in this case <paramref name="out_data"/> is set to <see langword="nullptr"/>).</returns>
-		virtual bool map_buffer_region(resource resource, uint64_t offset, uint64_t size, map_access access, void **out_data) = 0;
+		virtual bool map_buffer_region(struct command_list *command_list, resource resource, uint64_t offset, uint64_t size, map_access access, void **out_data) = 0;		 // VUGGER_ADDON: 
 		/// <summary>
 		/// Unmaps a previously mapped buffer resource.
 		/// </summary>
 		/// <param name="resource">Buffer resource to unmap from host memory.</param>
-		virtual void unmap_buffer_region(resource resource) = 0;
+		virtual void unmap_buffer_region(struct command_list *command_list, resource resource) = 0;		 // VUGGER_ADDON: 
 		/// <summary>
 		/// Maps the memory of a texture resource into application address space.
 		/// </summary>
@@ -328,13 +332,13 @@ namespace reshade::api
 		/// <param name="access">Hint on how the returned data pointer will be accessed.</param>
 		/// <param name="out_data">Pointer to a variable that is set to a pointer to the memory of the texture resource and optionally the row and slice pitch of that data (depending on the resource type).</param>
 		/// <returns><see langword="true"/> if the memory of the texture resource was successfully mapped, <see langword="false"/> otherwise (in this case <paramref name="out_data"/> is set to <see langword="nullptr"/>).</returns>
-		virtual bool map_texture_region(resource resource, uint32_t subresource, const subresource_box *box, map_access access, subresource_data *out_data) = 0;
+		virtual bool map_texture_region(struct command_list *command_list, resource resource, uint32_t subresource, const subresource_box *box, map_access access, subresource_data *out_data) = 0;		 // VUGGER_ADDON: 
 		/// <summary>
 		/// Unmaps a previously mapped texture resource.
 		/// </summary>
 		/// <param name="resource">Texture resource to unmap from host memory.</param>
 		/// <param name="subresource">Index of the subresource to unmap (<c>level + (layer * levels)</c>).</param>
-		virtual void unmap_texture_region(resource resource, uint32_t subresource) = 0;
+		virtual void unmap_texture_region(struct command_list *command_list, resource resource, uint32_t subresource) = 0;		 // VUGGER_ADDON: 
 
 		/// <summary>
 		/// Uploads data to a buffer resource.
@@ -343,7 +347,7 @@ namespace reshade::api
 		/// <param name="resource">Buffer resource to upload to.</param>
 		/// <param name="offset">Offset (in bytes) into the buffer resource to start uploading to.</param>
 		/// <param name="size">Number of bytes to upload.</param>
-		virtual void update_buffer_region(const void *data, resource resource, uint64_t offset, uint64_t size) = 0;
+		virtual void update_buffer_region(struct command_list *command_list, const void *data, resource resource, uint64_t offset, uint64_t size) = 0;		// VUGGER_ADDON:
 		/// <summary>
 		/// Uploads data to a texture resource.
 		/// </summary>
@@ -351,7 +355,7 @@ namespace reshade::api
 		/// <param name="resource">Texture resource to upload to.</param>
 		/// <param name="subresource">Index of the subresource to upload to (<c>level + (layer * levels)</c>).</param>
 		/// <param name="box">Optional 3D box (or <see langword="nullptr"/> to reference the entire subresource) that defines the region in the <paramref name="resource"/> to upload to.</param>
-		virtual void update_texture_region(const subresource_data &data, resource resource, uint32_t subresource, const subresource_box *box = nullptr) = 0;
+		virtual void update_texture_region(struct command_list *command_list, const subresource_data &data, resource resource, uint32_t subresource, const subresource_box *box = nullptr) = 0;		// VUGGER_ADDON:
 
 		/// <summary>
 		/// Creates a new pipeline state object.
@@ -516,6 +520,8 @@ namespace reshade::api
 	/// </summary>
 	RESHADE_DEFINE_INTERFACE_WITH_BASE(device_object, api_object)
 	{
+		virtual ~device_object() {}		// VUGGER_ADDON:
+
 		/// <summary>
 		/// Gets the parent device for this object.
 		/// </summary>
@@ -542,6 +548,8 @@ namespace reshade::api
 	/// </remarks>
 	RESHADE_DEFINE_INTERFACE_WITH_BASE(command_list, device_object)
 	{
+		virtual ~command_list() {}		// VUGGER_ADDON:
+
 		/// <summary>
 		/// Adds a barrier for the specified <paramref name="resource"/> to the command stream.
 		/// When both <paramref name="old_state"/> and <paramref name="new_state"/> are <see cref="resource_usage::unordered_access"/> a UAV barrier is added, otherwise a state transition is performed.
@@ -929,6 +937,23 @@ namespace reshade::api
 		/// <param name="label">Null-terminated string containing the label of the debug marker.</param>
 		/// <param name="color">Optional RGBA color value associated with the debug marker.</param>
 		virtual void insert_debug_marker(const char *label, const float color[4] = nullptr) = 0;
+
+		// VUGGER_ADDON: BEGIN
+		/// <summary>
+		/// Executes one or more command lists
+		/// </summary>
+		/// <param name="count">Number of commands lists passed in next params</param>
+		/// <param name="command_lists">List of command lists</param>
+		/// <param name="restore_state">restore command list state after execution</param>
+		virtual void execute_command_lists(uint32_t count, command_list **command_lists, bool restore_state = false) = 0;
+
+		/// <summary>
+		/// Finish one or more command lists
+		/// </summary>
+		/// <param name="command_lists">output command list</param>
+		/// <param name="restore_state">restore command list state after execution</param>
+		virtual void finish_command_list(api::command_list **command_list, bool restore_state = false) = 0;
+		// VUGGER_ADDON: END
 	};
 
 	/// <summary>
@@ -951,6 +976,8 @@ namespace reshade::api
 	/// </remarks>
 	RESHADE_DEFINE_INTERFACE_WITH_BASE(command_queue, device_object)
 	{
+		virtual ~command_queue() {}		// VUGGER_ADDON:
+
 		/// <summary>
 		/// Gets the type of the command queue, which specifies what commands can be executed on it.
 		/// </summary>
@@ -990,6 +1017,23 @@ namespace reshade::api
 		/// <param name="label">Null-terminated string containing the label of the debug marker.</param>
 		/// <param name="color">Optional RGBA color value associated with the debug marker.</param>
 		virtual void insert_debug_marker(const char *label, const float color[4] = nullptr) = 0;
+
+		// VUGGER_ADDON: BEGIN
+		/// <summary>
+		/// Executes one or more command lists
+		/// </summary>
+		/// <param name="count">Number of commands lists passed in next params</param>
+		/// <param name="command_lists">List of command lists</param>
+		/// <param name="restore_state">restore command list state after execution</param>
+		virtual void execute_command_lists(uint32_t count, api::command_list * *command_lists, bool restore_state = false) = 0;
+
+		/// <summary>
+		/// Finish one or more command lists
+		/// </summary>
+		/// <param name="command_lists">output command list</param>
+		/// <param name="restore_state">restore command list state after execution</param>
+		virtual void finish_command_list(api::command_list * *command_list, bool restore_state = false) = 0;
+		// VUGGER_ADDON: END
 	};
 
 	/// <summary>
@@ -1019,6 +1063,8 @@ namespace reshade::api
 	/// </summary>
 	RESHADE_DEFINE_INTERFACE_WITH_BASE(swapchain, device_object)
 	{
+		virtual ~swapchain() {}		// VUGGER_ADDON:
+
 		/// <summary>
 		/// Gets the window handle of the window this swap chain was created with, or <see langword="nullptr"/> if this is an offscreen swap chain.
 		/// </summary>

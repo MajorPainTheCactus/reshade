@@ -3,18 +3,24 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#undef NOCTLMGR			// VUGGER_ADDON:
+
+#include <windows.h>
 #include "version.h"
 #include "dll_log.hpp"
 #include "ini_file.hpp"
 #include "hook_manager.hpp"
 #include "addon_manager.hpp"
-#include <Windows.h>
-#include <Psapi.h>
+#include <psapi.h>
+#include <shlwapi.h>			// VUGGER_ADDON:
+#include <shlobj.h>				// VUGGER_ADDON:
+
 #ifndef NDEBUG
 #include <DbgHelp.h>
 
 static PVOID s_exception_handler_handle = nullptr;
 #endif
+
 
 // Export special symbol to identify modules as ReShade instances
 extern "C" __declspec(dllexport) const char *ReShadeVersion = VERSION_STRING_PRODUCT;
@@ -23,6 +29,7 @@ HMODULE g_module_handle = nullptr;
 std::filesystem::path g_reshade_dll_path;
 std::filesystem::path g_reshade_base_path;
 std::filesystem::path g_target_executable_path;
+std::filesystem::path g_app_local_path;		// VUGGER ADDON
 
 /// <summary>
 /// Checks whether the current application is running on UWP.
@@ -117,6 +124,23 @@ std::filesystem::path get_module_path(HMODULE module)
 	return GetModuleFileNameW(module, buf, ARRAYSIZE(buf)) ? buf : std::filesystem::path();
 }
 
+// VUGGER_ADDON: BEGIN
+/// <summary>
+/// Returns the path to the module file identified by the specified <paramref name="module"/> handle.
+/// </summary>
+std::filesystem::path get_app_local_path()
+{
+	WCHAR buf[4096];
+	// Get path for each computer, non-user specific and non-roaming data.
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, buf)))
+	{
+		return buf;
+	}
+
+	return std::filesystem::path();
+}
+// VUGGER_ADDON: END
+
 #ifndef RESHADE_TEST_APPLICATION
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
@@ -130,6 +154,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 			g_module_handle = hModule;
 			g_reshade_dll_path = get_module_path(hModule);
 			g_target_executable_path = get_module_path(nullptr);
+			g_app_local_path = get_app_local_path();					// VUGGER_ADDON:
 
 			const std::filesystem::path module_name = g_reshade_dll_path.stem();
 
@@ -257,6 +282,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 			// Register modules to hook
 			{
 				reshade::hooks::register_module(L"user32.dll");
+				//reshade::hooks::register_module(L"kernel32.dll");			// VUGGER_ADDON:
 
 #if RESHADE_ADDON_LITE
 				// Disable network hooks when requested through an environment variable and always disable add-ons in that case
@@ -345,5 +371,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 
 	return TRUE;
 }
+
+// VUGGER_ADDON: BEGIN
+//HOOK_EXPORT BOOL WINAPI HookIsDebuggerPresent(void)
+//{
+//	LOG(INFO) << "HookIsDebuggerPresent";
+//
+//	return FALSE;
+//}
+// VUGGER_ADDON: END
 
 #endif

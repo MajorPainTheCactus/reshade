@@ -14,6 +14,7 @@
 #include "runtime_objects.hpp"
 #include "input.hpp"
 #include "imgui_widgets.hpp"
+#include "misc\freetype\imgui_freetype.h"		// VUGGER_ADDON:
 #include "process_utils.hpp"
 #include "fonts/forkawesome.inl"
 #include <fstream>
@@ -92,6 +93,7 @@ void reshade::runtime::build_font_atlas()
 	{
 		ImFontConfig cfg;
 		cfg.SizePixels = static_cast<float>(i == 0 ? _font_size : _editor_font_size);
+		cfg.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;		// VUGGER_ADDON:
 
 		const std::filesystem::path &font_path = i == 0 ? _font : _editor_font;
 		if (std::error_code ec; !std::filesystem::is_regular_file(font_path, ec) || !atlas->AddFontFromFileTTF(font_path.u8string().c_str(), cfg.SizePixels))
@@ -103,6 +105,7 @@ void reshade::runtime::build_font_atlas()
 			ImFontConfig icon_config;
 			icon_config.MergeMode = true;
 			icon_config.PixelSnapH = true;
+			icon_config.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;		// VUGGER_ADDON:
 			icon_config.GlyphOffset = ImVec2(0.0f, 0.1f * _font_size);
 			constexpr ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_FK, 0 }; // Zero-terminated list
 			atlas->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_FK, cfg.SizePixels, &icon_config, icon_ranges);
@@ -3789,8 +3792,10 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 		_imgui_num_vertices[buffer_index] = new_size;
 	}
 
+	reshade::api::command_list* immediate_list = _graphics_queue->get_immediate_command_list();		// VUGGER_ADDON:
+
 	if (ImDrawIdx *idx_dst;
-		_device->map_buffer_region(_imgui_indices[buffer_index], 0, UINT64_MAX, api::map_access::write_discard, reinterpret_cast<void **>(&idx_dst)))
+		_device->map_buffer_region(immediate_list, _imgui_indices[buffer_index], 0, UINT64_MAX, api::map_access::write_discard, reinterpret_cast<void **>(&idx_dst)))		// VUGGER_ADDON:
 	{
 		for (int n = 0; n < draw_data->CmdListsCount; ++n)
 		{
@@ -3799,10 +3804,10 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 			idx_dst += draw_list->IdxBuffer.Size;
 		}
 
-		_device->unmap_buffer_region(_imgui_indices[buffer_index]);
+		_device->unmap_buffer_region(immediate_list, _imgui_indices[buffer_index]);		// VUGGER_ADDON:
 	}
 	if (ImDrawVert *vtx_dst;
-		_device->map_buffer_region(_imgui_vertices[buffer_index], 0, UINT64_MAX, api::map_access::write_discard, reinterpret_cast<void **>(&vtx_dst)))
+		_device->map_buffer_region(immediate_list, _imgui_vertices[buffer_index], 0, UINT64_MAX, api::map_access::write_discard, reinterpret_cast<void **>(&vtx_dst)))		// VUGGER_ADDON:
 	{
 		for (int n = 0; n < draw_data->CmdListsCount; ++n)
 		{
@@ -3811,7 +3816,7 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 			vtx_dst += draw_list->VtxBuffer.Size;
 		}
 
-		_device->unmap_buffer_region(_imgui_vertices[buffer_index]);
+		_device->unmap_buffer_region(immediate_list, _imgui_vertices[buffer_index]);		// VUGGER_ADDON:
 	}
 
 	api::render_pass_render_target_desc render_target = {};

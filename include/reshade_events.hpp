@@ -1422,6 +1422,22 @@ namespace reshade
 		/// </summary>
 		close_command_list,
 
+		// VUGGER_ADDON: BEGIN
+		/// <summary>
+		/// Called when a secondary command list is executed on a primary command list, before:
+		/// <list type="bullet">
+		/// <item><description>ID3D11DeviceContext::ExecuteCommandList</description></item>
+		/// <item><description>vkCmdExecuteCommands</description></item>
+		/// </list>
+		/// In addition, called after:
+		/// <list type="bullet">
+		/// <item><description>ID3D11DeviceContext::FinishCommandList</description></item>
+		/// </list>
+		/// <para>Callback function signature: <c>void (api::command_list *cmd_list, api::command_list *secondary_cmd_list)</c></para>
+		/// </summary>
+		finish_command_list,
+		// VUGGER_ADDON: END
+
 		/// <summary>
 		/// Called before:
 		/// <list type="bullet">
@@ -1448,7 +1464,6 @@ namespace reshade
 		/// <summary>
 		/// Called when a secondary command list is executed on a primary command list, before:
 		/// <list type="bullet">
-		/// <item><description>ID3D11DeviceContext::ExecuteCommandList</description></item>
 		/// <item><description>ID3D12GraphicsCommandList::ExecuteBundle</description></item>
 		/// <item><description>vkCmdExecuteCommands</description></item>
 		/// </list>
@@ -1558,6 +1573,65 @@ namespace reshade
 		/// </summary>
 		reshade_add_font,
 
+		// VUGGER_ADDON: BEGIN
+		/// <summary>
+		/// Called after:
+		/// <list type="bullet">
+		/// <item><description>IDirect3DDevice9::DrawPrimitive</description></item>
+		/// <item><description>IDirect3DDevice9::DrawPrimitiveUP</description></item>
+		/// <item><description>IDirect3DDevice9::ProcessVertices</description></item>
+		/// <item><description>ID3D10Device::Draw</description></item>
+		/// <item><description>ID3D10Device::DrawInstanced</description></item>
+		/// <item><description>ID3D11DeviceContext::Draw</description></item>
+		/// <item><description>ID3D11DeviceContext::DrawInstanced</description></item>
+		/// <item><description>ID3D12GraphicsCommandList::DrawInstanced</description></item>
+		/// <item><description>glDrawArrays</description></item>
+		/// <item><description>glDrawArraysInstanced</description></item>
+		/// <item><description>glDrawArraysInstancedBaseInstance</description></item>
+		/// <item><description>glMultiDrawArrays</description></item>
+		/// <item><description>vkCmdDraw</description></item>
+		/// </list>
+		/// <para>Callback function signature: <c>bool (api::command_list *cmd_list)</c></para>
+		/// </summary>
+		post_draw,
+
+		/// <summary>
+		/// Called after:
+		/// <list type="bullet">
+		/// <item><description>IDirect3DDevice9::DrawIndexedPrimitive</description></item>
+		/// <item><description>IDirect3DDevice9::DrawIndexedPrimitiveUP</description></item>
+		/// <item><description>ID3D10Device::DrawIndexed</description></item>
+		/// <item><description>ID3D10Device::DrawIndexedInstanced</description></item>
+		/// <item><description>ID3D11DeviceContext::DrawIndexed</description></item>
+		/// <item><description>ID3D11DeviceContext::DrawIndexedInstanced</description></item>
+		/// <item><description>ID3D12GraphicsCommandList::DrawIndexedInstanced</description></item>
+		/// <item><description>glDrawElements</description></item>
+		/// <item><description>glDrawElementsBaseVertex</description></item>
+		/// <item><description>glDrawElementsInstanced</description></item>
+		/// <item><description>glDrawElementsInstancedBaseVertex</description></item>
+		/// <item><description>glDrawElementsInstancedBaseInstance</description></item>
+		/// <item><description>glDrawElementsInstancedBaseVertexBaseInstance</description></item>
+		/// <item><description>glMultiDrawElements</description></item>
+		/// <item><description>glMultiDrawElementsBaseVertex</description></item>
+		/// <item><description>vkCmdDrawIndexed</description></item>
+		/// </list>
+		/// <para>Callback function signature: <c>bool (api::command_list *cmd_list)</c></para>
+		/// </summary>
+		post_draw_indexed,
+
+		/// <summary>
+		/// Called after:
+		/// <list type="bullet">
+		/// <item><description>ID3D11DeviceContext::Dispatch</description></item>
+		/// <item><description>ID3D12GraphicsCommandList::Dispatch</description></item>
+		/// <item><description>glDispatchCompute</description></item>
+		/// <item><description>vkCmdDispatch</description></item>
+		/// </list>
+		/// <para>Callback function signature: <c>bool (api::command_list *cmd_list)</c></para>
+		/// </summary>
+		post_dispatch,
+		// VUGGER_ADDON: END
+
 #ifdef RESHADE_ADDON
 		max // Last value used internally by ReShade to determine number of events in this enum
 #endif
@@ -1601,13 +1675,15 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::create_resource_view, bool, api::device *device, api::resource resource, api::resource_usage usage_type, api::resource_view_desc &desc);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::destroy_resource_view, void, api::device *device, api::resource_view view);
 
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::map_buffer_region, void, api::device *device, api::resource resource, uint64_t offset, uint64_t size, api::map_access access, void **data);
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::unmap_buffer_region, void, api::device *device, api::resource resource);
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::map_texture_region, void, api::device *device, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *data);
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::unmap_texture_region, void, api::device *device, api::resource resource, uint32_t subresource);
+	// VUGGER_ADDON: BEGIN
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::map_buffer_region, void, api::device *device, api::command_list *command_list, api::resource resource, uint64_t offset, uint64_t size, api::map_access access, void **data);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::unmap_buffer_region, void, api::device *device, api::command_list *command_list, api::resource resource);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::map_texture_region, void, api::device *device, api::command_list *command_list, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *data);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::unmap_texture_region, void, api::device *device, api::command_list *command_list, api::resource resource, uint32_t subresource);
 
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::update_buffer_region, bool, api::device *device, const void *data, api::resource resource, uint64_t offset, uint64_t size);
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::update_texture_region, bool, api::device *device, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::update_buffer_region, bool, api::device *device, api::command_list *command_list, const void *data, api::resource resource, uint64_t offset, uint64_t size);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::update_texture_region, bool, api::device *device, api::command_list *command_list, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box);
+	// VUGGER_ADDON: END
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::init_pipeline, void, api::device *device, api::pipeline_layout layout, uint32_t subobject_count, const api::pipeline_subobject *subobjects, api::pipeline pipeline);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::create_pipeline, bool, api::device *device, api::pipeline_layout layout, uint32_t subobject_count, const api::pipeline_subobject *subobjects);
@@ -1678,6 +1754,7 @@ namespace reshade
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::execute_command_list, void, api::command_queue *queue, api::command_list *cmd_list);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::execute_secondary_command_list, void, api::command_list *cmd_list, api::command_list *secondary_cmd_list);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::finish_command_list, void, api::command_list *cmd_list, api::command_list *device_context);							// VUGGER_ADDON:
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::present, void, api::command_queue *queue, api::swapchain *swapchain, const api::rect *source_rect, const api::rect *dest_rect, uint32_t dirty_rect_count, const api::rect *dirty_rects);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::start_frame, void, api::device *device);
@@ -1694,4 +1771,10 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_screenshot, void, api::effect_runtime *runtime, const char *filename);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_add_font, void, api::effect_runtime *runtime, api::font_atlas atlas);
+
+	// VUGGER_ADDON: BEGIN
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_draw, bool, api::command_list *cmd_list);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_draw_indexed, bool, api::command_list *cmd_list);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_dispatch, bool, api::command_list *cmd_list);
+	// VUGGER_ADDON: END
 }

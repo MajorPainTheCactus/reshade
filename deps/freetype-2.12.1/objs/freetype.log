@@ -1,0 +1,46 @@
+﻿  autofit.c
+  ftbase.c
+  ftbbox.c
+  ftbdf.c
+  ftbitmap.c
+  ftcid.c
+  ftfstype.c
+  ftgasp.c
+  ftglyph.c
+  ftgxval.c
+  ftinit.c
+  ftmm.c
+  ftotval.c
+  ftpatent.c
+  ftpfr.c
+  ftstroke.c
+  ftsynth.c
+  fttype1.c
+  ftwinfnt.c
+  bdf.c
+  ftcache.c
+  cff.c
+  type1cid.c
+  dlgwrap.c
+  ftgzip.c
+  ftlzw.c
+  pcf.c
+  pfr.c
+  psaux.c
+  pshinter.c
+  psmodule.c
+  raster.c
+  sfnt.c
+  smooth.c
+  sdf.c
+  svg.c
+  truetype.c
+  type1.c
+  type42.c
+  winfnt.c
+  ftdebug.c
+  ftsystem.c
+C:\Development\reshade\deps\freetype-2.12.1\src\sdf\ftsdf.c(2528): warning C4701: potentially uninitialized local variable 'nearest_point' used
+C:\Development\reshade\deps\freetype-2.12.1\src\sdf\ftsdf.c(2854): warning C4701: potentially uninitialized local variable 'nearest_point' used
+C:\Development\reshade\deps\freetype-2.12.1\src\sfnt\ttsvg.c(272): warning C4701: potentially uninitialized local variable 'mid_doc' used
+  freetype.vcxproj -> C:\Development\reshade\deps\freetype-2.12.1\objs\Win32\Debug Static\freetype.lib

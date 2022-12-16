@@ -128,6 +128,15 @@ namespace reshade
 		config_set_value<int>(runtime, section, key, value ? 1 : 0);
 	}
 
+	// VUGGER_ADDON: BEGIN
+	inline void save_global_config()
+	{
+		static const auto func = reinterpret_cast<void(*)(HMODULE)>(
+			GetProcAddress(internal::get_reshade_module_handle(), "ReShadeSaveGlobalConfig"));
+		func(internal::get_current_module_handle());
+	}
+	// VUGGER_ADDON: END
+
 	/// <summary>
 	/// Registers this module as an add-on with ReShade.
 	/// Call this in 'DllMain' during process attach, before any of the other API functions!

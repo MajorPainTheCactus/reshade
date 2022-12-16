@@ -6,6 +6,7 @@
 #include "d3d11_impl_device.hpp"
 #include "d3d11_impl_device_context.hpp"
 
+
 reshade::d3d11::device_context_impl::device_context_impl(device_impl *device, ID3D11DeviceContext *context) :
 	api_object_impl(context), _device_impl(device)
 {
@@ -44,3 +45,19 @@ void reshade::d3d11::device_context_impl::flush_immediate_command_list() const
 
 	_orig->Flush();
 }
+
+// VUGGER_ADDON: BEGIN
+void reshade::d3d11::device_context_impl::finish_command_list(api::command_list **command_list, bool restore_state)
+{
+	ID3D11CommandList *native_command_list = nullptr;
+
+	const HRESULT hr = _orig->FinishCommandList(restore_state, &native_command_list);
+	if (SUCCEEDED(hr))
+	{
+		assert(native_command_list != nullptr);
+
+		command_list_impl* command_list_proxy = new command_list_impl(_device_impl, native_command_list);
+		*command_list = command_list_proxy;
+	}
+}
+// VUGGER_ADDON: END

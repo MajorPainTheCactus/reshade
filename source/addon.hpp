@@ -88,7 +88,7 @@ namespace reshade::api
 	protected:
 		template <typename... Args>
 		explicit api_object_impl(T orig, Args... args) : api_object_base(std::forward<Args>(args)...)..., _orig(orig) {}
-		~api_object_impl()
+		virtual ~api_object_impl()			// VUGGER_ADDON:
 		{
 			// All user data should ideally have been removed before destruction, to avoid leaks
 			assert(_private_data.empty());

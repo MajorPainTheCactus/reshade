@@ -24,6 +24,7 @@ static void invoke_map_buffer_region_event(ID3D10Buffer *resource, D3D10_MAP map
 
 	reshade::invoke_addon_event<reshade::addon_event::map_buffer_region>(
 		device_proxy,
+		nullptr,					// VUGGER_ADDON:
 		to_handle(resource),
 		0,
 		UINT64_MAX,
@@ -39,7 +40,7 @@ static void invoke_unmap_buffer_region_event(ID3D10Buffer *resource)
 	if (device_proxy == nullptr)
 		return;
 
-	reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(device_proxy, to_handle(resource));
+	reshade::invoke_addon_event<reshade::addon_event::unmap_buffer_region>(device_proxy, nullptr, to_handle(resource));		// VUGGER_ADDON:
 }
 static void invoke_map_texture_region_event(ID3D10Resource *resource, UINT subresource, D3D10_MAP map_type, reshade::api::subresource_data *data)
 {
@@ -52,6 +53,7 @@ static void invoke_map_texture_region_event(ID3D10Resource *resource, UINT subre
 
 	reshade::invoke_addon_event<reshade::addon_event::map_texture_region>(
 		device_proxy,
+		nullptr,					// VUGGER_ADDON:
 		to_handle(resource),
 		subresource,
 		nullptr,
@@ -67,7 +69,7 @@ static void invoke_unmap_texture_region_event(ID3D10Resource *resource, UINT sub
 	if (device_proxy == nullptr)
 		return;
 
-	reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, to_handle(resource), subresource);
+	reshade::invoke_addon_event<reshade::addon_event::unmap_texture_region>(device_proxy, nullptr, to_handle(resource), subresource);		// VUGGER_ADDON:
 }
 
 HRESULT STDMETHODCALLTYPE ID3D10Buffer_Map(ID3D10Buffer *pResource, D3D10_MAP MapType, UINT MapFlags, void **ppData)

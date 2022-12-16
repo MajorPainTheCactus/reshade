@@ -544,7 +544,7 @@ reshade::api::resource_view_desc reshade::d3d11::device_impl::get_resource_view_
 	return api::resource_view_desc();
 }
 
-bool reshade::d3d11::device_impl::map_buffer_region(api::resource resource, uint64_t offset, uint64_t, api::map_access access, void **out_data)
+bool reshade::d3d11::device_impl::map_buffer_region(api::command_list* command_list, api::resource resource, uint64_t offset, uint64_t, api::map_access access, void **out_data)	// VUGGER_ADDON: 
 {
 	if (out_data == nullptr)
 		return false;
@@ -552,10 +552,23 @@ bool reshade::d3d11::device_impl::map_buffer_region(api::resource resource, uint
 	assert(resource.handle != 0);
 
 	com_ptr<ID3D11DeviceContext> immediate_context;
-	_orig->GetImmediateContext(&immediate_context);
+
+	// VUGGER_ADDON:
+	ID3D11DeviceContext *context = nullptr;
+
+	if(command_list == nullptr)
+	{
+		_orig->GetImmediateContext(&immediate_context);
+		context = immediate_context.get();
+	}
+	else
+	{
+		context = reinterpret_cast<ID3D11DeviceContext *>(command_list->get_native());
+	}
+	// VUGGER_ADDON: END
 
 	D3D11_MAPPED_SUBRESOURCE mapped_ptr;
-	if (SUCCEEDED(immediate_context->Map(reinterpret_cast<ID3D11Buffer *>(resource.handle), 0, convert_access_flags(access), 0, &mapped_ptr)))
+	if (SUCCEEDED(context->Map(reinterpret_cast<ID3D11Buffer *>(resource.handle), 0, convert_access_flags(access), 0, &mapped_ptr)))	// VUGGER_ADDON:
 	{
 		*out_data = static_cast<uint8_t *>(mapped_ptr.pData) + offset;
 		return true;
@@ -566,16 +579,29 @@ bool reshade::d3d11::device_impl::map_buffer_region(api::resource resource, uint
 		return false;
 	}
 }
-void reshade::d3d11::device_impl::unmap_buffer_region(api::resource resource)
+void reshade::d3d11::device_impl::unmap_buffer_region(api::command_list *command_list, api::resource resource)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
 	com_ptr<ID3D11DeviceContext> immediate_context;
-	_orig->GetImmediateContext(&immediate_context);
 
-	immediate_context->Unmap(reinterpret_cast<ID3D11Buffer *>(resource.handle), 0);
+	// VUGGER_ADDON: BEGIN
+	ID3D11DeviceContext *context = nullptr;
+
+	if (command_list == nullptr)
+	{
+		_orig->GetImmediateContext(&immediate_context);
+		context = immediate_context.get();
+	}
+	else
+	{
+		context = reinterpret_cast<ID3D11DeviceContext *>(command_list->get_native());
+	}
+	// VUGGER_ADDON: END
+
+	context->Unmap(reinterpret_cast<ID3D11Buffer *>(resource.handle), 0);
 }
-bool reshade::d3d11::device_impl::map_texture_region(api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data)
+bool reshade::d3d11::device_impl::map_texture_region(api::command_list *command_list, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data)	// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -591,40 +617,92 @@ bool reshade::d3d11::device_impl::map_texture_region(api::resource resource, uin
 	assert(resource.handle != 0);
 
 	com_ptr<ID3D11DeviceContext> immediate_context;
-	_orig->GetImmediateContext(&immediate_context);
 
-	return SUCCEEDED(immediate_context->Map(reinterpret_cast<ID3D11Resource *>(resource.handle), subresource, convert_access_flags(access), 0, reinterpret_cast<D3D11_MAPPED_SUBRESOURCE *>(out_data)));
+	// VUGGER_ADDON: BEGIN
+	ID3D11DeviceContext *context = nullptr;
+
+	if (command_list == nullptr)
+	{
+		_orig->GetImmediateContext(&immediate_context);
+		context = immediate_context.get();
+	}
+	else
+	{
+		context = reinterpret_cast<ID3D11DeviceContext *>(command_list->get_native());
+	}
+
+	return SUCCEEDED(context->Map(reinterpret_cast<ID3D11Resource *>(resource.handle), subresource, convert_access_flags(access), 0, reinterpret_cast<D3D11_MAPPED_SUBRESOURCE *>(out_data)));
+	// VUGGER_ADDON: END
 }
-void reshade::d3d11::device_impl::unmap_texture_region(api::resource resource, uint32_t subresource)
+void reshade::d3d11::device_impl::unmap_texture_region(api::command_list *command_list, api::resource resource, uint32_t subresource)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
 	com_ptr<ID3D11DeviceContext> immediate_context;
-	_orig->GetImmediateContext(&immediate_context);
 
-	immediate_context->Unmap(reinterpret_cast<ID3D11Resource *>(resource.handle), subresource);
+	// VUGGER_ADDON: BEGIN
+	ID3D11DeviceContext *context = nullptr;
+
+	if (command_list == nullptr)
+	{
+		_orig->GetImmediateContext(&immediate_context);
+		context = immediate_context.get();
+	}
+	else
+	{
+		context = reinterpret_cast<ID3D11DeviceContext *>(command_list->get_native());
+	}
+
+	context->Unmap(reinterpret_cast<ID3D11Resource *>(resource.handle), subresource);
+	// VUGGER_ADDON: END
 }
 
-void reshade::d3d11::device_impl::update_buffer_region(const void *data, api::resource resource, uint64_t offset, uint64_t size)
+void reshade::d3d11::device_impl::update_buffer_region(api::command_list *command_list, const void *data, api::resource resource, uint64_t offset, uint64_t size)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 	assert(offset <= std::numeric_limits<UINT>::max() && size <= std::numeric_limits<UINT>::max());
 
 	com_ptr<ID3D11DeviceContext> immediate_context;
-	_orig->GetImmediateContext(&immediate_context);
+
+	// VUGGER_ADDON: BEGIN
+	ID3D11DeviceContext *context = nullptr;
+
+	if (command_list == nullptr)
+	{
+		_orig->GetImmediateContext(&immediate_context);
+		context = immediate_context.get();
+	}
+	else
+	{
+		context = reinterpret_cast<ID3D11DeviceContext *>(command_list->get_native());
+	}
+	// VUGGER_ADDON: END
 
 	const D3D11_BOX box = { static_cast<UINT>(offset), 0, 0, static_cast<UINT>(offset + size), 1, 1 };
 
-	immediate_context->UpdateSubresource(reinterpret_cast<ID3D11Resource *>(resource.handle), 0, offset != 0 && size != 0 ? &box : nullptr, data, static_cast<UINT>(size), 0);   // VUGGER ADDON
+	context->UpdateSubresource(reinterpret_cast<ID3D11Resource *>(resource.handle), 0, offset != 0 && size != 0 ? &box : nullptr, data, static_cast<UINT>(size), 0);   // VUGGER ADDON
 }
-void reshade::d3d11::device_impl::update_texture_region(const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)
+void reshade::d3d11::device_impl::update_texture_region(api::command_list *command_list, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
 	com_ptr<ID3D11DeviceContext> immediate_context;
-	_orig->GetImmediateContext(&immediate_context);
 
-	immediate_context->UpdateSubresource(reinterpret_cast<ID3D11Resource *>(resource.handle), subresource, reinterpret_cast<const D3D11_BOX *>(box), data.data, data.row_pitch, data.slice_pitch);
+	// VUGGER_ADDON: BEGIN
+	ID3D11DeviceContext *context = nullptr;
+
+	if (command_list == nullptr)
+	{
+		_orig->GetImmediateContext(&immediate_context);
+		context = immediate_context.get();
+	}
+	else
+	{
+		context = reinterpret_cast<ID3D11DeviceContext *>(command_list->get_native());
+	}
+
+	context->UpdateSubresource(reinterpret_cast<ID3D11Resource *>(resource.handle), subresource, reinterpret_cast<const D3D11_BOX *>(box), data.data, data.row_pitch, data.slice_pitch);
+	// VUGGER_ADDON: END
 }
 
 bool reshade::d3d11::device_impl::create_pipeline(api::pipeline_layout, uint32_t subobject_count, const api::pipeline_subobject *subobjects, api::pipeline *out_handle)

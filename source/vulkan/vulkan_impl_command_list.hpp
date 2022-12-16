@@ -67,6 +67,11 @@ namespace reshade::vulkan
 		void end_debug_event() final;
 		void insert_debug_marker(const char *label, const float color[4]) final;
 
+		// VUGGER_ADDON: BEGIN
+		void execute_command_lists(uint32_t, api::command_list **, bool) final {}
+		void finish_command_list(api::command_list **, bool) final {}
+		// VUGGER_ADDON: END
+
 	protected:
 		device_impl *const _device_impl;
 		bool _has_commands = false;

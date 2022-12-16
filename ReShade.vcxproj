@@ -118,13 +118,13 @@
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Configuration)\</OutDir>
+    <OutDir>C:\Development\directx-sdk-samples\FluidCS11\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug App|Win32'">
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Dead Cells\</OutDir>
+    <OutDir>C:\Development\directx-sdk-samples\FluidCS11\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release App|Win32'">
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
@@ -159,6 +159,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -194,6 +195,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -225,6 +227,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(TargetDir)\..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -256,6 +259,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(TargetDir)\..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -297,6 +301,7 @@
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -338,6 +343,7 @@
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -377,6 +383,7 @@
       <AdditionalLibraryDirectories>$(TargetDir)\..\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
       <Profile>true</Profile>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -416,6 +423,7 @@
       <AdditionalLibraryDirectories>$(TargetDir)\..\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
       <Profile>true</Profile>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -457,6 +465,7 @@
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <DelayLoadDLLs>ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>
@@ -501,6 +510,7 @@
       <ModuleDefinitionFile>res\exports.def</ModuleDefinitionFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <DelayLoadDLLs>ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalDependencies>$(SolutionDir)deps\freetype-2.12.1\objs\$(Platform)\$(Configuration) Static\freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>4.0</ShaderModel>

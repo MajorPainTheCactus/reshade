@@ -28,7 +28,7 @@ extern "C" __declspec(dllexport) bool ReShadeGetConfigValue(void *, reshade::api
 	if (key == nullptr || length == nullptr)
 		return false;
 
-	ini_file &config = (runtime != nullptr) ? ini_file::load_cache(static_cast<reshade::runtime *>(runtime)->get_config_path()) : reshade::global_config();
+	ini_file &config = (runtime != nullptr) ? (reinterpret_cast<size_t>(runtime) != static_cast<size_t>(-1)) ? ini_file::load_cache(static_cast<reshade::runtime *>(runtime)->get_config_path()) : reshade::system_global_config() : reshade::global_config();			// VUGGER_ADDON:
 
 	std::string value_string;
 	if (!config.get(section, key, value_string))
@@ -42,10 +42,17 @@ extern "C" __declspec(dllexport) bool ReShadeGetConfigValue(void *, reshade::api
 }
 extern "C" __declspec(dllexport) void ReShadeSetConfigValue(void *, reshade::api::effect_runtime *runtime, const char *section, const char *key, const char *value)
 {
-	ini_file &config = (runtime != nullptr) ? ini_file::load_cache(static_cast<reshade::runtime *>(runtime)->get_config_path()) : reshade::global_config();
+	ini_file &config = (runtime != nullptr) ? (reinterpret_cast<size_t>(runtime) != static_cast<size_t>(-1)) ? ini_file::load_cache(static_cast<reshade::runtime *>(runtime)->get_config_path()) : reshade::system_global_config() : reshade::global_config();			// VUGGER_ADDON:
 
 	config.set(section, key, std::string(value));
 }
+
+// VUGGER_ADDON: BEGIN
+extern "C" __declspec(dllexport) void ReShadeSaveGlobalConfig(void *)
+{
+	reshade::system_global_config().save();
+}
+// VUGGER_ADDON: END
 
 #if RESHADE_GUI
 

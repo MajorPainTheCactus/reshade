@@ -494,7 +494,7 @@ bool reshade::opengl::device_impl::create_resource(const api::resource_desc &des
 
 		if (initial_data != nullptr && status == GL_NO_ERROR)
 		{
-			update_buffer_region(initial_data->data, make_resource_handle(GL_BUFFER, object), 0, desc.buffer.size);
+			update_buffer_region(nullptr, initial_data->data, make_resource_handle(GL_BUFFER, object), 0, desc.buffer.size);		// VUGGER_ADDON:
 		}
 
 		glBindBuffer(target, prev_binding);
@@ -590,7 +590,7 @@ bool reshade::opengl::device_impl::create_resource(const api::resource_desc &des
 		if (initial_data != nullptr && status == GL_NO_ERROR)
 		{
 			for (uint32_t subresource = 0; subresource < static_cast<uint32_t>(desc.texture.depth_or_layers) * desc.texture.levels; ++subresource)
-				update_texture_region(initial_data[subresource], make_resource_handle(target, object), subresource, nullptr);
+				update_texture_region(nullptr, initial_data[subresource], make_resource_handle(target, object), subresource, nullptr);				// VUGGER_ADDON:
 		}
 
 		glBindTexture(target, prev_binding);
@@ -1136,7 +1136,7 @@ reshade::api::resource_view_desc reshade::opengl::device_impl::get_resource_view
 	}
 }
 
-bool reshade::opengl::device_impl::map_buffer_region(api::resource resource, uint64_t offset, uint64_t size, api::map_access access, void **out_data)
+bool reshade::opengl::device_impl::map_buffer_region(api::command_list*, api::resource resource, uint64_t offset, uint64_t size, api::map_access access, void **out_data)		// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -1188,7 +1188,7 @@ bool reshade::opengl::device_impl::map_buffer_region(api::resource resource, uin
 
 	return *out_data != nullptr;
 }
-void reshade::opengl::device_impl::unmap_buffer_region(api::resource resource)
+void reshade::opengl::device_impl::unmap_buffer_region(api::command_list *, api::resource resource)			// VUGGER_ADDON:
 {
 	assert(resource.handle != 0 && (resource.handle >> 40) == GL_BUFFER);
 
@@ -1208,7 +1208,7 @@ void reshade::opengl::device_impl::unmap_buffer_region(api::resource resource)
 		glBindBuffer(GL_COPY_WRITE_BUFFER, prev_object);
 	}
 }
-bool reshade::opengl::device_impl::map_texture_region(api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data)
+bool reshade::opengl::device_impl::map_texture_region(api::command_list *, api::resource resource, uint32_t subresource, const api::subresource_box *box, api::map_access access, api::subresource_data *out_data)		// VUGGER_ADDON:
 {
 	if (out_data == nullptr)
 		return false;
@@ -1357,7 +1357,7 @@ bool reshade::opengl::device_impl::map_texture_region(api::resource resource, ui
 
 	return true;
 }
-void reshade::opengl::device_impl::unmap_texture_region(api::resource resource, uint32_t subresource)
+void reshade::opengl::device_impl::unmap_texture_region(api::command_list *, api::resource resource, uint32_t subresource)			// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 
@@ -1369,7 +1369,7 @@ void reshade::opengl::device_impl::unmap_texture_region(api::resource resource, 
 		it != _map_lookup.end())
 	{
 		if (it->second.access != api::map_access::read_only)
-			update_texture_region(it->second.data, resource, subresource, &it->second.box);
+			update_texture_region(nullptr, it->second.data, resource, subresource, &it->second.box);			// VUGGER_ADDON:
 
 		delete[] static_cast<uint8_t *>(it->second.data.data);
 
@@ -1381,7 +1381,7 @@ void reshade::opengl::device_impl::unmap_texture_region(api::resource resource, 
 	}
 }
 
-void reshade::opengl::device_impl::update_buffer_region(const void *data, api::resource resource, uint64_t offset, uint64_t size)
+void reshade::opengl::device_impl::update_buffer_region(api::command_list *, const void *data, api::resource resource, uint64_t offset, uint64_t size)			// VUGGER_ADDON:
 {
 	assert(resource.handle != 0 && (resource.handle >> 40) == GL_BUFFER);
 	assert(offset <= static_cast<uint64_t>(std::numeric_limits<GLintptr>::max()) && size <= static_cast<uint64_t>(std::numeric_limits<GLsizeiptr>::max()));
@@ -1403,7 +1403,7 @@ void reshade::opengl::device_impl::update_buffer_region(const void *data, api::r
 		glBindBuffer(GL_COPY_WRITE_BUFFER, prev_binding);
 	}
 }
-void reshade::opengl::device_impl::update_texture_region(const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)
+void reshade::opengl::device_impl::update_texture_region(api::command_list *, const api::subresource_data &data, api::resource resource, uint32_t subresource, const api::subresource_box *box)		// VUGGER_ADDON:
 {
 	assert(resource.handle != 0);
 

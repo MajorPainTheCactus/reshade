@@ -3555,10 +3555,10 @@ void reshade::runtime::render_technique(technique &tech, api::command_list *cmd_
 
 	// Update shader constants
 	if (void *mapped_uniform_data; effect.cb != 0 &&
-		_device->map_buffer_region(effect.cb, 0, std::numeric_limits<uint64_t>::max(), api::map_access::write_discard, &mapped_uniform_data))
+		_device->map_buffer_region(nullptr, effect.cb, 0, std::numeric_limits<uint64_t>::max(), api::map_access::write_discard, &mapped_uniform_data))		// VUGGER_ADDON:
 	{
 		std::memcpy(mapped_uniform_data, effect.uniform_data_storage.data(), effect.uniform_data_storage.size());
-		_device->unmap_buffer_region(effect.cb);
+		_device->unmap_buffer_region(nullptr, effect.cb);			// VUGGER_ADDON:
 	}
 	else if (_renderer_id == 0x9000)
 	{
@@ -3832,7 +3832,7 @@ void reshade::runtime::update_texture(texture &tex, const uint32_t width, const 
 
 	api::command_list *const cmd_list = _graphics_queue->get_immediate_command_list();
 	cmd_list->barrier(tex.resource, api::resource_usage::shader_resource, api::resource_usage::copy_dest);
-	_device->update_texture_region({ resized.data(), row_pitch, row_pitch * tex.height }, tex.resource, 0);
+	_device->update_texture_region(nullptr, { resized.data(), row_pitch, row_pitch * tex.height }, tex.resource, 0);			// VUGGER_ADDON:
 	cmd_list->barrier(tex.resource, api::resource_usage::copy_dest, api::resource_usage::shader_resource);
 
 	if (tex.levels > 1)
@@ -4411,14 +4411,14 @@ bool reshade::runtime::get_texture_data(api::resource resource, api::resource_us
 	api::subresource_data mapped_data = {};
 	if (_device->check_capability(api::device_caps::copy_buffer_to_texture))
 	{
-		_device->map_buffer_region(intermediate, 0, std::numeric_limits<uint64_t>::max(), api::map_access::read_only, &mapped_data.data);
+		_device->map_buffer_region(nullptr, intermediate, 0, std::numeric_limits<uint64_t>::max(), api::map_access::read_only, &mapped_data.data);			// VUGGER_ADDON:
 
 		mapped_data.row_pitch = row_pitch;
 		mapped_data.slice_pitch = slice_pitch;
 	}
 	else
 	{
-		_device->map_texture_region(intermediate, 0, nullptr, api::map_access::read_only, &mapped_data);
+		_device->map_texture_region(nullptr, intermediate, 0, nullptr, api::map_access::read_only, &mapped_data);			// VUGGER_ADDON:
 	}
 
 	if (mapped_data.data != nullptr)
@@ -4482,9 +4482,9 @@ bool reshade::runtime::get_texture_data(api::resource resource, api::resource_us
 		}
 
 		if (_device->check_capability(api::device_caps::copy_buffer_to_texture))
-			_device->unmap_buffer_region(intermediate);
+			_device->unmap_buffer_region(nullptr, intermediate);			// VUGGER_ADDON:
 		else
-			_device->unmap_texture_region(intermediate, 0);
+			_device->unmap_texture_region(nullptr, intermediate, 0);		// VUGGER_ADDON:
 	}
 
 	_device->destroy_resource(intermediate);
