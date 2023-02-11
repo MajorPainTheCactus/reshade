@@ -949,7 +949,7 @@ void reshade::d3d11::device_context_impl::bind_unordered_access_views(api::shade
 #endif
 
 	if ((stages & api::shader_stage::pixel) == api::shader_stage::pixel)
-		_orig->OMSetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, first, count, view_ptrs, nullptr);
+		_orig->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, first, count, view_ptrs, nullptr);	// VUGGER ADDON:
 	if ((stages & api::shader_stage::compute) == api::shader_stage::compute)
 		_orig->CSSetUnorderedAccessViews(first, count, view_ptrs, nullptr);
 }
@@ -1138,7 +1138,7 @@ void reshade::d3d11::device_context_impl::bind_index_buffer(api::resource buffer
 {
 	assert(offset <= std::numeric_limits<UINT>::max());
 	assert(buffer.handle == 0 || index_size == 2 || index_size == 4);
-
+ 
 	_orig->IASetIndexBuffer(reinterpret_cast<ID3D11Buffer *>(buffer.handle), index_size == 2 ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, static_cast<UINT>(offset));
 }
 void reshade::d3d11::device_context_impl::bind_vertex_buffers(uint32_t first, uint32_t count, const api::resource *buffers, const uint64_t *offsets, const uint32_t *strides)
