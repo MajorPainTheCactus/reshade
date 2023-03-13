@@ -700,4 +700,7 @@
       <Filter>resources\addons</Filter>
     </_EmbedManagedResourceFile>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\renderdoc\renderdoc\renderdoc.natvis" />
+  </ItemGroup>
 </Project>

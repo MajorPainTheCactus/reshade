@@ -109,7 +109,7 @@
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release App|x64'">
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
@@ -118,13 +118,13 @@
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>C:\Development\directx-sdk-samples\FluidCS11\$(Configuration)\</OutDir>
+    <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug App|Win32'">
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>C:\Development\directx-sdk-samples\FluidCS11\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release App|Win32'">
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
@@ -853,6 +853,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\main_icon_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\renderdoc\renderdoc\renderdoc.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
