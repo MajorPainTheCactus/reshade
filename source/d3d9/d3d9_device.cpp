@@ -386,7 +386,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice9::Present(const RECT *pSourceRect, cons
 	HRESULT hr = _orig->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
 
 #if RESHADE_ADDON
-	reshade::invoke_addon_event<reshade::addon_event::start_frame>(this);
+	reshade::invoke_addon_event<reshade::addon_event::start_frame>(this, this); // VUGGER_ADDON:
 #endif
 
 	return hr;
@@ -2081,7 +2081,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice9::PresentEx(const RECT *pSourceRect, co
 	HRESULT hr = static_cast<IDirect3DDevice9Ex *>(_orig)->PresentEx(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion, dwFlags);
 	
 #if RESHADE_ADDON
-	reshade::invoke_addon_event<reshade::addon_event::start_frame>(this);
+	reshade::invoke_addon_event<reshade::addon_event::start_frame>(this, this);
 #endif
 
 	return hr;

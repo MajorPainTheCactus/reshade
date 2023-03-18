@@ -1757,7 +1757,7 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::finish_command_list, void, api::command_list *cmd_list, api::command_list *device_context);							// VUGGER_ADDON:
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::present, void, api::command_queue *queue, api::swapchain *swapchain, const api::rect *source_rect, const api::rect *dest_rect, uint32_t dirty_rect_count, const api::rect *dirty_rects);
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::start_frame, void, api::device *device);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::start_frame, void, api::device *device, api::command_queue *queue);  // VUGGER_ADDON:
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_present, void, api::effect_runtime *runtime);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::reshade_begin_effects, void, api::effect_runtime *runtime, api::command_list *cmd_list, api::resource_view rtv, api::resource_view rtv_srgb);

@@ -228,7 +228,8 @@ void DXGISwapChain::runtime_start_frame()
 	case 10:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
-			static_cast<D3D10Device *>(static_cast<ID3D10Device *>(_direct3d_device)));
+				static_cast<D3D10Device *>(static_cast<ID3D10Device *>(_direct3d_device)),								// VUGGER_ADDON:
+				static_cast<D3D10Device *>(static_cast<ID3D10Device *>(_direct3d_device)));
 #else
 		UNREFERENCED_PARAMETER(params);
 #endif
@@ -237,7 +238,8 @@ void DXGISwapChain::runtime_start_frame()
 	case 11:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
-			static_cast<D3D11Device *>(static_cast<ID3D11Device *>(_direct3d_device)));
+				static_cast<D3D11Device *>(static_cast<ID3D11Device *>(_direct3d_device)),								// VUGGER_ADDON:
+				static_cast<D3D11Device *>(static_cast<ID3D11Device *>(_direct3d_device))->_immediate_context);			// VUGGER_ADDON:
 #else
 		UNREFERENCED_PARAMETER(params);
 #endif
@@ -246,7 +248,8 @@ void DXGISwapChain::runtime_start_frame()
 	case 12:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
-			static_cast<D3D12Device *>(static_cast<ID3D12Device *>(_direct3d_device)));
+			static_cast<D3D12Device *>(static_cast<ID3D12Device *>(_direct3d_device)),			// VUGGER_ADDON:
+			static_cast<D3D12CommandQueue *>(_direct3d_command_queue));							// VUGGER_ADDON:
 #else
 		UNREFERENCED_PARAMETER(params);
 #endif

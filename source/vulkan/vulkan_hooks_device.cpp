@@ -993,7 +993,7 @@ VkResult VKAPI_CALL vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPr
 
 #if RESHADE_ADDON
 				// TODO: Call 'start_frame' event for both submits
-				reshade::invoke_addon_event<reshade::addon_event::start_frame>(queue_impl->get_device());
+				reshade::invoke_addon_event<reshade::addon_event::start_frame>(queue_impl->get_device(), queue_impl);		// VUGGER_ADDON:
 #endif
 			}
 		}

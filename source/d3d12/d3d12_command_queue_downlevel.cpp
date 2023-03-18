@@ -70,7 +70,7 @@ HRESULT STDMETHODCALLTYPE D3D12CommandQueueDownlevel::Present(ID3D12GraphicsComm
 #if RESHADE_ADDON
 	// Do not call 'start_frame' event before 'init_swapchain' event
 	if (_width != 0 && _height != 0)
-		reshade::invoke_addon_event<reshade::addon_event::start_frame>(_device);
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(_device, _parent_queue); // VUGGER_ADDON:
 #endif
 
 	return hr;

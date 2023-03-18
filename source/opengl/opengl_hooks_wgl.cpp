@@ -890,7 +890,7 @@ HOOK_EXPORT BOOL  WINAPI wglSwapBuffers(HDC hdc)
 		runtime->on_present();
 
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::start_frame>(runtime);
+		reshade::invoke_addon_event<reshade::addon_event::start_frame>(runtime, runtime);		// VUGGER_ADDON:
 #endif
 	}
 
