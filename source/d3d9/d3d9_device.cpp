@@ -1078,7 +1078,13 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice9::ColorFill(IDirect3DSurface9 *pSurface
 		return D3D_OK;
 #endif
 
-	return _orig->ColorFill(pSurface, pRect, Color);
+	HRESULT hr = _orig->ColorFill(pSurface, pRect, Color);
+
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_render_target_view>(this))		// VUGGER ADDON
+		return D3D_OK;
+#endif
+	return hr;
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice9::CreateOffscreenPlainSurface(UINT Width, UINT Height, D3DFORMAT Format, D3DPOOL Pool, IDirect3DSurface9 **ppSurface, HANDLE *pSharedHandle)
 {
@@ -1301,7 +1307,40 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice9::Clear(DWORD Count, const D3DRECT *pRe
 		return D3D_OK;
 #endif
 
-	return _orig->Clear(Count, pRects, Flags, Color, Z, Stencil);
+	HRESULT hr = _orig->Clear(Count, pRects, Flags, Color, Z, Stencil);
+
+	// VUGGER ADDON
+#if RESHADE_ADDON
+	//TODO:
+	//if (Flags & (D3DCLEAR_TARGET) &&
+	//	reshade::has_addon_event<reshade::addon_event::post_clear_render_target_view>())
+	//{
+	//	com_ptr<IDirect3DSurface9> surface;
+	//	for (DWORD i = 0; i < _caps.NumSimultaneousRTs; ++i, surface.reset())
+	//	{
+	//		if (FAILED(_orig->GetRenderTarget(i, &surface)))
+	//			continue;
+
+	//		if (reshade::invoke_addon_event<reshade::addon_event::post_clear_render_target_view>(this))
+	//			Flags &= ~(D3DCLEAR_TARGET); // This will prevent all render targets from getting cleared, not just the current one ...
+	//	}
+	//}
+	//if (Flags & (D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL) &&
+	//	reshade::has_addon_event<reshade::addon_event::post_clear_depth_stencil_view>())
+	//{
+	//	com_ptr<IDirect3DSurface9> surface;
+	//	if (SUCCEEDED(_orig->GetDepthStencilSurface(&surface)))
+	//	{
+	//		if (reshade::invoke_addon_event<reshade::addon_event::clear_depth_stencil_view>(this))
+	//			Flags &= ~(D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL);
+	//	}
+	//}
+
+	//if (Flags == 0)
+	//	return D3D_OK;
+#endif
+	// VUGGER ADDON
+	return hr;
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice9::SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix)
 {

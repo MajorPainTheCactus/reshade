@@ -793,6 +793,10 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearDepthStencilView(D3D12_CPU
 		return;
 #endif
 	_orig->ClearDepthStencilView(DepthStencilView, ClearFlags, Depth, Stencil, NumRects, pRects);
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_depth_stencil_view>(this))		// VUGGER ADDON
+		return;
+#endif
 }
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView, const FLOAT ColorRGBA[4], UINT NumRects, const D3D12_RECT *pRects)
 {
@@ -801,6 +805,10 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearRenderTargetView(D3D12_CPU
 		return;
 #endif
 	_orig->ClearRenderTargetView(RenderTargetView, ColorRGBA, NumRects, pRects);
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_render_target_view>(this))		// VUGGER ADDON
+		return;
+#endif
 }
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource *pResource, const UINT Values[4], UINT NumRects, const D3D12_RECT *pRects)
 {
@@ -813,6 +821,10 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewUint(D3
 		return;
 #endif
 	_orig->ClearUnorderedAccessViewUint(ViewGPUHandleInCurrentHeap, ViewCPUHandle, pResource, Values, NumRects, pRects);
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_unordered_access_view_uint>(this))	// VUGGER ADDON
+		return;
+#endif
 }
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewFloat(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource *pResource, const FLOAT Values[4], UINT NumRects, const D3D12_RECT *pRects)
 {
@@ -825,6 +837,10 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewFloat(D
 		return;
 #endif
 	_orig->ClearUnorderedAccessViewFloat(ViewGPUHandleInCurrentHeap, ViewCPUHandle, pResource, Values, NumRects, pRects);
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_unordered_access_view_float>(this))	// VUGGER ADDON
+		return;
+#endif
 }
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::DiscardResource(ID3D12Resource *pResource, const D3D12_DISCARD_REGION *pRegion)
 {

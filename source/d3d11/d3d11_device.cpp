@@ -369,6 +369,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateShaderResourceView(ID3D11Resource *
 			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, to_handle(resource_view));
 		});
 #endif
+		*ppShaderResourceView = new D3D11ShaderResourceView(this, *ppShaderResourceView);	// VUGGER ADDON
 	}
 	else
 	{
@@ -1820,3 +1821,32 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateFence(UINT64 InitialValue, D3D11_FE
 	assert(_interface_version >= 5);
 	return static_cast<ID3D11Device5 *>(_orig)->CreateFence(InitialValue, Flags, ReturnedInterface, ppFence);
 }
+
+// VUGGER_ADDON
+ULONG STDMETHODCALLTYPE D3D11ShaderResourceView::Release()
+{
+	const ULONG ref = InterlockedDecrement(&_ref);
+	if (ref != 0)
+	{
+		_orig->Release();
+		return ref;
+	}
+
+	const auto orig = _orig;
+#if 0
+	LOG(DEBUG) << "Destroying " << "D3D11ShaderResourceView" << " object " << this << " (" << orig << ").";
+#endif
+	delete this;
+
+	const ULONG ref_orig = orig->Release();
+	if (ref_orig != 0) // Verify internal reference count
+		LOG(WARN) << "Reference count for " << "D3D11ShaderResourceView" << " object " << this << " (" << orig << ") is inconsistent (" << ref_orig << ").";
+	return 0;
+}
+
+void STDMETHODCALLTYPE D3D11ShaderResourceView::GetDevice(ID3D11Device **ppDevice)
+{
+	_device->AddRef();
+	*ppDevice = _device;
+}
+// VUGGER_ADDON

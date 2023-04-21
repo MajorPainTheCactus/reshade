@@ -587,6 +587,10 @@ namespace reshade::api
 		/// </summary>
 		virtual void update_input() = 0;
 		/// <summary>
+		/// Update the time so that the add-on can take control of updating the frame
+		/// </summary>
+		virtual void update_time() = 0;
+		/// <summary>
 		/// Allow a addon to hide the overlay
 		/// </summary>
 		virtual void hide_overlay() = 0;

@@ -247,6 +247,8 @@ namespace reshade
 		/// Defines a global preprocessor definition to the specified <paramref name="value"/>.
 		/// </summary>
 		void set_preprocessor_definition(const char *name, const char *value) final;
+
+		// VUGGER ADDON
 		/// <summary>
 		/// Does the work for the begin of frame like begin ImGui so that the add-on can take control of updating the frame
 		/// </summary>
@@ -259,8 +261,10 @@ namespace reshade
 		/// Update the input so that the add-on can take control of updating the frame
 		/// </summary>
 		void update_input() final;
-
-		// VUGGER ADDON
+		/// <summary>
+		/// Update the time so that the add-on can take control of updating the frame
+		/// </summary>
+		void update_time() final;
 		/// <summary>
 		/// Allow a addon to hide the overlay
 		/// </summary>

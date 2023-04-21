@@ -643,6 +643,10 @@ void    STDMETHODCALLTYPE D3D10Device::ClearRenderTargetView(ID3D10RenderTargetV
 		return;
 #endif
 	_orig->ClearRenderTargetView(pRenderTargetView, ColorRGBA);
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_render_target_view>(this))	// VUGGER ADDON
+		return;
+#endif
 }
 void    STDMETHODCALLTYPE D3D10Device::ClearDepthStencilView(ID3D10DepthStencilView *pDepthStencilView, UINT ClearFlags, FLOAT Depth, UINT8 Stencil)
 {
@@ -651,6 +655,10 @@ void    STDMETHODCALLTYPE D3D10Device::ClearDepthStencilView(ID3D10DepthStencilV
 		return;
 #endif
 	_orig->ClearDepthStencilView(pDepthStencilView, ClearFlags, Depth, Stencil);
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_depth_stencil_view>(this))	// VUGGER ADDON
+		return;
+#endif
 }
 void    STDMETHODCALLTYPE D3D10Device::GenerateMips(ID3D10ShaderResourceView *pShaderResourceView)
 {

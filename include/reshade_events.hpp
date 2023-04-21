@@ -1290,6 +1290,7 @@ namespace reshade
 		/// Resource will be in the <see cref="api::resource_usage::depth_stencil_write"/> state.
 		/// </remarks>
 		clear_depth_stencil_view,
+		post_clear_depth_stencil_view,	// VUGGER ADDON
 
 		/// <summary>
 		/// Called before:
@@ -1313,6 +1314,7 @@ namespace reshade
 		/// Resources will be in the <see cref="api::resource_usage::render_target"/> state.
 		/// </remarks>
 		clear_render_target_view,
+		post_clear_render_target_view,	// VUGGER ADDON
 
 		/// <summary>
 		/// Called before:
@@ -1327,6 +1329,7 @@ namespace reshade
 		/// Resource will be in the <see cref="api::resource_usage::unordered_access"/> state.
 		/// </remarks>
 		clear_unordered_access_view_uint,
+		post_clear_unordered_access_view_uint,	// VUGGER ADDON
 
 		/// <summary>
 		/// Called before:
@@ -1342,6 +1345,7 @@ namespace reshade
 		/// Resource will be in the <see cref="api::resource_usage::unordered_access"/> state.
 		/// </remarks>
 		clear_unordered_access_view_float,
+		post_clear_unordered_access_view_float,	// VUGGER ADDON
 
 		/// <summary>
 		/// Called before:
@@ -1737,9 +1741,13 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::resolve_texture_region, bool, api::command_list *cmd_list, api::resource source, uint32_t source_subresource, const api::subresource_box *source_box, api::resource dest, uint32_t dest_subresource, int32_t dest_x, int32_t dest_y, int32_t dest_z, api::format format);
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::clear_depth_stencil_view, bool, api::command_list *cmd_list, api::resource_view dsv, const float *depth, const uint8_t *stencil, uint32_t rect_count, const api::rect *rects);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_clear_depth_stencil_view, bool, api::command_list *cmd_list);			// VUGGER ADDON
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::clear_render_target_view, bool, api::command_list *cmd_list, api::resource_view rtv, const float color[4], uint32_t rect_count, const api::rect *rects);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_clear_render_target_view, bool, api::command_list *cmd_list);			// VUGGER ADDON
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::clear_unordered_access_view_uint, bool, api::command_list *cmd_list, api::resource_view uav, const uint32_t values[4], uint32_t rect_count, const api::rect *rects);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_clear_unordered_access_view_uint, bool, api::command_list *cmd_list);	// VUGGER ADDON
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::clear_unordered_access_view_float, bool, api::command_list *cmd_list, api::resource_view uav, const float values[4], uint32_t rect_count, const api::rect *rects);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::post_clear_unordered_access_view_float, bool, api::command_list *cmd_list);	// VUGGER ADDON
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::generate_mipmaps, bool, api::command_list *cmd_list, api::resource_view srv);
 

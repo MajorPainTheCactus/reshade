@@ -17,6 +17,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext 
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
+	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
 }
 D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext1 *original) :
 	device_context_impl(device, original),
@@ -24,6 +25,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext1
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
+	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
 }
 D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext2 *original) :
 	device_context_impl(device, original),
@@ -31,6 +33,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext2
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
+	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
 }
 D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext3 *original) :
 	device_context_impl(device, original),
@@ -38,6 +41,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext3
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
+	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
 }
 
 bool D3D11DeviceContext::check_and_upgrade_interface(REFIID riid)
@@ -243,9 +247,20 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::VSSetConstantBuffers(UINT StartSlo
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::PSSetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews)
 {
-	_orig->PSSetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView*, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pShaderResourceViews;
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		assert(ppShaderResourceViews[i] == nullptr || D3D11ShaderResourceView::contains(ppShaderResourceViews[i]));
+		pShaderResourceViews[i] = ppShaderResourceViews[i] ? static_cast<D3D11ShaderResourceView*>(ppShaderResourceViews[i])->_orig : nullptr;
+		_shader_resource_views[StartSlot + i] = ppShaderResourceViews[i];
+	}
+
+	_orig->PSSetShaderResources(StartSlot, NumViews, pShaderResourceViews.data());
+	// VUGGER ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::pixel, StartSlot, NumViews, ppShaderResourceViews);
+	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::pixel, StartSlot, NumViews, pShaderResourceViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::PSSetShader(ID3D11PixelShader *pPixelShader, ID3D11ClassInstance *const *ppClassInstances, UINT NumClassInstances)
@@ -890,6 +905,11 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::ClearRenderTargetView(ID3D11Render
 		return;
 #endif
 	_orig->ClearRenderTargetView(pRenderTargetView, ColorRGBA);
+
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_render_target_view>(this))		// VUGGER ADDON
+		return;
+#endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::ClearUnorderedAccessViewUint(ID3D11UnorderedAccessView *pUnorderedAccessView, const UINT Values[4])
 {
@@ -898,6 +918,11 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::ClearUnorderedAccessViewUint(ID3D1
 		return;
 #endif
 	_orig->ClearUnorderedAccessViewUint(pUnorderedAccessView, Values);
+
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_unordered_access_view_uint>(this))		// VUGGER ADDON
+		return;
+#endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::ClearUnorderedAccessViewFloat(ID3D11UnorderedAccessView *pUnorderedAccessView, const FLOAT Values[4])
 {
@@ -906,6 +931,11 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::ClearUnorderedAccessViewFloat(ID3D
 		return;
 #endif
 	_orig->ClearUnorderedAccessViewFloat(pUnorderedAccessView, Values);
+
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_unordered_access_view_uint>(this))		// VUGGER ADDON
+		return;
+#endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::ClearDepthStencilView(ID3D11DepthStencilView *pDepthStencilView, UINT ClearFlags, FLOAT Depth, UINT8 Stencil)
 {
@@ -914,6 +944,11 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::ClearDepthStencilView(ID3D11DepthS
 		return;
 #endif
 	_orig->ClearDepthStencilView(pDepthStencilView, ClearFlags, Depth, Stencil);
+
+#if RESHADE_ADDON
+	if (reshade::invoke_addon_event<reshade::addon_event::post_clear_depth_stencil_view>(this))		// VUGGER ADDON
+		return;
+#endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::GenerateMips(ID3D11ShaderResourceView *pShaderResourceView)
 {
@@ -1051,7 +1086,15 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::VSGetConstantBuffers(UINT StartSlo
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::PSGetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView **ppShaderResourceViews)
 {
-	_orig->PSGetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	// _orig->PSGetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		ppShaderResourceViews[i] = _shader_resource_views[StartSlot + i];
+		ppShaderResourceViews[i]->AddRef();
+	}
+	// VUGGER ADDON
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::PSGetShader(ID3D11PixelShader **ppPixelShader, ID3D11ClassInstance **ppClassInstances, UINT *pNumClassInstances)
 {
@@ -1547,6 +1590,32 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::ClearView(ID3D11View *pView, const
 
 	assert(_interface_version >= 1);
 	static_cast<ID3D11DeviceContext1 *>(_orig)->ClearView(pView, Color, pRect, NumRects);
+
+	// VUGGER ADDON
+#if RESHADE_ADDON
+	if (com_ptr<ID3D11RenderTargetView> rtv;
+		SUCCEEDED(pView->QueryInterface(&rtv)))
+	{
+		if (reshade::invoke_addon_event<reshade::addon_event::post_clear_render_target_view>(this))
+			return;
+	}
+	else
+	if (com_ptr<ID3D11DepthStencilView> dsv;
+		SUCCEEDED(pView->QueryInterface(&dsv)))
+	{
+		// The 'ID3D11DeviceContext1::ClearView' API only works on depth-stencil views to depth-only resources (with no stencil component)
+		if (reshade::invoke_addon_event<reshade::addon_event::post_clear_depth_stencil_view>(this))
+			return;
+	}
+	else
+	if (com_ptr<ID3D11UnorderedAccessView> uav;
+		SUCCEEDED(pView->QueryInterface(&uav)))
+	{
+		if (reshade::invoke_addon_event<reshade::addon_event::post_clear_unordered_access_view_float>(this))
+			return;
+	}
+#endif
+	// VUGGER ADDON
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::DiscardView1(ID3D11View *pResourceView, const D3D11_RECT *pRects, UINT NumRects)
 {

@@ -95,9 +95,13 @@ static const char *addon_event_to_string(reshade::addon_event ev)
 		CASE(post_copy_texture_to_buffer);
 		CASE(resolve_texture_region);
 		CASE(clear_depth_stencil_view);
+		CASE(post_clear_depth_stencil_view);			// VUGGER ADDON
 		CASE(clear_render_target_view);
+		CASE(post_clear_render_target_view);			// VUGGER ADDON
 		CASE(clear_unordered_access_view_uint);
+		CASE(post_clear_unordered_access_view_uint);	// VUGGER ADDON
 		CASE(clear_unordered_access_view_float);
+		CASE(post_clear_unordered_access_view_float);	// VUGGER ADDON
 		CASE(generate_mipmaps);
 		CASE(begin_query);
 		CASE(end_query);

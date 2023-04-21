@@ -548,13 +548,20 @@ void reshade::runtime::on_reset()
 #endif
 }
 
+// VUGGER ADDON
 void reshade::runtime::update_input()
 {
 	if (_input != nullptr)
 		_input->next_frame();
 }
 
-// VUGGER ADDON
+void reshade::runtime::update_time()
+{
+	_framecount++;
+	const auto current_time = std::chrono::high_resolution_clock::now();
+	_last_frame_duration = current_time - _last_present_time; _last_present_time = current_time;
+}
+
 void reshade::runtime::hide_overlay()
 {
 	_show_overlay = false;
@@ -620,9 +627,7 @@ void reshade::runtime::on_present()
 	if (_should_save_screenshot)
 		save_screenshot();
 
-	_framecount++;
-	const auto current_time = std::chrono::high_resolution_clock::now();
-	_last_frame_duration = current_time - _last_present_time; _last_present_time = current_time;
+	update_time(); // VUGGER_ADDON
 
 #if !VUGGER_ADDON
 #ifdef NDEBUG
