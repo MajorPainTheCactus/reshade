@@ -362,14 +362,16 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateShaderResourceView(ID3D11Resource *
 	const HRESULT hr = _orig->CreateShaderResourceView(pResource, pDesc, ppShaderResourceView);
 	if (SUCCEEDED(hr))
 	{
+		ID3D11ShaderResourceView *ShaderResourceView = *ppShaderResourceView;
+		*ppShaderResourceView = new D3D11ShaderResourceView(this, ShaderResourceView);	// VUGGER ADDON
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::shader_resource, desc, to_handle(*ppShaderResourceView));
+		reshade::d3d11::shader_resource_view_impl * ptr = static_cast<reshade::d3d11::shader_resource_view_impl *>(static_cast<D3D11ShaderResourceView*>(*ppShaderResourceView));
+		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::shader_resource, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
 
-		register_destruction_callback(*ppShaderResourceView, [this, resource_view = *ppShaderResourceView]() {
-			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, to_handle(resource_view));
+		register_destruction_callback(ShaderResourceView, [this, resource_view = to_handle(ShaderResourceView)]() {
+			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, resource_view);
 		});
 #endif
-		*ppShaderResourceView = new D3D11ShaderResourceView(this, *ppShaderResourceView);	// VUGGER ADDON
 	}
 	else
 	{
@@ -1647,6 +1649,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateShaderResourceView1(ID3D11Resource 
 	const HRESULT hr = static_cast<ID3D11Device3 *>(_orig)->CreateShaderResourceView1(pResource, pDesc1, ppShaderResourceView1);
 	if (SUCCEEDED(hr))
 	{
+		*ppShaderResourceView1 = new D3D11ShaderResourceView(this, *ppShaderResourceView1);	// VUGGER ADDON
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::shader_resource, desc, to_handle(*ppShaderResourceView1));
 
@@ -1823,6 +1826,21 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateFence(UINT64 InitialValue, D3D11_FE
 }
 
 // VUGGER_ADDON
+D3D11ShaderResourceView::D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView *original)
+	: reshade::d3d11::shader_resource_view_impl(device, original),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
+D3D11ShaderResourceView::D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView1 *original)
+	: reshade::d3d11::shader_resource_view_impl(device, original),
+	_interface_version(1),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
 ULONG STDMETHODCALLTYPE D3D11ShaderResourceView::Release()
 {
 	const ULONG ref = InterlockedDecrement(&_ref);

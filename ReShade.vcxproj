@@ -109,7 +109,7 @@
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release App|x64'">
     <OutDir>C:\Development\directx-sdk-samples\MultithreadedRendering11\$(Platform)\$(Configuration)\</OutDir>

@@ -11,6 +11,28 @@
 
 namespace reshade::d3d11
 {
+	class device_impl;
+
+	class shader_resource_view_impl : public api::api_object_impl<ID3D11ShaderResourceView *, api::shader_resource_view>
+	{
+	public:
+		explicit shader_resource_view_impl(device_impl *device, ID3D11ShaderResourceView *shader_resource_view)
+			: api_object_impl(shader_resource_view), _device_impl(device)
+		{
+		}
+		virtual ~shader_resource_view_impl() {}	// VUGGER_ADDON:
+
+		virtual void override_view(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11ShaderResourceView*>(view.handle);
+		}
+
+		api::device *get_device() final;
+
+	private:
+		device_impl *const _device_impl = nullptr;
+	};
+
 	class device_impl : public api::api_object_impl<ID3D11Device *, api::device>
 	{
 		friend class swapchain_impl;

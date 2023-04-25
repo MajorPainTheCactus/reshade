@@ -20,7 +20,7 @@ template <typename Type, std::size_t BlockSize = 64>
 class block_allocator
 {
 public:
-	static constexpr std::size_t k_memory_allocation_alignment = alignof(std::max_align_t);
+	static constexpr std::size_t k_memory_allocation_alignment = alignof(Type);
 
 	block_allocator()
 	{
@@ -167,18 +167,21 @@ protected:
 
 #define DECLARE_MEM(_CLASS_, _BLOCK_SIZE_) \
 protected: \
-	inline static block_allocator<_CLASS_, _BLOCK_SIZE_>	ms_allocator; \
+	static block_allocator<_CLASS_, _BLOCK_SIZE_>	ms_allocator; \
 public: \
 	inline static void* operator new (std::size_t) { return ms_allocator.allocate(); } \
 	inline static void* operator new (std::size_t, void* ptr) { return ptr; } \
 	inline static void operator delete (void* ptr) { if(ptr) ms_allocator.free(static_cast<_CLASS_*>(ptr)); } \
 	inline static bool contains(void *ptr) { return ptr ? ms_allocator.contains(static_cast<_CLASS_*>(ptr)) : false; }
 
-struct DECLSPEC_UUID("3FF202D4-AC63-4AF0-9D74-0F69ADC521FA") D3D11ShaderResourceView final : ID3D11ShaderResourceView
+#define DECLARE_MEM_STATIC(_CLASS_, _BLOCK_SIZE_) inline block_allocator<_CLASS_, _BLOCK_SIZE_>	_CLASS_::ms_allocator; 
+
+struct DECLSPEC_UUID("3FF202D4-AC63-4AF0-9D74-0F69ADC521FA") D3D11ShaderResourceView final : ID3D11ShaderResourceView1, public reshade::d3d11::shader_resource_view_impl
 {
 	DECLARE_MEM(D3D11ShaderResourceView, 4096)
 
-	D3D11ShaderResourceView(struct D3D11Device * device, ID3D11ShaderResourceView * original) :_device(device), _orig(original) { assert(_orig != nullptr && _device != nullptr); }
+	D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView * original);
+	D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView1 * original);
 
 	#pragma region IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
@@ -214,6 +217,9 @@ struct DECLSPEC_UUID("3FF202D4-AC63-4AF0-9D74-0F69ADC521FA") D3D11ShaderResource
 	#pragma region ID3D11ShaderResourceView
 	void STDMETHODCALLTYPE GetDesc(D3D11_SHADER_RESOURCE_VIEW_DESC *pDesc) override final { _orig->GetDesc(pDesc); }
 	#pragma endregion
+	#pragma region ID3D11ShaderResourceView1
+	void STDMETHODCALLTYPE GetDesc1(D3D11_SHADER_RESOURCE_VIEW_DESC1 * pDesc1) override final { assert(_interface_version >= 1); static_cast<ID3D11ShaderResourceView1 *>(_orig)->GetDesc1(pDesc1); }
+	#pragma endregion
 
 	bool check_and_upgrade_interface(REFIID riid)
 	{
@@ -228,9 +234,11 @@ struct DECLSPEC_UUID("3FF202D4-AC63-4AF0-9D74-0F69ADC521FA") D3D11ShaderResource
 	}
 
 	ULONG _ref = 1;
-	D3D11Device *const _device;
-	ID3D11ShaderResourceView *_orig = nullptr;
+	unsigned int _interface_version = 0;
+	D3D11Device *const _device = nullptr;
+	//ID3D11ShaderResourceView *_orig = nullptr;
 };
+DECLARE_MEM_STATIC(D3D11ShaderResourceView, 4096)
 // VUGGER_ADDON
 
 struct DECLSPEC_UUID("72299288-2C68-4AD8-945D-2BFB5AA9C609") D3D11Device final : DXGIDevice, ID3D11Device5, public reshade::d3d11::device_impl

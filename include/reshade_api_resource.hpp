@@ -26,6 +26,11 @@
 
 #include "reshade_api_format.hpp"
 
+namespace vugger
+{
+	struct shader_resource_view;
+};
+
 namespace reshade::api
 {
 	/// <summary>

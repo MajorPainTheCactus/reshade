@@ -539,6 +539,17 @@ namespace reshade::api
 		dispatch
 	};
 
+	// VUGGER_ADDON:
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(shader_resource_view, device_object)
+	{
+		virtual ~shader_resource_view() {}
+
+		virtual void override_view(reshade::api::resource_view view) = 0;
+
+		vugger::shader_resource_view *_proxy = nullptr;
+	};
+	// VUGGER_ADDON:
+
 	/// <summary>
 	/// A command list, used to enqueue render commands on the CPU, before later executing them in a command queue.
 	/// <para>Functionally equivalent to a 'ID3D11CommandList', 'ID3D12CommandList' or 'VkCommandBuffer'.</para>

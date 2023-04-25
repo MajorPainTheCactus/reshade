@@ -10,6 +10,11 @@
 
 extern bool is_windows7();
 
+reshade::api::device* reshade::d3d11::shader_resource_view_impl::get_device()
+{
+	return _device_impl;
+}
+
 reshade::d3d11::device_impl::device_impl(ID3D11Device *device) :
 	api_object_impl(device)
 {
@@ -1371,8 +1376,10 @@ bool reshade::d3d11::device_impl::get_query_pool_results(api::query_pool pool, u
 	for (size_t i = 0; i < count; ++i)
 	{
 		HRESULT hr = immediate_context->GetData(impl->queries[first + i].get(), static_cast<uint8_t *>(results) + i * stride, stride, D3D11_ASYNC_GETDATA_DONOTFLUSH);
-		if (FAILED(hr))
+		if(hr == S_FALSE)
 			return false;
+		//if (FAILED(hr))
+		//	return false;
 	}
 
 	return true;
