@@ -252,27 +252,31 @@ namespace reshade
 		/// <summary>
 		/// Does the work for the begin of frame like begin ImGui so that the add-on can take control of updating the frame
 		/// </summary>
-		void begin_frame() final;
+		void begin_frame() override final;
 		/// <summary>
 		/// Does all the work for the end of frame like render ImGui so that the add-on can take control of updating the frame
 		/// </summary>
-		void end_frame() final;
+		void end_frame() override final;
 		/// <summary>
 		/// Update the input so that the add-on can take control of updating the frame
 		/// </summary>
-		void update_input() final;
+		void update_input() override final;
 		/// <summary>
 		/// Update the time so that the add-on can take control of updating the frame
 		/// </summary>
-		void update_time() final;
+		void update_time() override final;
 		/// <summary>
 		/// Allow a addon to hide the overlay
 		/// </summary>
-		void hide_overlay() final;
+		void hide_overlay() override final;
 		/// <summary>
 		/// Allow a addon to show the overlay
 		/// </summary>
-		void show_overlay() final;
+		void show_overlay() override final;
+		/// <summary>
+		/// Are we showing the overlay?
+		/// </summary>
+		bool is_overlay_showing() const override final;
 		// VUGGER ADDON
 
 	protected:

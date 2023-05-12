@@ -598,6 +598,10 @@ namespace reshade::api
 		/// Allow a addon to show the overlay
 		/// </summary>
 		virtual void show_overlay() = 0;
+		/// <summary>
+		/// Are we showing the overlay?
+		/// </summary>
+		virtual bool is_overlay_showing() const = 0;
 		// VUGGER ADDON
 	};
 }

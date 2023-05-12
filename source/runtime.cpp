@@ -571,6 +571,11 @@ void reshade::runtime::show_overlay()
 {
 	_show_overlay_next = true;
 }
+
+bool reshade::runtime::is_overlay_showing() const
+{
+	return _show_overlay;
+}
 // VUGGER ADDON
 
 void reshade::runtime::on_present()
