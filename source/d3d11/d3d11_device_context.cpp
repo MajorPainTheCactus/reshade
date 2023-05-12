@@ -352,6 +352,8 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::Unmap(ID3D11Resource *pResource, U
 {
 	assert(pResource != nullptr);
 
+	_orig->Unmap(pResource, Subresource);	// VUGGER_ADDON: Moved to before the event call
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
 	if (reshade::has_addon_event<reshade::addon_event::unmap_buffer_region>() ||
 		reshade::has_addon_event<reshade::addon_event::unmap_texture_region>())
@@ -370,8 +372,6 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::Unmap(ID3D11Resource *pResource, U
 		}
 	}
 #endif
-
-	_orig->Unmap(pResource, Subresource);
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::PSSetConstantBuffers(UINT StartSlot, UINT NumBuffers, ID3D11Buffer *const *ppConstantBuffers)
 {
