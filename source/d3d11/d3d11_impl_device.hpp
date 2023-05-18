@@ -13,6 +13,7 @@ namespace reshade::d3d11
 {
 	class device_impl;
 
+	// VUGGER_ADDON:
 	class shader_resource_view_impl : public api::api_object_impl<ID3D11ShaderResourceView *, api::shader_resource_view>
 	{
 	public:
@@ -20,7 +21,7 @@ namespace reshade::d3d11
 			: api_object_impl(shader_resource_view), _device_impl(device)
 		{
 		}
-		virtual ~shader_resource_view_impl() {}	// VUGGER_ADDON:
+		virtual ~shader_resource_view_impl() {}
 
 		virtual void override_view(api::resource_view view)
 		{
@@ -40,7 +41,7 @@ namespace reshade::d3d11
 			: api_object_impl(unordered_access_view), _device_impl(device)
 		{
 		}
-		virtual ~unordered_access_view_impl() {}	// VUGGER_ADDON:
+		virtual ~unordered_access_view_impl() {}	
 
 		virtual void override_view(api::resource_view view)
 		{
@@ -52,6 +53,27 @@ namespace reshade::d3d11
 	private:
 		device_impl *const _device_impl = nullptr;
 	};
+
+	class render_target_view_impl : public api::api_object_impl<ID3D11RenderTargetView *, api::render_target_view>
+	{
+	public:
+		explicit render_target_view_impl(device_impl *device, ID3D11RenderTargetView *render_target_view)
+			: api_object_impl(render_target_view), _device_impl(device)
+		{
+		}
+		virtual ~render_target_view_impl() {}
+
+		virtual void override_view(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11RenderTargetView *>(view.handle);
+		}
+
+		api::device *get_device() final;
+
+	private:
+		device_impl *const _device_impl = nullptr;
+	};
+	// VUGGER_ADDON:
 
 	class device_impl : public api::api_object_impl<ID3D11Device *, api::device>
 	{

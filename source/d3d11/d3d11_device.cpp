@@ -444,11 +444,14 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateRenderTargetView(ID3D11Resource *pR
 	const HRESULT hr = _orig->CreateRenderTargetView(pResource, pDesc, ppRenderTargetView);
 	if (SUCCEEDED(hr))
 	{
+		ID3D11RenderTargetView *RenderTargetView = *ppRenderTargetView;
+		*ppRenderTargetView = new D3D11RenderTargetView(this, RenderTargetView);	// VUGGER ADDON
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::render_target, desc, to_handle(*ppRenderTargetView));
+		reshade::d3d11::render_target_view_impl *ptr = static_cast<reshade::d3d11::render_target_view_impl *>(static_cast<D3D11RenderTargetView *>(*ppRenderTargetView));
+		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::render_target, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
 
-		register_destruction_callback(*ppRenderTargetView, [this, resource_view = *ppRenderTargetView]() {
-			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, to_handle(resource_view));
+		register_destruction_callback(RenderTargetView, [this, resource_view = to_handle(RenderTargetView)]() {
+			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, resource_view);
 		});
 #endif
 	}
@@ -1908,6 +1911,48 @@ ULONG STDMETHODCALLTYPE D3D11UnorderedAccessView::Release()
 }
 
 void STDMETHODCALLTYPE D3D11UnorderedAccessView::GetDevice(ID3D11Device **ppDevice)
+{
+	_device->AddRef();
+	*ppDevice = _device;
+}
+
+D3D11RenderTargetView::D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView *original)
+	: reshade::d3d11::render_target_view_impl(device, original),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
+D3D11RenderTargetView::D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView1 *original)
+	: reshade::d3d11::render_target_view_impl(device, original),
+	_interface_version(1),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
+ULONG STDMETHODCALLTYPE D3D11RenderTargetView::Release()
+{
+	const ULONG ref = InterlockedDecrement(&_ref);
+	if (ref != 0)
+	{
+		_orig->Release();
+		return ref;
+	}
+
+	const auto orig = _orig;
+#if 0
+	LOG(DEBUG) << "Destroying " << "D3D11RenderTargetView" << " object " << this << " (" << orig << ").";
+#endif
+	delete this;
+
+	const ULONG ref_orig = orig->Release();
+	if (ref_orig != 0) // Verify internal reference count
+		LOG(WARN) << "Reference count for " << "D3D11RenderTargetView" << " object " << this << " (" << orig << ") is inconsistent (" << ref_orig << ").";
+	return 0;
+}
+
+void STDMETHODCALLTYPE D3D11RenderTargetView::GetDevice(ID3D11Device **ppDevice)
 {
 	_device->AddRef();
 	*ppDevice = _device;

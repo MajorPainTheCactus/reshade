@@ -193,6 +193,17 @@ struct DECLSPEC_UUID("27B0246B-2152-4D42-AD11-32489472238F") D3D11DeviceContext 
 	unsigned int _interface_version;
 	D3D11Device *const _device;
 
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> _shader_resource_views;		// VUGGER ADDON
-	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> _unordered_access_views;		// VUGGER ADDON
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> vs_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> hs_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> ds_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> gs_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> ps_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> cs_shader_resource_views;
+
+	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> ps_unordered_access_views;
+	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> cs_unordered_access_views;
+
+	std::array<ID3D11RenderTargetView *, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> render_target_views;
+	// VUGGER ADDON
 };

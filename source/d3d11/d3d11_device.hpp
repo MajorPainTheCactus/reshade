@@ -304,6 +304,71 @@ struct DECLSPEC_UUID("ED73DC39-8A00-4264-B6B5-E6DAABBE79B5") D3D11UnorderedAcces
 	//ID3D11UnorderedAccessView *_orig = nullptr;
 };
 DECLARE_MEM_STATIC(D3D11UnorderedAccessView, 1024)
+
+
+struct DECLSPEC_UUID("32ED0AD5-5462-4AC6-BA63-4B7641FE1B3E") D3D11RenderTargetView final : ID3D11RenderTargetView1, public reshade::d3d11::render_target_view_impl
+{
+	DECLARE_MEM(D3D11RenderTargetView, 1024)
+
+	D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView * original);
+	D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView1 *original);
+
+	#pragma region IUnknown
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
+	{
+		if (ppvObj == nullptr)
+			return E_POINTER;
+
+		if (check_and_upgrade_interface(riid))
+		{
+			AddRef();
+			*ppvObj = this;
+			return S_OK;
+		}
+
+		return _orig->QueryInterface(riid, ppvObj);
+	}
+	ULONG   STDMETHODCALLTYPE AddRef() override final
+	{
+		_orig->AddRef();
+		return InterlockedIncrement(&_ref);
+	}
+	ULONG   STDMETHODCALLTYPE Release() override final;
+	#pragma endregion
+	#pragma region ID3D11DeviceChild
+	void    STDMETHODCALLTYPE GetDevice(ID3D11Device **ppDevice) override final;
+	HRESULT STDMETHODCALLTYPE GetPrivateData(REFGUID guid, UINT *pDataSize, void *pData) override final { return _orig->GetPrivateData(guid, pDataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateData(REFGUID guid, UINT DataSize, const void *pData) override final { return _orig->SetPrivateData(guid, DataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(REFGUID guid, const IUnknown *pData) override final { return _orig->SetPrivateDataInterface(guid, pData); }
+	#pragma endregion
+	#pragma region ID3D11View
+	void STDMETHODCALLTYPE GetResource(ID3D11Resource **ppResource) override final { _orig->GetResource(ppResource); }
+	#pragma endregion
+	#pragma region ID3D11RenderTargetView
+	void STDMETHODCALLTYPE GetDesc(D3D11_RENDER_TARGET_VIEW_DESC *pDesc) override final { _orig->GetDesc(pDesc); }
+	#pragma endregion
+	#pragma region ID3D11RenderTargetView1
+	void STDMETHODCALLTYPE GetDesc1(D3D11_RENDER_TARGET_VIEW_DESC1 *pDesc1) override final { assert(_interface_version >= 1); static_cast<ID3D11RenderTargetView1 *>(_orig)->GetDesc1(pDesc1); }
+	#pragma endregion
+
+	bool check_and_upgrade_interface(REFIID riid)
+	{
+		if (riid == __uuidof(this) ||
+			riid == __uuidof(IUnknown) ||
+			riid == __uuidof(ID3D11DeviceChild) ||
+			riid == __uuidof(ID3D11View) ||
+			riid == __uuidof(ID3D11RenderTargetView))
+			return true;
+
+		return false;
+	}
+
+	ULONG _ref = 1;
+	unsigned int _interface_version = 0;
+	D3D11Device *const _device = nullptr;
+	//ID3D11RenderTargetView *_orig = nullptr;
+};
+DECLARE_MEM_STATIC(D3D11RenderTargetView, 1024)
 // VUGGER_ADDON
 
 struct DECLSPEC_UUID("72299288-2C68-4AD8-945D-2BFB5AA9C609") D3D11Device final : DXGIDevice, ID3D11Device5, public reshade::d3d11::device_impl
