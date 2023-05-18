@@ -15,6 +15,11 @@ reshade::api::device* reshade::d3d11::shader_resource_view_impl::get_device()
 	return _device_impl;
 }
 
+reshade::api::device *reshade::d3d11::unordered_access_view_impl::get_device()
+{
+	return _device_impl;
+}
+
 reshade::d3d11::device_impl::device_impl(ID3D11Device *device) :
 	api_object_impl(device)
 {

@@ -33,6 +33,26 @@ namespace reshade::d3d11
 		device_impl *const _device_impl = nullptr;
 	};
 
+	class unordered_access_view_impl : public api::api_object_impl<ID3D11UnorderedAccessView *, api::unordered_access_view>
+	{
+	public:
+		explicit unordered_access_view_impl(device_impl *device, ID3D11UnorderedAccessView *unordered_access_view)
+			: api_object_impl(unordered_access_view), _device_impl(device)
+		{
+		}
+		virtual ~unordered_access_view_impl() {}	// VUGGER_ADDON:
+
+		virtual void override_view(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11UnorderedAccessView *>(view.handle);
+		}
+
+		api::device *get_device() final;
+
+	private:
+		device_impl *const _device_impl = nullptr;
+	};
+
 	class device_impl : public api::api_object_impl<ID3D11Device *, api::device>
 	{
 		friend class swapchain_impl;

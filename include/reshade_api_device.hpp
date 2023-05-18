@@ -548,6 +548,15 @@ namespace reshade::api
 
 		vugger::shader_resource_view *_proxy = nullptr;
 	};
+
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(unordered_access_view, device_object)
+	{
+		virtual ~unordered_access_view() {}
+
+		virtual void override_view(reshade::api::resource_view view) = 0;
+
+		vugger::unordered_access_view *_proxy = nullptr;
+	};
 	// VUGGER_ADDON:
 
 	/// <summary>

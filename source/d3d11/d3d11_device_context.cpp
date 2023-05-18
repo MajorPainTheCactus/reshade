@@ -18,6 +18,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext 
 {
 	assert(_orig != nullptr && _device != nullptr);
 	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
+	_unordered_access_views.fill(nullptr);		// VUGGER ADDON
 }
 D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext1 *original) :
 	device_context_impl(device, original),
@@ -26,6 +27,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext1
 {
 	assert(_orig != nullptr && _device != nullptr);
 	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
+	_unordered_access_views.fill(nullptr);		// VUGGER ADDON
 }
 D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext2 *original) :
 	device_context_impl(device, original),
@@ -34,6 +36,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext2
 {
 	assert(_orig != nullptr && _device != nullptr);
 	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
+	_unordered_access_views.fill(nullptr);		// VUGGER ADDON
 }
 D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext3 *original) :
 	device_context_impl(device, original),
@@ -42,6 +45,7 @@ D3D11DeviceContext::D3D11DeviceContext(D3D11Device *device, ID3D11DeviceContext3
 {
 	assert(_orig != nullptr && _device != nullptr);
 	_shader_resource_views.fill(nullptr);		// VUGGER ADDON
+	_unordered_access_views.fill(nullptr);		// VUGGER ADDON
 }
 
 bool D3D11DeviceContext::check_and_upgrade_interface(REFIID riid)
@@ -461,9 +465,20 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::IASetPrimitiveTopology(D3D11_PRIMI
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::VSSetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews)
 {
-	_orig->VSSetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pShaderResourceViews;
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		assert(ppShaderResourceViews[i] == nullptr || D3D11ShaderResourceView::contains(ppShaderResourceViews[i]));
+		pShaderResourceViews[i] = ppShaderResourceViews[i] ? static_cast<D3D11ShaderResourceView *>(ppShaderResourceViews[i])->_orig : nullptr;
+		_shader_resource_views[StartSlot + i] = ppShaderResourceViews[i];
+	}
+
+	_orig->VSSetShaderResources(StartSlot, NumViews, pShaderResourceViews.data());
+	// VUGGER ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::vertex, StartSlot, NumViews, ppShaderResourceViews);
+	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::vertex, StartSlot, NumViews, pShaderResourceViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::VSSetSamplers(UINT StartSlot, UINT NumSamplers, ID3D11SamplerState *const *ppSamplers)
@@ -491,9 +506,19 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::SetPredication(ID3D11Predicate *pP
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::GSSetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews)
 {
-	_orig->GSSetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pShaderResourceViews;
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		assert(ppShaderResourceViews[i] == nullptr || D3D11ShaderResourceView::contains(ppShaderResourceViews[i]));
+		pShaderResourceViews[i] = ppShaderResourceViews[i] ? static_cast<D3D11ShaderResourceView *>(ppShaderResourceViews[i])->_orig : nullptr;
+		_shader_resource_views[StartSlot + i] = ppShaderResourceViews[i];
+	}
+
+	_orig->GSSetShaderResources(StartSlot, NumViews, pShaderResourceViews.data());
+	// VUGGER ADDON
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::geometry, StartSlot, NumViews, ppShaderResourceViews);
+	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::geometry, StartSlot, NumViews, pShaderResourceViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::GSSetSamplers(UINT StartSlot, UINT NumSamplers, ID3D11SamplerState *const *ppSamplers)
@@ -526,7 +551,17 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::OMSetRenderTargets(UINT NumViews, 
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::OMSetRenderTargetsAndUnorderedAccessViews(UINT NumRTVs, ID3D11RenderTargetView *const *ppRenderTargetViews, ID3D11DepthStencilView *pDepthStencilView, UINT UAVStartSlot, UINT NumUAVs, ID3D11UnorderedAccessView *const *ppUnorderedAccessViews, const UINT *pUAVInitialCounts)
 {
-	_orig->OMSetRenderTargetsAndUnorderedAccessViews(NumRTVs, ppRenderTargetViews, pDepthStencilView, UAVStartSlot, NumUAVs, ppUnorderedAccessViews, pUAVInitialCounts);
+	// VUGGER ADDON
+	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pUnorderedAccessViews;
+	for (UINT i = 0; i < NumUAVs; ++i)
+	{
+		assert(ppUnorderedAccessViews[i] == nullptr || D3D11UnorderedAccessView::contains(ppUnorderedAccessViews[i]));
+		pUnorderedAccessViews[i] = ppUnorderedAccessViews[i] ? static_cast<D3D11UnorderedAccessView *>(ppUnorderedAccessViews[i])->_orig : nullptr;
+		_unordered_access_views[UAVStartSlot + i] = ppUnorderedAccessViews[i];
+	}
+
+	_orig->OMSetRenderTargetsAndUnorderedAccessViews(NumRTVs, ppRenderTargetViews, pDepthStencilView, UAVStartSlot, NumUAVs, pUnorderedAccessViews.data(), pUAVInitialCounts);
+	// VUGGER ADDON
 
 #if RESHADE_ADDON
 	if (NumRTVs != D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL &&
@@ -549,7 +584,7 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::OMSetRenderTargetsAndUnorderedAcce
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
 	if (NumUAVs != D3D11_KEEP_UNORDERED_ACCESS_VIEWS)
 	{
-		invoke_bind_unordered_access_views_event(reshade::api::shader_stage::pixel, UAVStartSlot, NumUAVs, ppUnorderedAccessViews);
+		invoke_bind_unordered_access_views_event(reshade::api::shader_stage::pixel, UAVStartSlot, NumUAVs, pUnorderedAccessViews.data());
 	}
 #endif
 }
@@ -991,9 +1026,20 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::ExecuteCommandList(ID3D11CommandLi
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::HSSetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews)
 {
-	_orig->HSSetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pShaderResourceViews;
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		assert(ppShaderResourceViews[i] == nullptr || D3D11ShaderResourceView::contains(ppShaderResourceViews[i]));
+		pShaderResourceViews[i] = ppShaderResourceViews[i] ? static_cast<D3D11ShaderResourceView *>(ppShaderResourceViews[i])->_orig : nullptr;
+		_shader_resource_views[StartSlot + i] = ppShaderResourceViews[i];
+	}
+
+	_orig->HSSetShaderResources(StartSlot, NumViews, pShaderResourceViews.data());
+	// VUGGER ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::hull, StartSlot, NumViews, ppShaderResourceViews);
+	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::hull, StartSlot, NumViews, pShaderResourceViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::HSSetShader(ID3D11HullShader *pHullShader, ID3D11ClassInstance *const *ppClassInstances, UINT NumClassInstances)
@@ -1019,9 +1065,20 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::HSSetConstantBuffers(UINT StartSlo
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::DSSetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews)
 {
-	_orig->DSSetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pShaderResourceViews;
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		assert(ppShaderResourceViews[i] == nullptr || D3D11ShaderResourceView::contains(ppShaderResourceViews[i]));
+		pShaderResourceViews[i] = ppShaderResourceViews[i] ? static_cast<D3D11ShaderResourceView *>(ppShaderResourceViews[i])->_orig : nullptr;
+		_shader_resource_views[StartSlot + i] = ppShaderResourceViews[i];
+	}
+
+	_orig->DSSetShaderResources(StartSlot, NumViews, pShaderResourceViews.data());
+	// VUGGER ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::domain, StartSlot, NumViews, ppShaderResourceViews);
+	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::domain, StartSlot, NumViews, pShaderResourceViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::DSSetShader(ID3D11DomainShader *pDomainShader, ID3D11ClassInstance *const *ppClassInstances, UINT NumClassInstances)
@@ -1047,16 +1104,38 @@ void    STDMETHODCALLTYPE D3D11DeviceContext::DSSetConstantBuffers(UINT StartSlo
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::CSSetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews)
 {
-	_orig->CSSetShaderResources(StartSlot, NumViews, ppShaderResourceViews);
+	// VUGGER ADDON
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pShaderResourceViews;
+	for (UINT i = 0; i < NumViews; ++i)
+	{
+		assert(ppShaderResourceViews[i] == nullptr || D3D11ShaderResourceView::contains(ppShaderResourceViews[i]));
+		pShaderResourceViews[i] = ppShaderResourceViews[i] ? static_cast<D3D11ShaderResourceView *>(ppShaderResourceViews[i])->_orig : nullptr;
+		_shader_resource_views[StartSlot + i] = ppShaderResourceViews[i];
+	}
+
+	_orig->CSSetShaderResources(StartSlot, NumViews, pShaderResourceViews.data());
+	// VUGGER ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::compute, StartSlot, NumViews, ppShaderResourceViews);
+	invoke_bind_shader_resource_views_event(reshade::api::shader_stage::compute, StartSlot, NumViews, pShaderResourceViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::CSSetUnorderedAccessViews(UINT StartSlot, UINT NumUAVs, ID3D11UnorderedAccessView *const *ppUnorderedAccessViews, const UINT *pUAVInitialCounts)
 {
-	_orig->CSSetUnorderedAccessViews(StartSlot, NumUAVs, ppUnorderedAccessViews, pUAVInitialCounts);
+	// VUGGER ADDON
+	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> pUnorderedAccessViews;
+	for (UINT i = 0; i < NumUAVs; ++i)
+	{
+		assert(ppUnorderedAccessViews[i] == nullptr || D3D11UnorderedAccessView::contains(ppUnorderedAccessViews[i]));
+		pUnorderedAccessViews[i] = ppUnorderedAccessViews[i] ? static_cast<D3D11UnorderedAccessView *>(ppUnorderedAccessViews[i])->_orig : nullptr;
+		_unordered_access_views[StartSlot + i] = ppUnorderedAccessViews[i];
+	}
+
+	_orig->CSSetUnorderedAccessViews(StartSlot, NumUAVs, pUnorderedAccessViews.data(), pUAVInitialCounts);
+	// VUGGER ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	invoke_bind_unordered_access_views_event(reshade::api::shader_stage::compute, StartSlot, NumUAVs, ppUnorderedAccessViews);
+	invoke_bind_unordered_access_views_event(reshade::api::shader_stage::compute, StartSlot, NumUAVs, pUnorderedAccessViews.data());
 #endif
 }
 void    STDMETHODCALLTYPE D3D11DeviceContext::CSSetShader(ID3D11ComputeShader *pComputeShader, ID3D11ClassInstance *const *ppClassInstances, UINT NumClassInstances)
