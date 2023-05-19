@@ -73,6 +73,26 @@ namespace reshade::d3d11
 	private:
 		device_impl *const _device_impl = nullptr;
 	};
+
+	class depth_stencil_view_impl : public api::api_object_impl<ID3D11DepthStencilView *, api::depth_stencil_view>
+	{
+	public:
+		explicit depth_stencil_view_impl(device_impl *device, ID3D11DepthStencilView *depth_stencil_view)
+			: api_object_impl(depth_stencil_view), _device_impl(device)
+		{
+		}
+		virtual ~depth_stencil_view_impl() {}
+
+		virtual void override_view(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11DepthStencilView *>(view.handle);
+		}
+
+		api::device *get_device() final;
+
+	private:
+		device_impl *const _device_impl = nullptr;
+	};
 	// VUGGER_ADDON:
 
 	class device_impl : public api::api_object_impl<ID3D11Device *, api::device>

@@ -566,6 +566,15 @@ namespace reshade::api
 
 		vugger::render_target_view *_proxy = nullptr;
 	};
+
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(depth_stencil_view, device_object)
+	{
+		virtual ~depth_stencil_view() {}
+
+		virtual void override_view(reshade::api::resource_view view) = 0;
+
+		vugger::depth_stencil_view *_proxy = nullptr;
+	};
 	// VUGGER_ADDON:
 
 	/// <summary>

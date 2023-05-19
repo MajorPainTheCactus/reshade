@@ -243,7 +243,7 @@ DECLARE_MEM_STATIC(D3D11ShaderResourceView, 4096)
 
 struct DECLSPEC_UUID("ED73DC39-8A00-4264-B6B5-E6DAABBE79B5") D3D11UnorderedAccessView final : ID3D11UnorderedAccessView1, public reshade::d3d11::unordered_access_view_impl
 {
-	DECLARE_MEM(D3D11UnorderedAccessView, 1024)
+	DECLARE_MEM(D3D11UnorderedAccessView, 256)
 
 	D3D11UnorderedAccessView(struct D3D11Device *device, ID3D11UnorderedAccessView * original);
 	D3D11UnorderedAccessView(struct D3D11Device *device, ID3D11UnorderedAccessView1 *original);
@@ -303,12 +303,12 @@ struct DECLSPEC_UUID("ED73DC39-8A00-4264-B6B5-E6DAABBE79B5") D3D11UnorderedAcces
 	D3D11Device *const _device = nullptr;
 	//ID3D11UnorderedAccessView *_orig = nullptr;
 };
-DECLARE_MEM_STATIC(D3D11UnorderedAccessView, 1024)
+DECLARE_MEM_STATIC(D3D11UnorderedAccessView, 256)
 
 
 struct DECLSPEC_UUID("32ED0AD5-5462-4AC6-BA63-4B7641FE1B3E") D3D11RenderTargetView final : ID3D11RenderTargetView1, public reshade::d3d11::render_target_view_impl
 {
-	DECLARE_MEM(D3D11RenderTargetView, 1024)
+	DECLARE_MEM(D3D11RenderTargetView, 256)
 
 	D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView * original);
 	D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView1 *original);
@@ -368,7 +368,67 @@ struct DECLSPEC_UUID("32ED0AD5-5462-4AC6-BA63-4B7641FE1B3E") D3D11RenderTargetVi
 	D3D11Device *const _device = nullptr;
 	//ID3D11RenderTargetView *_orig = nullptr;
 };
-DECLARE_MEM_STATIC(D3D11RenderTargetView, 1024)
+DECLARE_MEM_STATIC(D3D11RenderTargetView, 256)
+
+struct DECLSPEC_UUID("E12919C2-54FA-4FB9-9938-6DC0F3257008") D3D11DepthStencilView final : ID3D11DepthStencilView, public reshade::d3d11::depth_stencil_view_impl
+{
+	DECLARE_MEM(D3D11DepthStencilView, 256)
+
+	D3D11DepthStencilView(struct D3D11Device *device, ID3D11DepthStencilView * original);
+
+	#pragma region IUnknown
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
+	{
+		if (ppvObj == nullptr)
+			return E_POINTER;
+
+		if (check_and_upgrade_interface(riid))
+		{
+			AddRef();
+			*ppvObj = this;
+			return S_OK;
+		}
+
+		return _orig->QueryInterface(riid, ppvObj);
+	}
+	ULONG   STDMETHODCALLTYPE AddRef() override final
+	{
+		_orig->AddRef();
+		return InterlockedIncrement(&_ref);
+	}
+	ULONG   STDMETHODCALLTYPE Release() override final;
+	#pragma endregion
+	#pragma region ID3D11DeviceChild
+	void    STDMETHODCALLTYPE GetDevice(ID3D11Device **ppDevice) override final;
+	HRESULT STDMETHODCALLTYPE GetPrivateData(REFGUID guid, UINT *pDataSize, void *pData) override final { return _orig->GetPrivateData(guid, pDataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateData(REFGUID guid, UINT DataSize, const void *pData) override final { return _orig->SetPrivateData(guid, DataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(REFGUID guid, const IUnknown *pData) override final { return _orig->SetPrivateDataInterface(guid, pData); }
+	#pragma endregion
+	#pragma region ID3D11View
+	void STDMETHODCALLTYPE GetResource(ID3D11Resource **ppResource) override final { _orig->GetResource(ppResource); }
+	#pragma endregion
+	#pragma region ID3D11DepthStencilView
+	void STDMETHODCALLTYPE GetDesc(D3D11_DEPTH_STENCIL_VIEW_DESC *pDesc) override final { _orig->GetDesc(pDesc); }
+	#pragma endregion
+
+	bool check_and_upgrade_interface(REFIID riid)
+	{
+		if (riid == __uuidof(this) ||
+			riid == __uuidof(IUnknown) ||
+			riid == __uuidof(ID3D11DeviceChild) ||
+			riid == __uuidof(ID3D11View) ||
+			riid == __uuidof(ID3D11DepthStencilView))
+			return true;
+
+		return false;
+	}
+
+	ULONG _ref = 1;
+	unsigned int _interface_version = 0;
+	D3D11Device *const _device = nullptr;
+	//ID3D11DepthStencilView *_orig = nullptr;
+};
+DECLARE_MEM_STATIC(D3D11DepthStencilView, 256)
 // VUGGER_ADDON
 
 struct DECLSPEC_UUID("72299288-2C68-4AD8-945D-2BFB5AA9C609") D3D11Device final : DXGIDevice, ID3D11Device5, public reshade::d3d11::device_impl

@@ -485,11 +485,14 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateDepthStencilView(ID3D11Resource *pR
 	const HRESULT hr = _orig->CreateDepthStencilView(pResource, pDesc, ppDepthStencilView);
 	if (SUCCEEDED(hr))
 	{
+		ID3D11DepthStencilView *DepthStencilView = *ppDepthStencilView;
+		*ppDepthStencilView = new D3D11DepthStencilView(this, DepthStencilView);	// VUGGER ADDON
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::depth_stencil, desc, to_handle(*ppDepthStencilView));
+		reshade::d3d11::depth_stencil_view_impl *ptr = static_cast<reshade::d3d11::depth_stencil_view_impl *>(static_cast<D3D11DepthStencilView *>(*ppDepthStencilView));
+		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::depth_stencil, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
 
-		register_destruction_callback(*ppDepthStencilView, [this, resource_view = *ppDepthStencilView]() {
-			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, to_handle(resource_view));
+		register_destruction_callback(*ppDepthStencilView, [this, resource_view = to_handle(DepthStencilView)]() {
+			reshade::invoke_addon_event<reshade::addon_event::destroy_resource_view>(this, resource_view);
 		});
 #endif
 	}
@@ -1953,6 +1956,40 @@ ULONG STDMETHODCALLTYPE D3D11RenderTargetView::Release()
 }
 
 void STDMETHODCALLTYPE D3D11RenderTargetView::GetDevice(ID3D11Device **ppDevice)
+{
+	_device->AddRef();
+	*ppDevice = _device;
+}
+
+D3D11DepthStencilView::D3D11DepthStencilView(struct D3D11Device *device, ID3D11DepthStencilView *original)
+	: reshade::d3d11::depth_stencil_view_impl(device, original),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
+ULONG STDMETHODCALLTYPE D3D11DepthStencilView::Release()
+{
+	const ULONG ref = InterlockedDecrement(&_ref);
+	if (ref != 0)
+	{
+		_orig->Release();
+		return ref;
+	}
+
+	const auto orig = _orig;
+#if 0
+	LOG(DEBUG) << "Destroying " << "D3D11DepthStencilView" << " object " << this << " (" << orig << ").";
+#endif
+	delete this;
+
+	const ULONG ref_orig = orig->Release();
+	if (ref_orig != 0) // Verify internal reference count
+		LOG(WARN) << "Reference count for " << "D3D11DepthStencilView" << " object " << this << " (" << orig << ") is inconsistent (" << ref_orig << ").";
+	return 0;
+}
+
+void STDMETHODCALLTYPE D3D11DepthStencilView::GetDevice(ID3D11Device **ppDevice)
 {
 	_device->AddRef();
 	*ppDevice = _device;

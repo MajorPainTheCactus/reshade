@@ -31,6 +31,7 @@ namespace vugger
 	struct shader_resource_view;
 	struct unordered_access_view;
 	struct render_target_view;
+	struct depth_stencil_view;
 };
 
 namespace reshade::api

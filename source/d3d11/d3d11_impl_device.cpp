@@ -25,6 +25,11 @@ reshade::api::device *reshade::d3d11::render_target_view_impl::get_device()
 	return _device_impl;
 }
 
+reshade::api::device *reshade::d3d11::depth_stencil_view_impl::get_device()
+{
+	return _device_impl;
+}
+
 reshade::d3d11::device_impl::device_impl(ID3D11Device *device) :
 	api_object_impl(device)
 {

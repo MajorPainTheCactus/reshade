@@ -205,5 +205,6 @@ struct DECLSPEC_UUID("27B0246B-2152-4D42-AD11-32489472238F") D3D11DeviceContext 
 	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> cs_unordered_access_views;
 
 	std::array<ID3D11RenderTargetView *, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> render_target_views;
+	ID3D11DepthStencilView * depth_stencil_view = nullptr;
 	// VUGGER ADDON
 };
