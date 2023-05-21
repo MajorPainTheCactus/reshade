@@ -7,6 +7,10 @@
 
 #include <dxgi1_5.h>
 
+// VUGGER_ADDON
+#define SUPPORT_D3D10	0
+#define SUPPORT_D3D12	0
+
 struct DECLSPEC_UUID("CB285C3B-3677-4332-98C7-D6339B9782B1") DXGIDevice : IDXGIDevice4
 {
 	DXGIDevice(IDXGIDevice1 *original);

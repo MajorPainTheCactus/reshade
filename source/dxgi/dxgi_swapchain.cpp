@@ -52,6 +52,7 @@ const char *dump_format(DXGI_FORMAT format)
 // Needs to be set whenever a DXGI call can end up in 'CDXGISwapChain::EnsureChildDeviceInternal', to avoid hooking internal D3D device creation
 thread_local bool g_in_dxgi_runtime = false;
 
+#if SUPPORT_D3D10
 DXGISwapChain::DXGISwapChain(D3D10Device *device, IDXGISwapChain  *original) :
 	_orig(original),
 	_interface_version(0),
@@ -75,6 +76,7 @@ DXGISwapChain::DXGISwapChain(D3D10Device *device, IDXGISwapChain1 *original) :
 	assert(_orig != nullptr && _direct3d_device != nullptr);
 	_direct3d_device->AddRef();
 }
+#endif // SUPPORT_D3D10
 DXGISwapChain::DXGISwapChain(D3D11Device *device, IDXGISwapChain  *original) :
 	_orig(original),
 	_interface_version(0),
@@ -97,6 +99,7 @@ DXGISwapChain::DXGISwapChain(D3D11Device *device, IDXGISwapChain1 *original) :
 	assert(_orig != nullptr && _direct3d_device != nullptr);
 	_direct3d_device->AddRef();
 }
+#if SUPPORT_D3D12
 DXGISwapChain::DXGISwapChain(D3D12CommandQueue *command_queue, IDXGISwapChain3 *original) :
 	_orig(original),
 	_interface_version(3),
@@ -110,6 +113,7 @@ DXGISwapChain::DXGISwapChain(D3D12CommandQueue *command_queue, IDXGISwapChain3 *
 	// Add reference to command queue as well to ensure it is kept alive for the lifetime of the effect runtime
 	_direct3d_command_queue->AddRef();
 }
+#endif // SUPPORT_D3D12
 
 void DXGISwapChain::runtime_reset()
 {
@@ -117,15 +121,19 @@ void DXGISwapChain::runtime_reset()
 
 	switch (_direct3d_version)
 	{
+#if SUPPORT_D3D10
 	case 10:
 		static_cast<reshade::d3d10::swapchain_impl *>(_impl)->on_reset();
 		break;
+#endif // SUPPORT_D3D10
 	case 11:
 		static_cast<reshade::d3d11::swapchain_impl *>(_impl)->on_reset();
 		break;
+#if SUPPORT_D3D12
 	case 12:
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_reset();
 		break;
+#endif // SUPPORT_D3D12
 	}
 }
 void DXGISwapChain::runtime_resize()
@@ -134,15 +142,19 @@ void DXGISwapChain::runtime_resize()
 
 	switch (_direct3d_version)
 	{
+#if SUPPORT_D3D10
 	case 10:
 		static_cast<reshade::d3d10::swapchain_impl *>(_impl)->on_init();
 		break;
+#endif // SUPPORT_D3D10
 	case 11:
 		static_cast<reshade::d3d11::swapchain_impl *>(_impl)->on_init();
 		break;
+#if SUPPORT_D3D12
 	case 12:
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_init();
 		break;
+#endif // SUPPORT_D3D12
 	}
 }
 void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRESENT_PARAMETERS *params)
@@ -162,6 +174,7 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 
 	switch (_direct3d_version)
 	{
+#if SUPPORT_D3D10
 	case 10:
 #if RESHADE_ADDON
 		// Behave as if immediate command list is flushed
@@ -179,6 +192,7 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 #endif
 		static_cast<reshade::d3d10::swapchain_impl *>(_impl)->on_present();
 		break;
+#endif // SUPPORT_D3D10
 	case 11:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::execute_command_list>(
@@ -195,6 +209,7 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 #endif
 		static_cast<reshade::d3d11::swapchain_impl *>(_impl)->on_present();
 		break;
+#if SUPPORT_D3D12
 	case 12:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::present>(
@@ -208,6 +223,7 @@ void DXGISwapChain::runtime_present(UINT flags, [[maybe_unused]] const DXGI_PRES
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_present();
 		static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->flush_immediate_command_list();
 		break;
+#endif // SUPPORT_D3D12
 	}
 
 	_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex.unlock() : _impl_mutex.unlock();	// VUGGER_ADDON
@@ -225,6 +241,7 @@ void DXGISwapChain::runtime_start_frame()
 
 	switch (_direct3d_version)
 	{
+#if SUPPORT_D3D10
 	case 10:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
@@ -235,6 +252,7 @@ void DXGISwapChain::runtime_start_frame()
 #endif
 		static_cast<reshade::d3d10::swapchain_impl *>(_impl)->on_start_frame();
 		break;
+#endif // SUPPORT_D3D10
 	case 11:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
@@ -245,6 +263,7 @@ void DXGISwapChain::runtime_start_frame()
 #endif
 		static_cast<reshade::d3d11::swapchain_impl *>(_impl)->on_start_frame();
 		break;
+#if SUPPORT_D3D12
 	case 12:
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::start_frame>(
@@ -255,6 +274,7 @@ void DXGISwapChain::runtime_start_frame()
 #endif
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->on_start_frame();
 		break;
+#endif // SUPPORT_D3D12
 	}
 
 	_direct3d_version == 12 ? static_cast<D3D12CommandQueue *>(_direct3d_command_queue)->_mutex.unlock() : _impl_mutex.unlock();		// VUGGER_ADDON
@@ -677,9 +697,11 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::SetColorSpace1(DXGI_COLOR_SPACE_TYPE Co
 	case 11:
 		static_cast<reshade::d3d11::swapchain_impl *>(_impl)->set_back_buffer_color_space(ColorSpace);
 		break;
+#if SUPPORT_D3D12
 	case 12:
 		static_cast<reshade::d3d12::swapchain_impl *>(_impl)->set_back_buffer_color_space(ColorSpace);
 		break;
+#endif // SUPPORT_D3D12
 	}
 
 	assert(_interface_version >= 3);

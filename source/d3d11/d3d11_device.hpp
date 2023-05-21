@@ -11,6 +11,8 @@
 struct D3D11On12Device;
 struct D3D11DeviceContext;
 
+#define SUPPORT_D3D11ON12 0
+
 // VUGGER_ADDON
 struct DECLSPEC_UUID("3FF202D4-AC63-4AF0-9D74-0F69ADC521FA") D3D11ShaderResourceView final : ID3D11ShaderResourceView1, public reshade::d3d11::shader_resource_view_impl
 {
@@ -417,6 +419,8 @@ struct DECLSPEC_UUID("72299288-2C68-4AD8-945D-2BFB5AA9C609") D3D11Device final :
 
 	LONG _ref = 1;
 	unsigned int _interface_version = 0;
+#if SUPPORT_D3D11ON12
 	D3D11On12Device *_d3d11on12_device = nullptr;
+#endif // SUPPORT_D3D11ON12
 	D3D11DeviceContext *_immediate_context = nullptr;
 };

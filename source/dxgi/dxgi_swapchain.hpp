@@ -15,11 +15,15 @@ namespace reshade { class runtime; }
 
 struct DECLSPEC_UUID("1F445F9F-9887-4C4C-9055-4E3BADAFCCA8") DXGISwapChain final : IDXGISwapChain4
 {
+#if SUPPORT_D3D10
 	DXGISwapChain(D3D10Device *device, IDXGISwapChain  *original);
 	DXGISwapChain(D3D10Device *device, IDXGISwapChain1 *original);
+#endif // SUPPORT_D3D10
 	DXGISwapChain(D3D11Device *device, IDXGISwapChain  *original);
 	DXGISwapChain(D3D11Device *device, IDXGISwapChain1 *original);
+#if SUPPORT_D3D12
 	DXGISwapChain(D3D12CommandQueue *command_queue, IDXGISwapChain3 *original);
+#endif // SUPPORT_D3D12
 
 	DXGISwapChain(const DXGISwapChain &) = delete;
 	DXGISwapChain &operator=(const DXGISwapChain &) = delete;

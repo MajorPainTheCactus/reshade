@@ -8,6 +8,13 @@
 #include "input.hpp"
 #include <cassert>
 
+// VUGGER_ADDON
+#if !RESHADE_FX
+#pragma warning( push )
+#pragma warning( once : 4100 )
+#endif // RESHADE_FX
+// VUGGER_ADDON
+
 reshade::input::window_handle reshade::runtime::get_hwnd() const
 {
 	return _input != nullptr ? _input->get_window_handle() : nullptr;
@@ -957,3 +964,9 @@ void reshade::runtime::render_technique(api::effect_technique handle, api::comma
 	render_technique(*tech, cmd_list, back_buffer_resource, rtv, rtv_srgb);
 }
 #endif
+
+// VUGGER_ADDON
+#if !RESHADE_FX
+#pragma warning( pop )
+#endif // RESHADE_FX
+// VUGGER_ADDON

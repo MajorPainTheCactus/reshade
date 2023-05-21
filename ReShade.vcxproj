@@ -557,20 +557,41 @@
     <ClCompile Include="source\d2d1\d2d1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="source\d3d10\d3d10.cpp" />
-    <ClCompile Include="source\d3d10\d3d10_device.cpp" />
+    <ClCompile Include="source\d3d10\d3d10.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d10\d3d10_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d10\d3d10_impl_command_list.cpp">
       <DisableSpecificWarnings>4063;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="source\d3d10\d3d10_impl_command_queue.cpp" />
-    <ClCompile Include="source\d3d10\d3d10_impl_device.cpp" />
-    <ClCompile Include="source\d3d10\d3d10_impl_state_block.cpp" />
-    <ClCompile Include="source\d3d10\d3d10_impl_swapchain.cpp" />
-    <ClCompile Include="source\d3d10\d3d10_impl_type_convert.cpp" />
-    <ClCompile Include="source\d3d10\d3d10_resource.cpp" />
+    <ClCompile Include="source\d3d10\d3d10_impl_command_queue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d10\d3d10_impl_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d10\d3d10_impl_state_block.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d10\d3d10_impl_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d10\d3d10_impl_type_convert.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d10\d3d10_resource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d11\d3d11.cpp" />
-    <ClCompile Include="source\d3d11\d3d11on12.cpp" />
-    <ClCompile Include="source\d3d11\d3d11on12_device.cpp" />
+    <ClCompile Include="source\d3d11\d3d11on12.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d11\d3d11on12_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d11\d3d11_command_list.cpp" />
     <ClCompile Include="source\d3d11\d3d11_device.cpp" />
     <ClCompile Include="source\d3d11\d3d11_device_context.cpp" />
@@ -582,22 +603,54 @@
     <ClCompile Include="source\d3d11\d3d11_impl_state_block.cpp" />
     <ClCompile Include="source\d3d11\d3d11_impl_swapchain.cpp" />
     <ClCompile Include="source\d3d11\d3d11_impl_type_convert.cpp" />
-    <ClCompile Include="source\d3d12\d3d12.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_command_list.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_command_queue.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_command_queue_downlevel.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_descriptor_heap.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_device.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_device_downlevel.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_impl_command_list.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_impl_command_list_immediate.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_impl_command_queue.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_impl_device.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_impl_swapchain.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_impl_type_convert.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_pipeline_library.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_pix.cpp" />
-    <ClCompile Include="source\d3d12\d3d12_resource.cpp" />
+    <ClCompile Include="source\d3d12\d3d12.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_command_list.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_command_queue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_command_queue_downlevel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_descriptor_heap.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_device_downlevel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_impl_command_list.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_impl_command_list_immediate.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_impl_command_queue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_impl_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_impl_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_impl_type_convert.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_pipeline_library.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_pix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d12\d3d12_resource.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d9\d3d9.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>

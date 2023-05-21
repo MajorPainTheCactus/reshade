@@ -25,34 +25,36 @@ EXPORTS
 	; Direct3D9SetMaximizedWindowHwndOverride @22 NONAME PRIVATE
 	; Direct3D9SetVendorIDLieFor9on12 @23 NONAME PRIVATE
 	; Direct3D9EnableMaximizedWindowedModeShim PRIVATE
-	; // VUGGER_ADDON
 
 	; d3d10.dll
-	D3D10CreateDevice @4 PRIVATE
-	D3D10CreateDeviceAndSwapChain @5 PRIVATE
+	; D3D10CreateDevice @4 PRIVATE
+	; D3D10CreateDeviceAndSwapChain @5 PRIVATE
 
 	; d3d10_1.dll
-	D3D10CreateDevice1 PRIVATE
-	D3D10CreateDeviceAndSwapChain1 PRIVATE
+	; D3D10CreateDevice1 PRIVATE
+	; D3D10CreateDeviceAndSwapChain1 PRIVATE
+	; // VUGGER_ADDON
 
 	; d3d11.dll
 	D3D11CreateDevice PRIVATE
 	D3D11CreateDeviceAndSwapChain PRIVATE
-	D3D11On12CreateDevice PRIVATE
-
+	; D3D11On12CreateDevice PRIVATE
+	
+	; // VUGGER_ADDON
 	; d3d12.dll (Uses ordinals in d3d12.lib for 'D3D12CreateDevice' and 'D3D12GetDebugInterface')
-	D3D12CreateDevice @101 PRIVATE
-	D3D12GetDebugInterface @102 PRIVATE
-	D3D12CreateRootSignatureDeserializer @107 PRIVATE
-	D3D12CreateVersionedRootSignatureDeserializer @108 PRIVATE
-	D3D12EnableExperimentalFeatures @110 PRIVATE
-	D3D12GetInterface @111 PRIVATE
-	D3D12PIXEventsReplaceBlock PRIVATE
-	D3D12PIXGetThreadInfo PRIVATE
-	D3D12PIXNotifyWakeFromFenceSignal PRIVATE
-	D3D12PIXReportCounter PRIVATE
-	D3D12SerializeRootSignature PRIVATE
-	D3D12SerializeVersionedRootSignature PRIVATE
+	; D3D12CreateDevice @101 PRIVATE
+	; D3D12GetDebugInterface @102 PRIVATE
+	; D3D12CreateRootSignatureDeserializer @107 PRIVATE
+	; D3D12CreateVersionedRootSignatureDeserializer @108 PRIVATE
+	; D3D12EnableExperimentalFeatures @110 PRIVATE
+	; D3D12GetInterface @111 PRIVATE
+	; D3D12PIXEventsReplaceBlock PRIVATE
+	; D3D12PIXGetThreadInfo PRIVATE
+	; D3D12PIXNotifyWakeFromFenceSignal PRIVATE
+	; D3D12PIXReportCounter PRIVATE
+	; D3D12SerializeRootSignature PRIVATE
+	; D3D12SerializeVersionedRootSignature PRIVATE
+	; // VUGGER_ADDON
 
 	; dxgi.dll
 	CreateDXGIFactory PRIVATE
