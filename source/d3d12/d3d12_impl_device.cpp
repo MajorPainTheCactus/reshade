@@ -22,7 +22,7 @@ constexpr size_t heap_index_start = 24;
 #endif
 
 reshade::d3d12::device_impl::device_impl(ID3D12Device *device) :
-	api_object_impl(device),
+	api_object_impl(device, this),			// VUGGER_ADDON
 	_view_heaps {
 		descriptor_heap_cpu(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV),
 		descriptor_heap_cpu(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER),
@@ -208,10 +208,8 @@ bool reshade::d3d12::device_impl::check_format_support(api::format format, api::
 	return true;
 }
 
-bool reshade::d3d12::device_impl::create_sampler(const api::sampler_desc &desc, api::sampler *out_handle)
+std::unique_ptr<reshade::api::sampler> reshade::d3d12::device_impl::create_sampler(const api::sampler_desc &desc)			// VUGGER_ADDON
 {
-	*out_handle = { 0 };
-
 	D3D12_CPU_DESCRIPTOR_HANDLE descriptor_handle;
 	if (!_view_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER].allocate(descriptor_handle))
 		return false;
@@ -221,16 +219,18 @@ bool reshade::d3d12::device_impl::create_sampler(const api::sampler_desc &desc, 
 
 	_orig->CreateSampler(&internal_desc, descriptor_handle);
 
-	*out_handle = { descriptor_handle.ptr };
-	return true;
+	return std::make_unique<reshade::d3d12::sampler_impl>(this, desc, descriptor_handle);			// VUGGER_ADDON
 }
-void reshade::d3d12::device_impl::destroy_sampler(api::sampler handle)
+
+// VUGGER_ADDON
+void reshade::d3d12::device_impl::destroy_sampler(api::sampler *ptr)
 {
-	if (handle.handle == 0)
+	if (ptr == 0)
 		return;
 
-	_view_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER].free({ static_cast<SIZE_T>(handle.handle) });
+	_view_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER].free({ reinterpret_cast<SIZE_T>(ptr) });
 }
+// VUGGER_ADDON
 
 bool reshade::d3d12::device_impl::create_resource(const api::resource_desc &desc, const api::subresource_data *initial_data, api::resource_usage initial_state, api::resource *out_handle, HANDLE *shared_handle)
 {
@@ -1141,7 +1141,7 @@ void reshade::d3d12::device_impl::update_descriptor_sets(uint32_t count, const a
 			_orig->CopyDescriptors(1, &dst_range_start, &update.count, update.count, src_handles.data(), &src_range_size, heap_type);
 #else
 			static_assert(
-				sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) == sizeof(api::sampler) &&
+				sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) == sizeof(api::sampler*) &&			// VUGGER_ADDON
 				sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) == sizeof(api::resource_view));
 
 			std::vector<UINT> src_range_sizes(update.count, 1);

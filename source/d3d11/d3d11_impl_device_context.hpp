@@ -15,7 +15,8 @@ namespace reshade::d3d11
 		command_list_impl(device_impl *device, ID3D11CommandList *cmd_list);
 		virtual ~command_list_impl();		// VUGGER_ADDON:
 
-		api::device *get_device() final;
+		//api::device *get_device() final;
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }	// VUGGER_ADDON:
 
 		void barrier(uint32_t, const api::resource *, const api::resource_usage *, const api::resource_usage *) final { assert(false); }
 
@@ -121,10 +122,17 @@ namespace reshade::d3d11
 		//void begin_debug_event(const char *, const float[4]) final;
 		//void end_debug_event() final;
 		//void insert_debug_marker(const char *, const float[4]) final;
+
+		reshade::api::sampler *const *get_vs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_hs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_ds_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_gs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_ps_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_cs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
 		// VUGGER_ADDON: END
 
 	private:
-		device_impl *const _device_impl;
+		//device_impl *const _device_impl;
 		
 		// VUGGER_ADDON: BEGIN
 		com_ptr<ID3DUserDefinedAnnotation> _annotations;
@@ -142,7 +150,8 @@ namespace reshade::d3d11
 		device_context_impl(device_impl *device, ID3D11DeviceContext *context);
 		~device_context_impl();
 
-		api::device *get_device() final;
+		//api::device *get_device() final;
+		device_impl *get_device() { return static_cast<device_impl *>(api::command_queue::_device); }	// VUGGER_ADDON:
 
 		api::command_queue_type get_type() const final { return api::command_queue_type::graphics | api::command_queue_type::compute | api::command_queue_type::copy; }
 
@@ -163,7 +172,7 @@ namespace reshade::d3d11
 		void bind_viewports(uint32_t first, uint32_t count, const api::viewport *viewports) final;
 		void bind_scissor_rects(uint32_t first, uint32_t count, const api::rect *rects) final;
 
-		void bind_samplers(api::shader_stage stages, uint32_t first, uint32_t count, const api::sampler *samplers);
+		void bind_samplers(api::shader_stage stages, uint32_t first, uint32_t count, api::sampler *const *samplers);			// VUGGER_ADDON
 		void bind_shader_resource_views(api::shader_stage stages, uint32_t first, uint32_t count, const api::resource_view *views);
 		void bind_unordered_access_views(api::shader_stage stages, uint32_t first, uint32_t count, const api::resource_view *views);
 		void bind_constant_buffers(api::shader_stage stages, uint32_t first, uint32_t count, const api::buffer_range *buffer_ranges);
@@ -211,7 +220,7 @@ namespace reshade::d3d11
 		// VUGGER_ADDON: END
 
 	private:
-		device_impl *const _device_impl;
+		//device_impl *const _device_impl;						// VUGGER_ADDON
 		com_ptr<ID3DUserDefinedAnnotation> _annotations;
 
 		UINT _push_constants_size = 0;

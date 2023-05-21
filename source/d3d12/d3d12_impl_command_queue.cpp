@@ -10,12 +10,12 @@
 extern void encode_pix3blob(UINT64(&pix3blob)[64], const char *label, const float color[4]);
 
 reshade::d3d12::command_queue_impl::command_queue_impl(device_impl *device, ID3D12CommandQueue *queue) :
-	api_object_impl(queue),
-	_device_impl(device)
+	api_object_impl(queue, device)		// VUGGER_ADDON
+	//_device_impl(device)
 {
 	// Register queue to device
 	// Technically need to lock here, since queues may be created on multiple threads simultaneously via 'ID3D12Device::CreateCommandQueue', but it is unlikely an application actually does that
-	_device_impl->_queues.push_back(this);
+	get_device()->_queues.push_back(this);		// VUGGER_ADDON
 
 	// Only create an immediate command list for graphics queues (since the implemented commands do not work on other queue types)
 	if (queue->GetDesc().Type == D3D12_COMMAND_LIST_TYPE_DIRECT)
@@ -34,7 +34,7 @@ reshade::d3d12::command_queue_impl::command_queue_impl(device_impl *device, ID3D
 	// Create auto-reset event and fence for wait for idle synchronization
 	_wait_idle_fence_event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	if (_wait_idle_fence_event == nullptr ||
-		FAILED(_device_impl->_orig->CreateFence(_wait_idle_fence_value, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_wait_idle_fence))))
+		FAILED(get_device()->_orig->CreateFence(_wait_idle_fence_value, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_wait_idle_fence))))			// VUGGER_ADDON
 	{
 		LOG(ERROR) << "Failed to create wait for idle resources for queue " << _orig << '!';
 	}
@@ -55,13 +55,20 @@ reshade::d3d12::command_queue_impl::~command_queue_impl()
 	delete _immediate_cmd_list;
 
 	// Unregister queue from device
-	_device_impl->_queues.erase(std::find(_device_impl->_queues.begin(), _device_impl->_queues.end(), this));
+	get_device()->_queues.erase(std::find(get_device()->_queues.begin(), get_device()->_queues.end(), this));			// VUGGER_ADDON
 }
 
-reshade::api::device *reshade::d3d12::command_queue_impl::get_device()
+// VUGGER_ADDON
+//reshade::api::device *reshade::d3d12::command_queue_impl::get_device()
+//{
+//	return _device_impl;
+//}
+
+reshade::d3d12::device_impl *reshade::d3d12::command_queue_impl::get_device()
 {
-	return _device_impl;
+	return static_cast<reshade::d3d12::device_impl *>(_device);
 }
+// VUGGER_ADDON
 
 reshade::api::command_queue_type reshade::d3d12::command_queue_impl::get_type() const
 {

@@ -11,90 +11,6 @@
 
 namespace reshade::d3d11
 {
-	class device_impl;
-
-	// VUGGER_ADDON:
-	class shader_resource_view_impl : public api::api_object_impl<ID3D11ShaderResourceView *, api::shader_resource_view>
-	{
-	public:
-		explicit shader_resource_view_impl(device_impl *device, ID3D11ShaderResourceView *shader_resource_view)
-			: api_object_impl(shader_resource_view), _device_impl(device)
-		{
-		}
-		virtual ~shader_resource_view_impl() {}
-
-		virtual void override_view(api::resource_view view)
-		{
-			_orig = reinterpret_cast<ID3D11ShaderResourceView*>(view.handle);
-		}
-
-		api::device *get_device() final;
-
-	private:
-		device_impl *const _device_impl = nullptr;
-	};
-
-	class unordered_access_view_impl : public api::api_object_impl<ID3D11UnorderedAccessView *, api::unordered_access_view>
-	{
-	public:
-		explicit unordered_access_view_impl(device_impl *device, ID3D11UnorderedAccessView *unordered_access_view)
-			: api_object_impl(unordered_access_view), _device_impl(device)
-		{
-		}
-		virtual ~unordered_access_view_impl() {}	
-
-		virtual void override_view(api::resource_view view)
-		{
-			_orig = reinterpret_cast<ID3D11UnorderedAccessView *>(view.handle);
-		}
-
-		api::device *get_device() final;
-
-	private:
-		device_impl *const _device_impl = nullptr;
-	};
-
-	class render_target_view_impl : public api::api_object_impl<ID3D11RenderTargetView *, api::render_target_view>
-	{
-	public:
-		explicit render_target_view_impl(device_impl *device, ID3D11RenderTargetView *render_target_view)
-			: api_object_impl(render_target_view), _device_impl(device)
-		{
-		}
-		virtual ~render_target_view_impl() {}
-
-		virtual void override_view(api::resource_view view)
-		{
-			_orig = reinterpret_cast<ID3D11RenderTargetView *>(view.handle);
-		}
-
-		api::device *get_device() final;
-
-	private:
-		device_impl *const _device_impl = nullptr;
-	};
-
-	class depth_stencil_view_impl : public api::api_object_impl<ID3D11DepthStencilView *, api::depth_stencil_view>
-	{
-	public:
-		explicit depth_stencil_view_impl(device_impl *device, ID3D11DepthStencilView *depth_stencil_view)
-			: api_object_impl(depth_stencil_view), _device_impl(device)
-		{
-		}
-		virtual ~depth_stencil_view_impl() {}
-
-		virtual void override_view(api::resource_view view)
-		{
-			_orig = reinterpret_cast<ID3D11DepthStencilView *>(view.handle);
-		}
-
-		api::device *get_device() final;
-
-	private:
-		device_impl *const _device_impl = nullptr;
-	};
-	// VUGGER_ADDON:
-
 	class device_impl : public api::api_object_impl<ID3D11Device *, api::device>
 	{
 		friend class swapchain_impl;
@@ -109,8 +25,8 @@ namespace reshade::d3d11
 		bool check_capability(api::device_caps capability) const final;
 		bool check_format_support(api::format format, api::resource_usage usage) const final;
 
-		bool create_sampler(const api::sampler_desc &desc, api::sampler *out_handle) final;
-		void destroy_sampler(api::sampler handle) final;
+		std::unique_ptr<reshade::api::sampler> create_sampler(const api::sampler_desc &desc) final;	// VUGGER_ADDON
+		void destroy_sampler(api::sampler *ptr) final;										// VUGGER_ADDON
 
 		bool create_resource(const api::resource_desc &desc, const api::subresource_data *initial_data, api::resource_usage initial_state, api::resource *out_handle, HANDLE *shared_handle = nullptr) final;
 		void destroy_resource(api::resource handle) final;
@@ -169,4 +85,86 @@ namespace reshade::d3d11
 		void set_resource_data(api::resource handle, const uint8_t (&guid)[16], uint32_t size, void* data) final;
 		void get_resource_data(api::resource handle, const uint8_t (&guid)[16], uint32_t* size, void* data) final;
 	};
+
+	// VUGGER_ADDON:
+	struct shader_resource_view_impl : public api::api_object_impl<ID3D11ShaderResourceView *, api::shader_resource_view>
+	{
+		explicit shader_resource_view_impl(device_impl *device, const reshade::api::resource_view_desc &desc, ID3D11ShaderResourceView *shader_resource_view)
+			: api_object_impl(shader_resource_view, device, desc)
+		{
+		}
+		virtual ~shader_resource_view_impl() {}
+
+		virtual void override(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11ShaderResourceView *>(view.handle);
+		}
+
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }
+	};
+
+	struct unordered_access_view_impl : public api::api_object_impl<ID3D11UnorderedAccessView *, api::unordered_access_view>
+	{
+		explicit unordered_access_view_impl(device_impl *device, const reshade::api::resource_view_desc &desc, ID3D11UnorderedAccessView *unordered_access_view)
+			: api_object_impl(unordered_access_view, device, desc)
+		{
+		}
+		virtual ~unordered_access_view_impl() {}
+
+		virtual void override(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11UnorderedAccessView *>(view.handle);
+		}
+
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }
+	};
+
+	struct render_target_view_impl : public api::api_object_impl<ID3D11RenderTargetView *, api::render_target_view>
+	{
+		explicit render_target_view_impl(device_impl *device, const reshade::api::resource_view_desc &desc, ID3D11RenderTargetView *render_target_view)
+			: api_object_impl(render_target_view, device, desc)
+		{
+		}
+		virtual ~render_target_view_impl() {}
+
+		virtual void override(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11RenderTargetView *>(view.handle);
+		}
+
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }
+	};
+
+	struct depth_stencil_view_impl : public api::api_object_impl<ID3D11DepthStencilView *, api::depth_stencil_view>
+	{
+		explicit depth_stencil_view_impl(device_impl *device, const reshade::api::resource_view_desc &desc, ID3D11DepthStencilView *depth_stencil_view)
+			: api_object_impl(depth_stencil_view, device, desc)
+		{
+		}
+		virtual ~depth_stencil_view_impl() {}
+
+		virtual void override(api::resource_view view)
+		{
+			_orig = reinterpret_cast<ID3D11DepthStencilView *>(view.handle);
+		}
+
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }
+	};
+
+	struct sampler_impl : public api::api_object_impl<ID3D11SamplerState *, api::sampler>
+	{
+		explicit sampler_impl(device_impl *device, const reshade::api::sampler_desc &desc, ID3D11SamplerState *sampler)
+			: api_object_impl(sampler, device, desc)
+		{
+		}
+		virtual ~sampler_impl() {}
+
+		virtual void override(api::sampler *sampler)
+		{
+			_orig = reinterpret_cast<ID3D11SamplerState *>(reinterpret_cast<sampler_impl *>(sampler));
+		}
+
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }
+	};
+	// VUGGER_ADDON:
 }

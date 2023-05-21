@@ -20,6 +20,15 @@ namespace reshade::d3d12
 		bool flush();
 		bool flush_and_wait();
 
+		// VUGGER_ADDON
+		reshade::api::sampler *const *get_vs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_hs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_ds_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_gs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_ps_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		reshade::api::sampler *const *get_cs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+		// VUGGER_ADDON
+
 	private:
 		ID3D12CommandQueue *const _parent_queue;
 		UINT32 _cmd_index = 0;

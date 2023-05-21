@@ -551,7 +551,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::SetComputeRootDescriptorTable(U
 	if (!reshade::has_addon_event<reshade::addon_event::bind_descriptor_sets>())
 		return;
 
-	const reshade::api::descriptor_set set = _device_impl->convert_to_descriptor_set(BaseDescriptor);
+	const reshade::api::descriptor_set set = get_device()->convert_to_descriptor_set(BaseDescriptor);			// VUGGER_ADDON
 	reshade::invoke_addon_event<reshade::addon_event::bind_descriptor_sets>(
 		this,
 		reshade::api::shader_stage::all_compute,
@@ -568,7 +568,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::SetGraphicsRootDescriptorTable(
 	if (!reshade::has_addon_event<reshade::addon_event::bind_descriptor_sets>())
 		return;
 
-	const reshade::api::descriptor_set set = _device_impl->convert_to_descriptor_set(BaseDescriptor);
+	const reshade::api::descriptor_set set = get_device()->convert_to_descriptor_set(BaseDescriptor);			// VUGGER_ADDON
 	reshade::invoke_addon_event<reshade::addon_event::bind_descriptor_sets>(
 		this,
 		reshade::api::shader_stage::all_graphics,
@@ -642,7 +642,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::SetComputeRootConstantBufferVie
 		return;
 
 	reshade::api::buffer_range buffer_range;
-	if (!_device_impl->resolve_gpu_address(BufferLocation, &buffer_range.buffer, &buffer_range.offset))
+	if (!get_device()->resolve_gpu_address(BufferLocation, &buffer_range.buffer, &buffer_range.offset))			// VUGGER_ADDON
 		return;
 	buffer_range.size = UINT64_MAX;
 
@@ -663,7 +663,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::SetGraphicsRootConstantBufferVi
 		return;
 
 	reshade::api::buffer_range buffer_range;
-	if (!_device_impl->resolve_gpu_address(BufferLocation, &buffer_range.buffer, &buffer_range.offset))
+	if (!get_device()->resolve_gpu_address(BufferLocation, &buffer_range.buffer, &buffer_range.offset))			// VUGGER_ADDON
 		return;
 	buffer_range.size = UINT64_MAX;
 
@@ -705,7 +705,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::IASetIndexBuffer(const D3D12_IN
 
 	if (pView != nullptr)
 	{
-		if (!_device_impl->resolve_gpu_address(pView->BufferLocation, &buffer, &offset))
+		if (!get_device()->resolve_gpu_address(pView->BufferLocation, &buffer, &offset))				// VUGGER_ADDON
 			return;
 		index_size = pView->Format == DXGI_FORMAT_R16_UINT ? 2 : 4;
 	}
@@ -728,7 +728,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::IASetVertexBuffers(UINT StartSl
 	{
 		if (pViews != nullptr)
 		{
-			if (!_device_impl->resolve_gpu_address(pViews[i].BufferLocation, &buffers[i], &offsets[i]))
+			if (!get_device()->resolve_gpu_address(pViews[i].BufferLocation, &buffers[i], &offsets[i]))			// VUGGER_ADDON
 				return;
 			strides[i] = pViews[i].StrideInBytes;
 		}
@@ -757,7 +757,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::SOSetTargets(UINT StartSlot, UI
 	{
 		if (pViews != nullptr)
 		{
-			if (!_device_impl->resolve_gpu_address(pViews[i].BufferLocation, &buffers[i], &offsets[i]))
+			if (!get_device()->resolve_gpu_address(pViews[i].BufferLocation, &buffers[i], &offsets[i]))		// VUGGER_ADDON
 				return;
 			max_sizes[i] = (pViews[i].SizeInBytes != 0) ? pViews[i].SizeInBytes : UINT64_MAX;
 		}
@@ -813,7 +813,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearRenderTargetView(D3D12_CPU
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource *pResource, const UINT Values[4], UINT NumRects, const D3D12_RECT *pRects)
 {
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	ViewCPUHandle = _device_impl->convert_to_original_cpu_descriptor_handle(ViewCPUHandle);
+	ViewCPUHandle = get_device()->convert_to_original_cpu_descriptor_handle(ViewCPUHandle);			// VUGGER_ADDON
 #endif
 
 #if RESHADE_ADDON
@@ -829,7 +829,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewUint(D3
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearUnorderedAccessViewFloat(D3D12_GPU_DESCRIPTOR_HANDLE ViewGPUHandleInCurrentHeap, D3D12_CPU_DESCRIPTOR_HANDLE ViewCPUHandle, ID3D12Resource *pResource, const FLOAT Values[4], UINT NumRects, const D3D12_RECT *pRects)
 {
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
-	ViewCPUHandle = _device_impl->convert_to_original_cpu_descriptor_handle(ViewCPUHandle);
+	ViewCPUHandle = get_device()->convert_to_original_cpu_descriptor_handle(ViewCPUHandle);			// VUGGER_ADDON
 #endif
 
 #if RESHADE_ADDON

@@ -10,7 +10,7 @@
 #include <algorithm>
 
 reshade::d3d10::device_impl::device_impl(ID3D10Device1 *device) :
-	api_object_impl(device)
+	api_object_impl(device, this)		// VUGGER_ADDON
 {
 #if RESHADE_ADDON
 	load_addons();
@@ -114,7 +114,8 @@ bool reshade::d3d10::device_impl::check_format_support(api::format format, api::
 	return true;
 }
 
-bool reshade::d3d10::device_impl::create_sampler(const api::sampler_desc &desc, api::sampler *out_handle)
+// VUGGER_ADDON
+std::unique_ptr<reshade::api::sampler> reshade::d3d10::device_impl::create_sampler(const api::sampler_desc &desc)
 {
 	D3D10_SAMPLER_DESC internal_desc = {};
 	convert_sampler_desc(desc, internal_desc);
@@ -122,20 +123,17 @@ bool reshade::d3d10::device_impl::create_sampler(const api::sampler_desc &desc, 
 	if (com_ptr<ID3D10SamplerState> object;
 		SUCCEEDED(_orig->CreateSamplerState(&internal_desc, &object)))
 	{
-		*out_handle = to_handle(object.release());
-		return true;
+		return std::make_unique<reshade::d3d10::sampler_impl>(this, desc, object.release());
 	}
-	else
-	{
-		*out_handle = { 0 };
-		return false;
-	}
+
+	return nullptr;
 }
-void reshade::d3d10::device_impl::destroy_sampler(api::sampler handle)
+void reshade::d3d10::device_impl::destroy_sampler(api::sampler* ptr)	
 {
-	if (handle.handle != 0)
-		reinterpret_cast<IUnknown *>(handle.handle)->Release();
+	if (ptr != nullptr)
+		reinterpret_cast<IUnknown *>(reinterpret_cast<reshade::d3d10::sampler_impl*>(ptr))->Release();
 }
+// VUGGER_ADDON
 
 static bool get_shared_resource(ID3D10Resource *object, HANDLE *shared_handle)
 {

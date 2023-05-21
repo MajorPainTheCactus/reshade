@@ -24,8 +24,10 @@ namespace reshade::d3d10
 		bool check_capability(api::device_caps capability) const final;
 		bool check_format_support(api::format format, api::resource_usage usage) const final;
 
-		bool create_sampler(const api::sampler_desc &desc, api::sampler *out_handle) final;
-		void destroy_sampler(api::sampler handle) final;
+		// VUGGER_ADDON:
+		std::unique_ptr<reshade::api::sampler> create_sampler(const api::sampler_desc &desc) final;
+		void destroy_sampler(api::sampler* ptr) final;
+		// VUGGER_ADDON:
 
 		bool create_resource(const api::resource_desc &desc, const api::subresource_data *initial_data, api::resource_usage initial_state, api::resource *out_handle, HANDLE *shared_handle = nullptr) final;
 		void destroy_resource(api::resource handle) final;
@@ -81,7 +83,7 @@ namespace reshade::d3d10
 		void set_resource_data(api::resource handle, const uint8_t (&guid)[16], uint32_t size, void* data) final;
 		void get_resource_data(api::resource handle, const uint8_t (&guid)[16], uint32_t* size, void* data) final;
 
-		api::device *get_device() final { return this; }
+		//api::device *get_device() final { return this; }		// VUGGER_ADDON
 
 		api::command_queue_type get_type() const final { return api::command_queue_type::graphics | api::command_queue_type::copy; }
 
@@ -152,4 +154,25 @@ namespace reshade::d3d10
 		UINT _push_constants_size = 0;
 		com_ptr<ID3D10Buffer> _push_constants;
 	};
+
+	// VUGGER_ADDON:
+	class sampler_impl : public api::api_object_impl<ID3D10SamplerState *, api::sampler>
+	{
+	public:
+		explicit sampler_impl(device_impl *device, const reshade::api::sampler_desc &desc, ID3D10SamplerState *sampler)
+			: api_object_impl(sampler, device, desc)
+		{
+		}
+		virtual ~sampler_impl() {}
+
+		virtual void override(api::sampler *sampler)
+		{
+			_orig = reinterpret_cast<ID3D10SamplerState *>(reinterpret_cast<sampler_impl *>(sampler));
+		}
+
+		device_impl *get_device() { return static_cast<device_impl *>(_device); }
+
+	private:
+	};
+	// VUGGER_ADDON:
 }

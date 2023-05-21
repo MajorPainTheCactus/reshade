@@ -42,7 +42,7 @@ namespace reshade
 		/// <summary>
 		/// Gets the parent device for this effect runtime.
 		/// </summary>
-		api::device *get_device() final { return _device; }
+		//api::device *get_device() final { return _device; }	// VUGGER_ADDON:
 
 		/// <summary>
 		/// Gets the main graphics command queue associated with this effect runtime.
@@ -288,7 +288,7 @@ namespace reshade
 		void on_present();
 		void on_start_frame();
 
-		api::device *const _device;
+		//api::device *const _device;  // VUGGER_ADDON:
 		api::command_queue *const _graphics_queue;
 		unsigned int _width = 0;
 		unsigned int _height = 0;
@@ -441,7 +441,7 @@ namespace reshade
 #endif
 		api::pipeline _copy_pipeline = {};
 		api::pipeline_layout _copy_pipeline_layout = {};
-		api::sampler  _copy_sampler_state = {};
+		std::unique_ptr<api::sampler> _copy_sampler_state;		// VUGGER_ADDON
 
 		api::resource _back_buffer_resolved = {};
 		api::resource_view _back_buffer_resolved_srv = {};
@@ -488,9 +488,9 @@ namespace reshade
 
 #if RESHADE_GUI
 		void init_gui();
-		void init_gui_vr();
+		void init_gui_vr() {}	// VUGGER_ADDON
 		void deinit_gui();
-		void deinit_gui_vr();
+		void deinit_gui_vr() {}	// VUGGER_ADDON
 		void build_font_atlas();
 
 		void load_config_gui(const ini_file &config);
@@ -500,7 +500,7 @@ namespace reshade
 		void save_custom_style() const;
 
 		void draw_gui();
-		void draw_gui_vr();
+		void draw_gui_vr() {}	// VUGGER_ADDON
 
 #if RESHADE_FX
 		void draw_gui_home();
@@ -551,7 +551,7 @@ namespace reshade
 
 		api::pipeline _imgui_pipeline = {};
 		api::pipeline_layout _imgui_pipeline_layout = {};
-		api::sampler  _imgui_sampler_state = {};
+		std::unique_ptr<api::sampler> _imgui_sampler_state;	// VUGGER_ADDON
 
 		int _imgui_num_indices[4] = {};
 		api::resource _imgui_indices[4] = {};

@@ -12,176 +12,12 @@ struct D3D11On12Device;
 struct D3D11DeviceContext;
 
 // VUGGER_ADDON
-#include <atomic>
-#include <cstdlib>
-#include <array>
-
-template <typename Type, std::size_t BlockSize = 64>
-class block_allocator
-{
-public:
-	static constexpr std::size_t k_memory_allocation_alignment = alignof(Type);
-
-	block_allocator()
-	{
-		static_assert(sizeof(Type) >= sizeof(node), "Type must be larger than node");
-
-		m_blocklist = allocate_aligned<node>();
-		m_blocklist->next.store(nullptr);
-
-		m_freelist = allocate_aligned<node>();
-		m_freelist->next.store(nullptr);
-	}
-
-	~block_allocator()
-	{
-		delete_aligned_list(m_blocklist);
-		//delete_aligned_list(m_freelist);
-#if defined(_MSC_VER)
-		_aligned_free(m_freelist);
-#else
-		std::free(m_freelist);
-#endif
-	}
-
-	Type *allocate()
-	{
-		node *element = pop_atomic(m_freelist);
-
-		if (element == nullptr) {
-			std::size_t sub_block_size = ((sizeof(Type) - 1) / k_memory_allocation_alignment + 1) * k_memory_allocation_alignment;
-
-			node *blockptr = allocate_aligned<node>((sub_block_size * BlockSize) + k_memory_allocation_alignment);
-			push_atomic(m_blocklist, blockptr);
-
-			std::uint8_t *block = reinterpret_cast<std::uint8_t *>(blockptr) + k_memory_allocation_alignment;
-
-			for (std::size_t i = BlockSize - 1; i > 0; --i)
-			{
-				node *sub_block = reinterpret_cast<node *>(block + (sub_block_size * i));
-				push_atomic(m_freelist, sub_block);
-			}
-
-			element = pop_atomic(m_freelist);
-		}
-
-		assert(element);
-		return reinterpret_cast<Type *>(element);
-	}
-
-	void free(Type *element)
-	{
-		push_atomic(m_freelist, reinterpret_cast<node *>(element));
-	}
-
-	bool contains(const Type *ptr) const
-	{
-		std::uint8_t *byte_ptr = reinterpret_cast<std::uint8_t *>(const_cast<Type *>(ptr));
-		node *block = m_blocklist->next.load();
-
-		while (block)
-		{
-			std::uint8_t *block_start = reinterpret_cast<std::uint8_t *>(block) + k_memory_allocation_alignment;
-			std::size_t sub_block_size = ((sizeof(Type) - 1) / k_memory_allocation_alignment + 1) * k_memory_allocation_alignment;
-
-			std::uint8_t *block_end = block_start + (sub_block_size * BlockSize);
-
-			if (byte_ptr >= block_start && byte_ptr < block_end)
-			{
-				std::uintptr_t offset = byte_ptr - block_start;
-				if (offset % sub_block_size == 0)
-				{
-					return true;
-				}
-			}
-
-			block = block->next.load();
-		}
-
-		return false;
-	}
-
-protected:
-	struct node
-	{
-		std::atomic<node *> next;
-	};
-
-	node *m_freelist;
-	node *m_blocklist;
-
-	template <typename T>
-	static T *allocate_aligned(std::size_t size = sizeof(T))
-	{
-#if defined(_MSC_VER)
-		return reinterpret_cast<T*>(_aligned_malloc(size, k_memory_allocation_alignment));
-#else
-		return reinterpret_cast<T*>(std::aligned_alloc(k_memory_allocation_alignment, size));
-#endif
-	}
-
-	static void delete_aligned_list(node *list)
-	{
-		node *current = list->next.load();
-		while (current) {
-			node *next = current->next.load();
-#if defined(_MSC_VER)
-			_aligned_free(current);
-#else
-			std::free(current);
-#endif
-			current = next;
-		}
-
-#if defined(_MSC_VER)
-		_aligned_free(list);
-#else
-		std::free(list);
-#endif
-	}
-
-	static void push_atomic(node *head, node *element)
-	{
-		node *next = head->next.load();
-		do {
-			element->next.store(next);
-		} while (!head->next.compare_exchange_weak(next, element));
-	}
-
-	static node *pop_atomic(node *head)
-	{
-		node *next = head->next.load();
-		node *desired;
-		do
-		{
-			if (next == nullptr)
-			{
-				return nullptr;
-			}
-			desired = next->next.load();
-		} while (!head->next.compare_exchange_weak(next, desired));
-
-		return next;
-	}
-};
-
-#define DECLARE_MEM(_CLASS_, _BLOCK_SIZE_) \
-protected: \
-	static block_allocator<_CLASS_, _BLOCK_SIZE_>	ms_allocator; \
-public: \
-	inline static void* operator new (std::size_t) { return ms_allocator.allocate(); } \
-	inline static void* operator new (std::size_t, void* ptr) { return ptr; } \
-	inline static void operator delete (void* ptr) { if(ptr) ms_allocator.free(static_cast<_CLASS_*>(ptr)); } \
-	inline static bool contains(void *ptr) { return ptr ? ms_allocator.contains(static_cast<_CLASS_*>(ptr)) : false; }
-
-#define DECLARE_MEM_STATIC(_CLASS_, _BLOCK_SIZE_) inline block_allocator<_CLASS_, _BLOCK_SIZE_>	_CLASS_::ms_allocator; 
-
 struct DECLSPEC_UUID("3FF202D4-AC63-4AF0-9D74-0F69ADC521FA") D3D11ShaderResourceView final : ID3D11ShaderResourceView1, public reshade::d3d11::shader_resource_view_impl
 {
 	DECLARE_MEM(D3D11ShaderResourceView, 4096)
 
-	D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView * original);
-	D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView1 * original);
+	D3D11ShaderResourceView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11ShaderResourceView * original);		// VUGGER_ADDON
+	D3D11ShaderResourceView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11ShaderResourceView1 * original);	// VUGGER_ADDON
 
 	#pragma region IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
@@ -245,8 +81,8 @@ struct DECLSPEC_UUID("ED73DC39-8A00-4264-B6B5-E6DAABBE79B5") D3D11UnorderedAcces
 {
 	DECLARE_MEM(D3D11UnorderedAccessView, 256)
 
-	D3D11UnorderedAccessView(struct D3D11Device *device, ID3D11UnorderedAccessView * original);
-	D3D11UnorderedAccessView(struct D3D11Device *device, ID3D11UnorderedAccessView1 *original);
+	D3D11UnorderedAccessView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11UnorderedAccessView * original);		// VUGGER_ADDON
+	D3D11UnorderedAccessView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11UnorderedAccessView1 *original);		// VUGGER_ADDON
 
 	#pragma region IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
@@ -310,8 +146,8 @@ struct DECLSPEC_UUID("32ED0AD5-5462-4AC6-BA63-4B7641FE1B3E") D3D11RenderTargetVi
 {
 	DECLARE_MEM(D3D11RenderTargetView, 256)
 
-	D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView * original);
-	D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView1 *original);
+	D3D11RenderTargetView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11RenderTargetView * original);		// VUGGER_ADDON
+	D3D11RenderTargetView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11RenderTargetView1 *original);		// VUGGER_ADDON
 
 	#pragma region IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
@@ -374,7 +210,7 @@ struct DECLSPEC_UUID("E12919C2-54FA-4FB9-9938-6DC0F3257008") D3D11DepthStencilVi
 {
 	DECLARE_MEM(D3D11DepthStencilView, 256)
 
-	D3D11DepthStencilView(struct D3D11Device *device, ID3D11DepthStencilView * original);
+	D3D11DepthStencilView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11DepthStencilView * original);			// VUGGER_ADDON
 
 	#pragma region IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
@@ -429,6 +265,62 @@ struct DECLSPEC_UUID("E12919C2-54FA-4FB9-9938-6DC0F3257008") D3D11DepthStencilVi
 	//ID3D11DepthStencilView *_orig = nullptr;
 };
 DECLARE_MEM_STATIC(D3D11DepthStencilView, 256)
+
+struct DECLSPEC_UUID("FC08B47C-A36C-408A-A5E7-A707527E0FF1") D3D11SamplerState final : ID3D11SamplerState, public reshade::d3d11::sampler_impl
+{
+	DECLARE_MEM(D3D11SamplerState, 32)
+
+	D3D11SamplerState(struct D3D11Device *device, const reshade::api::sampler_desc &desc, ID3D11SamplerState * original);
+
+	#pragma region IUnknown
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
+	{
+		if (ppvObj == nullptr)
+			return E_POINTER;
+
+		if (check_and_upgrade_interface(riid))
+		{
+			AddRef();
+			*ppvObj = this;
+			return S_OK;
+		}
+
+		return _orig->QueryInterface(riid, ppvObj);
+	}
+	ULONG   STDMETHODCALLTYPE AddRef() override final
+	{
+		_orig->AddRef();
+		return InterlockedIncrement(&_ref);
+	}
+	ULONG   STDMETHODCALLTYPE Release() override final;
+	#pragma endregion
+	#pragma region ID3D11DeviceChild
+	void    STDMETHODCALLTYPE GetDevice(ID3D11Device **ppDevice) override final;
+	HRESULT STDMETHODCALLTYPE GetPrivateData(REFGUID guid, UINT *pDataSize, void *pData) override final { return _orig->GetPrivateData(guid, pDataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateData(REFGUID guid, UINT DataSize, const void *pData) override final { return _orig->SetPrivateData(guid, DataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(REFGUID guid, const IUnknown *pData) override final { return _orig->SetPrivateDataInterface(guid, pData); }
+	#pragma endregion
+	#pragma region ID3D11SamplerState
+	void STDMETHODCALLTYPE GetDesc(D3D11_SAMPLER_DESC *pDesc) override final { _orig->GetDesc(pDesc); }
+	#pragma endregion
+
+	bool check_and_upgrade_interface(REFIID riid)
+	{
+		if (riid == __uuidof(this) ||
+			riid == __uuidof(IUnknown) ||
+			riid == __uuidof(ID3D11DeviceChild) ||
+			riid == __uuidof(ID3D11SamplerState))
+			return true;
+
+		return false;
+	}
+
+	ULONG _ref = 1;
+	unsigned int _interface_version = 0;
+	D3D11Device *const _device = nullptr;
+	//ID3D11SamplerState *_orig = nullptr;
+};
+DECLARE_MEM_STATIC(D3D11SamplerState, 32)
 // VUGGER_ADDON
 
 struct DECLSPEC_UUID("72299288-2C68-4AD8-945D-2BFB5AA9C609") D3D11Device final : DXGIDevice, ID3D11Device5, public reshade::d3d11::device_impl

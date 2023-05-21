@@ -37,6 +37,8 @@ namespace reshade::api
 	/// </summary>
 	RESHADE_DEFINE_INTERFACE_WITH_BASE(effect_runtime, swapchain)
 	{
+		effect_runtime(device* device) : swapchain(device) {}		// VUGGER_ADDON:
+
 		/// <summary>
 		/// Gets the main graphics command queue associated with this effect runtime.
 		/// This may potentially be different from the presentation queue and should be used to execute graphics commands on.

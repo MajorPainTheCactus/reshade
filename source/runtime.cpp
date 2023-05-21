@@ -167,7 +167,8 @@ static inline int format_color_bit_depth(reshade::api::format value)
 #endif
 
 reshade::runtime::runtime(api::device *device, api::command_queue *graphics_queue) :
-	_device(device),
+	//_device(device),				// VUGGER_ADDON
+	effect_runtime(device),
 	_graphics_queue(graphics_queue),
 	_start_time(std::chrono::high_resolution_clock::now()),
 	_last_present_time(_start_time),
@@ -299,9 +300,10 @@ bool reshade::runtime::on_init(input::window_handle window)
 			subobjects.push_back({ api::pipeline_subobject_type::vertex_shader, 1, &vs_desc });
 			subobjects.push_back({ api::pipeline_subobject_type::pixel_shader, 1, &ps_desc });
 
+			_copy_sampler_state = _device->create_sampler(sampler_desc);			// VUGGER_ADDON
 			if (!_device->create_pipeline_layout(2, layout_params, &_copy_pipeline_layout) ||
 				!_device->create_pipeline(_copy_pipeline_layout, static_cast<uint32_t>(subobjects.size()), subobjects.data(), &_copy_pipeline) ||
-				!_device->create_sampler(sampler_desc, &_copy_sampler_state))
+				_copy_sampler_state == nullptr)				// VUGGER_ADDON
 			{
 				LOG(ERROR) << "Failed to create copy pipeline!";
 				goto exit_failure;
@@ -458,8 +460,10 @@ exit_failure:
 	_copy_pipeline = {};
 	_device->destroy_pipeline_layout(_copy_pipeline_layout);
 	_copy_pipeline_layout = {};
-	_device->destroy_sampler(_copy_sampler_state);
-	_copy_sampler_state = {};
+	// VUGGER_ADDON
+	_device->destroy_sampler(_copy_sampler_state.get());
+	_copy_sampler_state = nullptr;
+	// VUGGER_ADDON
 
 	_device->destroy_resource(_back_buffer_resolved);
 	_back_buffer_resolved = {};
@@ -518,8 +522,10 @@ void reshade::runtime::on_reset()
 	_copy_pipeline = {};
 	_device->destroy_pipeline_layout(_copy_pipeline_layout);
 	_copy_pipeline_layout = {};
-	_device->destroy_sampler(_copy_sampler_state);
-	_copy_sampler_state = {};
+	// VUGGER_ADDON
+	_device->destroy_sampler(_copy_sampler_state.get());
+	_copy_sampler_state = nullptr;
+	// VUGGER_ADDON
 
 	_device->destroy_resource(_back_buffer_resolved);
 	_back_buffer_resolved = {};

@@ -43,8 +43,8 @@ namespace reshade::vulkan
 		bool check_capability(api::device_caps capability) const final;
 		bool check_format_support(api::format format, api::resource_usage usage) const final;
 
-		bool create_sampler(const api::sampler_desc &desc, api::sampler *out_handle) final;
-		void destroy_sampler(api::sampler handle) final;
+		bool create_sampler(const api::sampler_desc &desc, api::sampler **out_ptr) final;	// VUGGER_ADDON:
+		void destroy_sampler(api::sampler* ptr) final;										// VUGGER_ADDON:
 
 		bool create_resource(const api::resource_desc &desc, const api::subresource_data *initial_data, api::resource_usage initial_state, api::resource *out_handle, HANDLE *shared_handle = nullptr) final;
 		void destroy_resource(api::resource handle) final;

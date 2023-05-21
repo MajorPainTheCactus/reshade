@@ -103,8 +103,8 @@ void D3D10Device::invoke_bind_samplers_event(reshade::api::shader_stage stage, U
 		descriptors_mem[i] = to_handle(objects[i]);
 	const auto descriptors = descriptors_mem.p;
 #else
-	static_assert(sizeof(*objects) == sizeof(reshade::api::sampler));
-	const auto descriptors = reinterpret_cast<const reshade::api::sampler *>(objects);
+	static_assert(sizeof(*objects) == sizeof(reshade::api::sampler*));								// VUGGER_ADDON
+	const auto descriptors = reinterpret_cast<const reshade::api::sampler* const*>(objects);		// VUGGER_ADDON
 #endif
 
 	reshade::invoke_addon_event<reshade::addon_event::push_descriptors>(
@@ -1485,7 +1485,7 @@ HRESULT STDMETHODCALLTYPE D3D10Device::CreateSamplerState(const D3D10_SAMPLER_DE
 		return _orig->CreateSamplerState(pSamplerDesc, ppSamplerState);
 
 	D3D10_SAMPLER_DESC internal_desc = *pSamplerDesc;
-	auto desc = reshade::d3d10::convert_sampler_desc(internal_desc);
+	reshade::api::sampler_desc desc = reshade::d3d10::convert_sampler_desc(internal_desc);		// VUGGER_ADDON
 
 	if (reshade::invoke_addon_event<reshade::addon_event::create_sampler>(this, desc))
 	{
@@ -1497,13 +1497,17 @@ HRESULT STDMETHODCALLTYPE D3D10Device::CreateSamplerState(const D3D10_SAMPLER_DE
 	const HRESULT hr = _orig->CreateSamplerState(pSamplerDesc, ppSamplerState);
 	if (SUCCEEDED(hr))
 	{
+		// VUGGER ADDON
+		D3D10SamplerState* SamplerState = new D3D10SamplerState(this, desc, *ppSamplerState);
+		*ppSamplerState = SamplerState;
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::init_sampler>(this, desc, to_handle(*ppSamplerState));
+		reshade::invoke_addon_event<reshade::addon_event::init_sampler>(this, desc, SamplerState);
 
-		register_destruction_callback(*ppSamplerState, [this, sampler = *ppSamplerState]() {
-			reshade::invoke_addon_event<reshade::addon_event::destroy_sampler>(this, to_handle(sampler));
+		register_destruction_callback(SamplerState, [this, sampler = SamplerState]() {
+			reshade::invoke_addon_event<reshade::addon_event::destroy_sampler>(this, sampler);
 		});
 #endif
+		// VUGGER ADDON
 	}
 	else
 	{
@@ -1708,3 +1712,39 @@ D3D10_FEATURE_LEVEL1 STDMETHODCALLTYPE D3D10Device::GetFeatureLevel()
 {
 	return _orig->GetFeatureLevel();
 }
+
+// VUGGER_ADDON
+D3D10SamplerState::D3D10SamplerState(struct D3D10Device *device, const reshade::api::sampler_desc &desc, ID3D10SamplerState *original)
+	: reshade::d3d10::sampler_impl(device, desc, static_cast<D3D10SamplerState*>(original)),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
+ULONG STDMETHODCALLTYPE D3D10SamplerState::Release()
+{
+	const ULONG ref = InterlockedDecrement(&_ref);
+	if (ref != 0)
+	{
+		_orig->Release();
+		return ref;
+	}
+
+	const auto orig = _orig;
+#if 0
+	LOG(DEBUG) << "Destroying " << "D3D10SamplerState" << " object " << this << " (" << orig << ").";
+#endif
+	delete this;
+
+	const ULONG ref_orig = orig->Release();
+	if (ref_orig != 0) // Verify internal reference count
+		LOG(WARN) << "Reference count for " << "D3D10SamplerState" << " object " << this << " (" << orig << ") is inconsistent (" << ref_orig << ").";
+	return 0;
+}
+
+void STDMETHODCALLTYPE D3D10SamplerState::GetDevice(ID3D10Device **ppDevice)
+{
+	_device->AddRef();
+	*ppDevice = _device;
+}
+// VUGGER_ADDON

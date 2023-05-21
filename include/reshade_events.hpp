@@ -1667,9 +1667,9 @@ namespace reshade
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::init_effect_runtime, void, api::effect_runtime *runtime);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::destroy_effect_runtime, void, api::effect_runtime *runtime);
 
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::init_sampler, void, api::device *device, const api::sampler_desc &desc, api::sampler sampler);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::init_sampler, void, api::device *device, const api::sampler_desc &desc, api::sampler* sampler);		// VUGGER_ADDON
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::create_sampler, bool, api::device *device, api::sampler_desc &desc);
-	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::destroy_sampler, void, api::device *device, api::sampler sampler);
+	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::destroy_sampler, void, api::device *device, api::sampler* sampler);									// VUGGER_ADDON
 
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::init_resource, void, api::device *device, const api::resource_desc &desc, const api::subresource_data *initial_data, api::resource_usage initial_state, api::resource resource);
 	RESHADE_DEFINE_ADDON_EVENT_TRAITS(addon_event::create_resource, bool, api::device *device, api::resource_desc &desc, api::subresource_data *initial_data, api::resource_usage initial_state);

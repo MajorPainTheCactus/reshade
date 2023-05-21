@@ -363,7 +363,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateShaderResourceView(ID3D11Resource *
 	if (SUCCEEDED(hr))
 	{
 		ID3D11ShaderResourceView *ShaderResourceView = *ppShaderResourceView;
-		*ppShaderResourceView = new D3D11ShaderResourceView(this, ShaderResourceView);	// VUGGER ADDON
+		*ppShaderResourceView = new D3D11ShaderResourceView(this, desc, ShaderResourceView);	// VUGGER ADDON
 #if RESHADE_ADDON
 		reshade::d3d11::shader_resource_view_impl * ptr = static_cast<reshade::d3d11::shader_resource_view_impl *>(static_cast<D3D11ShaderResourceView*>(*ppShaderResourceView));
 		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::shader_resource, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
@@ -404,7 +404,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateUnorderedAccessView(ID3D11Resource 
 	if (SUCCEEDED(hr))
 	{
 		ID3D11UnorderedAccessView *UnorderedAccessView = *ppUnorderedAccessView;
-		*ppUnorderedAccessView = new D3D11UnorderedAccessView(this, UnorderedAccessView);	// VUGGER ADDON
+		*ppUnorderedAccessView = new D3D11UnorderedAccessView(this, desc, UnorderedAccessView);	// VUGGER ADDON
 #if RESHADE_ADDON
 		reshade::d3d11::unordered_access_view_impl *ptr = static_cast<reshade::d3d11::unordered_access_view_impl *>(static_cast<D3D11UnorderedAccessView *>(*ppUnorderedAccessView));
 		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::unordered_access, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
@@ -445,7 +445,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateRenderTargetView(ID3D11Resource *pR
 	if (SUCCEEDED(hr))
 	{
 		ID3D11RenderTargetView *RenderTargetView = *ppRenderTargetView;
-		*ppRenderTargetView = new D3D11RenderTargetView(this, RenderTargetView);	// VUGGER ADDON
+		*ppRenderTargetView = new D3D11RenderTargetView(this, desc, RenderTargetView);	// VUGGER ADDON
 #if RESHADE_ADDON
 		reshade::d3d11::render_target_view_impl *ptr = static_cast<reshade::d3d11::render_target_view_impl *>(static_cast<D3D11RenderTargetView *>(*ppRenderTargetView));
 		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::render_target, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
@@ -486,7 +486,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateDepthStencilView(ID3D11Resource *pR
 	if (SUCCEEDED(hr))
 	{
 		ID3D11DepthStencilView *DepthStencilView = *ppDepthStencilView;
-		*ppDepthStencilView = new D3D11DepthStencilView(this, DepthStencilView);	// VUGGER ADDON
+		*ppDepthStencilView = new D3D11DepthStencilView(this, desc, DepthStencilView);	// VUGGER ADDON
 #if RESHADE_ADDON
 		reshade::d3d11::depth_stencil_view_impl *ptr = static_cast<reshade::d3d11::depth_stencil_view_impl *>(static_cast<D3D11DepthStencilView *>(*ppDepthStencilView));
 		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::depth_stencil, desc, reshade::api::resource_view{ reinterpret_cast<uintptr_t>(ptr) });
@@ -987,13 +987,17 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateSamplerState(const D3D11_SAMPLER_DE
 	const HRESULT hr = _orig->CreateSamplerState(pSamplerDesc, ppSamplerState);
 	if (SUCCEEDED(hr))
 	{
+		// VUGGER ADDON
+		D3D11SamplerState *SamplerState = new D3D11SamplerState(this, desc, *ppSamplerState);
+		*ppSamplerState = SamplerState;
 #if RESHADE_ADDON
-		reshade::invoke_addon_event<reshade::addon_event::init_sampler>(this, desc, to_handle(*ppSamplerState));
+		reshade::invoke_addon_event<reshade::addon_event::init_sampler>(this, desc, SamplerState);
 
-		register_destruction_callback(*ppSamplerState, [this, sampler = *ppSamplerState]() {
-			reshade::invoke_addon_event<reshade::addon_event::destroy_sampler>(this, to_handle(sampler));
+		register_destruction_callback(SamplerState, [this, sampler = SamplerState]() {
+			reshade::invoke_addon_event<reshade::addon_event::destroy_sampler>(this, sampler);
 		});
 #endif
+		// VUGGER ADDON
 	}
 	else
 	{
@@ -1658,7 +1662,7 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateShaderResourceView1(ID3D11Resource 
 	const HRESULT hr = static_cast<ID3D11Device3 *>(_orig)->CreateShaderResourceView1(pResource, pDesc1, ppShaderResourceView1);
 	if (SUCCEEDED(hr))
 	{
-		*ppShaderResourceView1 = new D3D11ShaderResourceView(this, *ppShaderResourceView1);	// VUGGER ADDON
+		*ppShaderResourceView1 = new D3D11ShaderResourceView(this, desc, *ppShaderResourceView1);	// VUGGER ADDON
 #if RESHADE_ADDON
 		reshade::invoke_addon_event<reshade::addon_event::init_resource_view>(this, to_handle(pResource), reshade::api::resource_usage::shader_resource, desc, to_handle(*ppShaderResourceView1));
 
@@ -1835,15 +1839,15 @@ HRESULT STDMETHODCALLTYPE D3D11Device::CreateFence(UINT64 InitialValue, D3D11_FE
 }
 
 // VUGGER_ADDON
-D3D11ShaderResourceView::D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView *original)
-	: reshade::d3d11::shader_resource_view_impl(device, original),
+D3D11ShaderResourceView::D3D11ShaderResourceView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11ShaderResourceView *original)
+	: reshade::d3d11::shader_resource_view_impl(device, desc, original),
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
 }
 
-D3D11ShaderResourceView::D3D11ShaderResourceView(struct D3D11Device *device, ID3D11ShaderResourceView1 *original)
-	: reshade::d3d11::shader_resource_view_impl(device, original),
+D3D11ShaderResourceView::D3D11ShaderResourceView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11ShaderResourceView1 *original)
+	: reshade::d3d11::shader_resource_view_impl(device, desc, original),
 	_interface_version(1),
 	_device(device)
 {
@@ -1877,15 +1881,15 @@ void STDMETHODCALLTYPE D3D11ShaderResourceView::GetDevice(ID3D11Device **ppDevic
 	*ppDevice = _device;
 }
 
-D3D11UnorderedAccessView::D3D11UnorderedAccessView(struct D3D11Device *device, ID3D11UnorderedAccessView *original)
-	: reshade::d3d11::unordered_access_view_impl(device, original),
+D3D11UnorderedAccessView::D3D11UnorderedAccessView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11UnorderedAccessView *original)
+	: reshade::d3d11::unordered_access_view_impl(device, desc, original),
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
 }
 
-D3D11UnorderedAccessView::D3D11UnorderedAccessView(struct D3D11Device *device, ID3D11UnorderedAccessView1 *original)
-	: reshade::d3d11::unordered_access_view_impl(device, original),
+D3D11UnorderedAccessView::D3D11UnorderedAccessView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11UnorderedAccessView1 *original)
+	: reshade::d3d11::unordered_access_view_impl(device, desc, original),
 	_interface_version(1),
 	_device(device)
 {
@@ -1919,15 +1923,15 @@ void STDMETHODCALLTYPE D3D11UnorderedAccessView::GetDevice(ID3D11Device **ppDevi
 	*ppDevice = _device;
 }
 
-D3D11RenderTargetView::D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView *original)
-	: reshade::d3d11::render_target_view_impl(device, original),
+D3D11RenderTargetView::D3D11RenderTargetView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11RenderTargetView *original)
+	: reshade::d3d11::render_target_view_impl(device, desc, original),
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
 }
 
-D3D11RenderTargetView::D3D11RenderTargetView(struct D3D11Device *device, ID3D11RenderTargetView1 *original)
-	: reshade::d3d11::render_target_view_impl(device, original),
+D3D11RenderTargetView::D3D11RenderTargetView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11RenderTargetView1 *original)
+	: reshade::d3d11::render_target_view_impl(device, desc, original),
 	_interface_version(1),
 	_device(device)
 {
@@ -1961,8 +1965,8 @@ void STDMETHODCALLTYPE D3D11RenderTargetView::GetDevice(ID3D11Device **ppDevice)
 	*ppDevice = _device;
 }
 
-D3D11DepthStencilView::D3D11DepthStencilView(struct D3D11Device *device, ID3D11DepthStencilView *original)
-	: reshade::d3d11::depth_stencil_view_impl(device, original),
+D3D11DepthStencilView::D3D11DepthStencilView(struct D3D11Device *device, const reshade::api::resource_view_desc &desc, ID3D11DepthStencilView *original)
+	: reshade::d3d11::depth_stencil_view_impl(device, desc, original),
 	_device(device)
 {
 	assert(_orig != nullptr && _device != nullptr);
@@ -1990,6 +1994,41 @@ ULONG STDMETHODCALLTYPE D3D11DepthStencilView::Release()
 }
 
 void STDMETHODCALLTYPE D3D11DepthStencilView::GetDevice(ID3D11Device **ppDevice)
+{
+	_device->AddRef();
+	*ppDevice = _device;
+}
+
+
+D3D11SamplerState::D3D11SamplerState(struct D3D11Device *device, const reshade::api::sampler_desc &desc, ID3D11SamplerState *original)
+	: reshade::d3d11::sampler_impl(device, desc, original),
+	_device(device)
+{
+	assert(_orig != nullptr && _device != nullptr);
+}
+
+ULONG STDMETHODCALLTYPE D3D11SamplerState::Release()
+{
+	const ULONG ref = InterlockedDecrement(&_ref);
+	if (ref != 0)
+	{
+		_orig->Release();
+		return ref;
+	}
+
+	const auto orig = _orig;
+#if 0
+	LOG(DEBUG) << "Destroying " << "D3D11SamplerState" << " object " << this << " (" << orig << ").";
+#endif
+	delete this;
+
+	const ULONG ref_orig = orig->Release();
+	if (ref_orig != 0) // Verify internal reference count
+		LOG(WARN) << "Reference count for " << "D3D11SamplerState" << " object " << this << " (" << orig << ") is inconsistent (" << ref_orig << ").";
+	return 0;
+}
+
+void STDMETHODCALLTYPE D3D11SamplerState::GetDevice(ID3D11Device **ppDevice)
 {
 	_device->AddRef();
 	*ppDevice = _device;

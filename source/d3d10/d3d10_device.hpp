@@ -8,6 +8,64 @@
 #include "dxgi/dxgi_device.hpp"
 #include "d3d10_impl_device.hpp"
 
+// VUGGER_ADDON
+struct DECLSPEC_UUID("FC08B47C-A36C-408A-A5E7-A707527E0FF1") D3D10SamplerState final : ID3D10SamplerState, public reshade::d3d10::sampler_impl
+{
+	DECLARE_MEM(D3D10SamplerState, 32)
+
+	D3D10SamplerState(struct D3D10Device *device, const reshade::api::sampler_desc &desc, ID3D10SamplerState *original);
+
+	#pragma region IUnknown
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObj) override final
+	{
+		if (ppvObj == nullptr)
+			return E_POINTER;
+
+		if (check_and_upgrade_interface(riid))
+		{
+			AddRef();
+			*ppvObj = this;
+			return S_OK;
+		}
+
+		return _orig->QueryInterface(riid, ppvObj);
+	}
+	ULONG   STDMETHODCALLTYPE AddRef() override final
+	{
+		_orig->AddRef();
+		return InterlockedIncrement(&_ref);
+	}
+	ULONG   STDMETHODCALLTYPE Release() override final;
+	#pragma endregion
+	#pragma region ID3D10DeviceChild
+	void    STDMETHODCALLTYPE GetDevice(ID3D10Device **ppDevice) override final;
+	HRESULT STDMETHODCALLTYPE GetPrivateData(REFGUID guid, UINT *pDataSize, void *pData) override final { return _orig->GetPrivateData(guid, pDataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateData(REFGUID guid, UINT DataSize, const void *pData) override final { return _orig->SetPrivateData(guid, DataSize, pData); }
+	HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(REFGUID guid, const IUnknown *pData) override final { return _orig->SetPrivateDataInterface(guid, pData); }
+	#pragma endregion
+	#pragma region ID3D10SamplerState
+	void STDMETHODCALLTYPE GetDesc(D3D10_SAMPLER_DESC *pDesc) override final { _orig->GetDesc(pDesc); }
+	#pragma endregion
+
+	bool check_and_upgrade_interface(REFIID riid)
+	{
+		if (riid == __uuidof(this) ||
+			riid == __uuidof(IUnknown) ||
+			riid == __uuidof(ID3D10DeviceChild) ||
+			riid == __uuidof(ID3D10SamplerState))
+			return true;
+
+		return false;
+	}
+
+	ULONG _ref = 1;
+	unsigned int _interface_version = 0;
+	D3D10Device *const _device = nullptr;
+	//ID3D10SamplerState *_orig = nullptr;
+};
+DECLARE_MEM_STATIC(D3D10SamplerState, 32)
+// VUGGER_ADDON
+
 struct DECLSPEC_UUID("88399375-734F-4892-A95F-70DD42CE7CDD") D3D10Device final : DXGIDevice, ID3D10Device1, public reshade::d3d10::device_impl
 {
 	D3D10Device(IDXGIDevice1 *original_dxgi_device, ID3D10Device1 *original);
@@ -121,6 +179,15 @@ struct DECLSPEC_UUID("88399375-734F-4892-A95F-70DD42CE7CDD") D3D10Device final :
 	#pragma endregion
 
 	bool check_and_upgrade_interface(REFIID riid);
+
+	// VUGGER_ADDON
+	reshade::api::sampler *const *get_vs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_hs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_ds_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_gs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_ps_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_cs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	// VUGGER_ADDON
 
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
 	void invoke_bind_samplers_event(reshade::api::shader_stage stage, UINT first, UINT count, ID3D10SamplerState *const *objects);

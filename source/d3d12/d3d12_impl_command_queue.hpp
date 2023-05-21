@@ -16,7 +16,7 @@ namespace reshade::d3d12
 		command_queue_impl(device_impl *device, ID3D12CommandQueue *queue);
 		~command_queue_impl();
 
-		api::device *get_device() final;
+		device_impl *get_device();		// VUGGER_ADDON
 
 		api::command_queue_type get_type() const final;
 
@@ -39,7 +39,7 @@ namespace reshade::d3d12
 		std::shared_mutex _mutex;
 
 	private:
-		device_impl *const _device_impl;
+		//device_impl *const _device_impl;		// VUGGER_ADDON
 		command_list_immediate_impl *_immediate_cmd_list = nullptr;
 
 		HANDLE _wait_idle_fence_event = nullptr;

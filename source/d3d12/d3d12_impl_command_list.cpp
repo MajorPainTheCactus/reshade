@@ -20,8 +20,8 @@ void encode_pix3blob(UINT64(&pix3blob)[64], const char *label, const float color
 }
 
 reshade::d3d12::command_list_impl::command_list_impl(device_impl *device, ID3D12GraphicsCommandList *cmd_list) :
-	api_object_impl(cmd_list),
-	_device_impl(device)
+	api_object_impl(cmd_list, device)		// VUGGER_ADDON
+	//_device_impl(device)
 {
 #if RESHADE_ADDON
 	if (_orig != nullptr) // Do not call add-on event for immediate command list (since it is internal and not used by the application)
@@ -36,10 +36,17 @@ reshade::d3d12::command_list_impl::~command_list_impl()
 #endif
 }
 
-reshade::api::device *reshade::d3d12::command_list_impl::get_device()
+// VUGGER_ADDON
+reshade::d3d12::device_impl *reshade::d3d12::command_list_impl::get_device()
 {
-	return _device_impl;
+	return static_cast<reshade::d3d12::device_impl *>(_device);
 }
+
+//reshade::api::device *reshade::d3d12::command_list_impl::get_device()
+//{
+//	return _device_impl;
+//}
+// VUGGER_ADDON
 
 void reshade::d3d12::command_list_impl::barrier(uint32_t count, const api::resource *resources, const api::resource_usage *old_states, const api::resource_usage *new_states)
 {
@@ -101,7 +108,7 @@ void reshade::d3d12::command_list_impl::begin_render_pass(uint32_t count, const 
 
 			if (rts[i].load_op == api::render_pass_load_op::clear)
 			{
-				rt_desc[i].BeginningAccess.Clear.ClearValue.Format = convert_format(_device_impl->get_resource_view_desc(rts[i].view).format);
+				rt_desc[i].BeginningAccess.Clear.ClearValue.Format = convert_format(get_device()->get_resource_view_desc(rts[i].view).format);		// VUGGER_ADDON
 				std::copy_n(rts[i].clear_color, 4, rt_desc[i].BeginningAccess.Clear.ClearValue.Color);
 			}
 		}
@@ -117,12 +124,12 @@ void reshade::d3d12::command_list_impl::begin_render_pass(uint32_t count, const 
 
 			if (ds->depth_load_op == api::render_pass_load_op::clear)
 			{
-				depth_stencil_desc.DepthBeginningAccess.Clear.ClearValue.Format = convert_format(_device_impl->get_resource_view_desc(ds->view).format);
+				depth_stencil_desc.DepthBeginningAccess.Clear.ClearValue.Format = convert_format(get_device()->get_resource_view_desc(ds->view).format);			// VUGGER_ADDON
 				depth_stencil_desc.DepthBeginningAccess.Clear.ClearValue.DepthStencil.Depth = ds->clear_depth;
 			}
 			if (ds->stencil_load_op == api::render_pass_load_op::clear)
 			{
-				depth_stencil_desc.StencilBeginningAccess.Clear.ClearValue.Format = convert_format(_device_impl->get_resource_view_desc(ds->view).format);
+				depth_stencil_desc.StencilBeginningAccess.Clear.ClearValue.Format = convert_format(get_device()->get_resource_view_desc(ds->view).format);			// VUGGER_ADDON
 				depth_stencil_desc.StencilBeginningAccess.Clear.ClearValue.DepthStencil.Stencil = ds->clear_stencil;
 			}
 		}
@@ -272,18 +279,18 @@ void reshade::d3d12::command_list_impl::push_descriptors(api::shader_stage stage
 	D3D12_CPU_DESCRIPTOR_HANDLE base_handle;
 	D3D12_GPU_DESCRIPTOR_HANDLE base_handle_gpu;
 	if (update.type != api::descriptor_type::sampler ?
-		!_device_impl->_gpu_view_heap.allocate_transient(update.binding + update.count, base_handle, base_handle_gpu) :
-		!_device_impl->_gpu_sampler_heap.allocate_transient(update.binding + update.count, base_handle, base_handle_gpu))
+		!get_device()->_gpu_view_heap.allocate_transient(update.binding + update.count, base_handle, base_handle_gpu) :			// VUGGER_ADDON
+		!get_device()->_gpu_sampler_heap.allocate_transient(update.binding + update.count, base_handle, base_handle_gpu))		// VUGGER_ADDON
 		return;
 
 	const D3D12_DESCRIPTOR_HEAP_TYPE heap_type = convert_descriptor_type_to_heap_type(update.type);
 
 	// Add base descriptor offset (these descriptors stay unusued)
-	base_handle = _device_impl->offset_descriptor_handle(base_handle, update.binding, heap_type);
+	base_handle = get_device()->offset_descriptor_handle(base_handle, update.binding, heap_type);			// VUGGER_ADDON
 
 	if (update.type == api::descriptor_type::constant_buffer)
 	{
-		for (uint32_t k = 0; k < update.count; ++k, base_handle = _device_impl->offset_descriptor_handle(base_handle, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV))
+		for (uint32_t k = 0; k < update.count; ++k, base_handle = get_device()->offset_descriptor_handle(base_handle, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV))			// VUGGER_ADDON
 		{
 			const auto buffer_range = static_cast<const api::buffer_range *>(update.descriptors)[k];
 			const auto buffer_resource = reinterpret_cast<ID3D12Resource *>(buffer_range.buffer.handle);
@@ -292,7 +299,7 @@ void reshade::d3d12::command_list_impl::push_descriptors(api::shader_stage stage
 			view_desc.BufferLocation = buffer_resource->GetGPUVirtualAddress() + buffer_range.offset;
 			view_desc.SizeInBytes = (buffer_range.size == UINT64_MAX) ? static_cast<UINT>(buffer_resource->GetDesc().Width) : static_cast<UINT>(buffer_range.size);
 
-			_device_impl->_orig->CreateConstantBufferView(&view_desc, base_handle);
+			get_device()->_orig->CreateConstantBufferView(&view_desc, base_handle);			// VUGGER_ADDON
 		}
 	}
 	else if (update.type == api::descriptor_type::sampler || update.type == api::descriptor_type::shader_resource_view || update.type == api::descriptor_type::unordered_access_view)
@@ -303,12 +310,12 @@ void reshade::d3d12::command_list_impl::push_descriptors(api::shader_stage stage
 			src_handles[k] = { static_cast<SIZE_T>(static_cast<const uint64_t *>(update.descriptors)[k]) };
 		const UINT src_range_size = 1;
 
-		_device_impl->_orig->CopyDescriptors(1, &base_handle, &update.count, update.count, src_handles.p, &src_range_size, convert_descriptor_type_to_heap_type(update.type));
+		get_device()->_orig->CopyDescriptors(1, &base_handle, &update.count, update.count, src_handles.p, &src_range_size, convert_descriptor_type_to_heap_type(update.type));			// VUGGER_ADDON
 #else
 		temp_mem<UINT> src_range_sizes(update.count);
 		std::fill(src_range_sizes.p, src_range_sizes.p + update.count, 1);
 
-		_device_impl->_orig->CopyDescriptors(1, &base_handle, &update.count, update.count, static_cast<const D3D12_CPU_DESCRIPTOR_HANDLE *>(update.descriptors), src_range_sizes.p, convert_descriptor_type_to_heap_type(update.type));
+		get_device()->_orig->CopyDescriptors(1, &base_handle, &update.count, update.count, static_cast<const D3D12_CPU_DESCRIPTOR_HANDLE *>(update.descriptors), src_range_sizes.p, convert_descriptor_type_to_heap_type(update.type));			// VUGGER_ADDON
 #endif
 	}
 	else
@@ -316,15 +323,17 @@ void reshade::d3d12::command_list_impl::push_descriptors(api::shader_stage stage
 		assert(false);
 	}
 
-	if (_current_descriptor_heaps[0] != _device_impl->_gpu_sampler_heap.get() ||
-		_current_descriptor_heaps[1] != _device_impl->_gpu_view_heap.get())
+	// VUGGER_ADDON
+	if (_current_descriptor_heaps[0] != get_device()->_gpu_sampler_heap.get() ||
+		_current_descriptor_heaps[1] != get_device()->_gpu_view_heap.get())
 	{
-		ID3D12DescriptorHeap *const heaps[2] = { _device_impl->_gpu_sampler_heap.get(), _device_impl->_gpu_view_heap.get() };
+		ID3D12DescriptorHeap *const heaps[2] = { get_device()->_gpu_sampler_heap.get(), get_device()->_gpu_view_heap.get() };
 		_orig->SetDescriptorHeaps(2, heaps);
 
 		_current_descriptor_heaps[0] = heaps[0];
 		_current_descriptor_heaps[1] = heaps[1];
 	}
+	// VUGGER_ADDON
 
 	const auto root_signature = reinterpret_cast<ID3D12RootSignature *>(layout.handle);
 
@@ -373,7 +382,7 @@ void reshade::d3d12::command_list_impl::bind_descriptor_sets(api::shader_stage s
 
 	for (uint32_t i = 0; i < count; ++i)
 	{
-		ID3D12DescriptorHeap *const heap = _device_impl->get_descriptor_heap(sets[i]);
+		ID3D12DescriptorHeap *const heap = get_device()->get_descriptor_heap(sets[i]);			// VUGGER_ADDON
 		if (heap == nullptr)
 			continue;
 
@@ -410,7 +419,7 @@ void reshade::d3d12::command_list_impl::bind_descriptor_sets(api::shader_stage s
 		}
 
 		for (uint32_t i = 0; i < count; ++i)
-			_orig->SetComputeRootDescriptorTable(first + i, _device_impl->convert_to_original_gpu_descriptor_handle(sets[i]));
+			_orig->SetComputeRootDescriptorTable(first + i, get_device()->convert_to_original_gpu_descriptor_handle(sets[i]));			// VUGGER_ADDON
 	}
 	if (static_cast<uint32_t>(stages & api::shader_stage::all_graphics) != 0)
 	{
@@ -421,7 +430,7 @@ void reshade::d3d12::command_list_impl::bind_descriptor_sets(api::shader_stage s
 		}
 
 		for (uint32_t i = 0; i < count; ++i)
-			_orig->SetGraphicsRootDescriptorTable(first + i, _device_impl->convert_to_original_gpu_descriptor_handle(sets[i]));
+			_orig->SetGraphicsRootDescriptorTable(first + i, get_device()->convert_to_original_gpu_descriptor_handle(sets[i]));			// VUGGER_ADDON
 	}
 }
 
@@ -550,7 +559,7 @@ void reshade::d3d12::command_list_impl::copy_buffer_to_texture(api::resource src
 	D3D12_TEXTURE_COPY_LOCATION src_copy_location;
 	src_copy_location.pResource = reinterpret_cast<ID3D12Resource *>(src.handle);
 	src_copy_location.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-	_device_impl->_orig->GetCopyableFootprints(&res_desc, dst_subresource, 1, src_offset, &src_copy_location.PlacedFootprint, nullptr, nullptr, nullptr);
+	get_device()->_orig->GetCopyableFootprints(&res_desc, dst_subresource, 1, src_offset, &src_copy_location.PlacedFootprint, nullptr, nullptr, nullptr);			// VUGGER_ADDON
 
 	D3D12_TEXTURE_COPY_LOCATION dst_copy_location;
 	dst_copy_location.pResource = reinterpret_cast<ID3D12Resource *>(dst.handle);
@@ -604,7 +613,7 @@ void reshade::d3d12::command_list_impl::copy_texture_to_buffer(api::resource src
 	D3D12_TEXTURE_COPY_LOCATION dst_copy_location;
 	dst_copy_location.pResource = reinterpret_cast<ID3D12Resource *>(dst.handle);
 	dst_copy_location.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-	_device_impl->_orig->GetCopyableFootprints(&res_desc, src_subresource, 1, dst_offset, &dst_copy_location.PlacedFootprint, nullptr, nullptr, nullptr);
+	get_device()->_orig->GetCopyableFootprints(&res_desc, src_subresource, 1, dst_offset, &dst_copy_location.PlacedFootprint, nullptr, nullptr, nullptr);			// VUGGER_ADDON
 
 	_orig->CopyTextureRegion(
 		&dst_copy_location, 0, 0, 0,
@@ -671,19 +680,19 @@ void reshade::d3d12::command_list_impl::clear_unordered_access_view_uint(api::re
 
 	assert(uav.handle != 0);
 
-	const auto resource = reinterpret_cast<ID3D12Resource *>(_device_impl->get_resource_from_view(uav).handle);
+	const auto resource = reinterpret_cast<ID3D12Resource *>(get_device()->get_resource_from_view(uav).handle);			// VUGGER_ADDON
 	assert(resource != nullptr);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE table_base;
 	D3D12_GPU_DESCRIPTOR_HANDLE table_base_gpu;
-	if (!_device_impl->_gpu_view_heap.allocate_transient(1, table_base, table_base_gpu))
+	if (!get_device()->_gpu_view_heap.allocate_transient(1, table_base, table_base_gpu))			// VUGGER_ADDON
 		return;
 
-	const auto view_heap = _device_impl->_gpu_view_heap.get();
+	const auto view_heap = get_device()->_gpu_view_heap.get();			// VUGGER_ADDON
 	if (_current_descriptor_heaps[0] != view_heap && _current_descriptor_heaps[1] != view_heap)
 		_orig->SetDescriptorHeaps(1, &view_heap);
 
-	_device_impl->_orig->CreateUnorderedAccessView(resource, nullptr, nullptr, table_base);
+	get_device()->_orig->CreateUnorderedAccessView(resource, nullptr, nullptr, table_base);			// VUGGER_ADDON
 	_orig->ClearUnorderedAccessViewUint(table_base_gpu, D3D12_CPU_DESCRIPTOR_HANDLE { static_cast<SIZE_T>(uav.handle) }, resource, values, rect_count, reinterpret_cast<const D3D12_RECT *>(rects));
 
 	if (_current_descriptor_heaps[0] != view_heap && _current_descriptor_heaps[1] != view_heap && _current_descriptor_heaps[0] != nullptr)
@@ -695,19 +704,19 @@ void reshade::d3d12::command_list_impl::clear_unordered_access_view_float(api::r
 
 	assert(uav.handle != 0);
 
-	const auto resource = reinterpret_cast<ID3D12Resource *>(_device_impl->get_resource_from_view(uav).handle);
+	const auto resource = reinterpret_cast<ID3D12Resource *>(get_device()->get_resource_from_view(uav).handle);			// VUGGER_ADDON
 	assert(resource != nullptr);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE table_base;
 	D3D12_GPU_DESCRIPTOR_HANDLE table_base_gpu;
-	if (!_device_impl->_gpu_view_heap.allocate_transient(1, table_base, table_base_gpu))
+	if (!get_device()->_gpu_view_heap.allocate_transient(1, table_base, table_base_gpu))			// VUGGER_ADDON
 		return;
 
-	const auto view_heap = _device_impl->_gpu_view_heap.get();
+	const auto view_heap = get_device()->_gpu_view_heap.get();				// VUGGER_ADDON
 	if (_current_descriptor_heaps[0] != view_heap && _current_descriptor_heaps[1] != view_heap)
 		_orig->SetDescriptorHeaps(1, &view_heap);
 
-	_device_impl->_orig->CreateUnorderedAccessView(resource, nullptr, nullptr, table_base);
+	get_device()->_orig->CreateUnorderedAccessView(resource, nullptr, nullptr, table_base);		// VUGGER_ADDON
 	_orig->ClearUnorderedAccessViewFloat(table_base_gpu, D3D12_CPU_DESCRIPTOR_HANDLE { static_cast<SIZE_T>(uav.handle) }, resource, values, rect_count, reinterpret_cast<const D3D12_RECT *>(rects));
 
 	if (_current_descriptor_heaps[0] != view_heap && _current_descriptor_heaps[1] != view_heap && _current_descriptor_heaps[0] != nullptr)
@@ -716,24 +725,24 @@ void reshade::d3d12::command_list_impl::clear_unordered_access_view_float(api::r
 
 void reshade::d3d12::command_list_impl::generate_mipmaps(api::resource_view srv)
 {
-	if (_device_impl->_mipmap_pipeline == nullptr)
+	if (get_device()->_mipmap_pipeline == nullptr)			// VUGGER_ADDON
 		return;
 
 	_has_commands = true;
 
 	assert(srv.handle != 0);
 
-	const auto resource = reinterpret_cast<ID3D12Resource *>(_device_impl->get_resource_from_view(srv).handle);
+	const auto resource = reinterpret_cast<ID3D12Resource *>(get_device()->get_resource_from_view(srv).handle);			// VUGGER_ADDON
 	assert(resource != nullptr);
 
 	const D3D12_RESOURCE_DESC desc = resource->GetDesc();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE base_handle;
 	D3D12_GPU_DESCRIPTOR_HANDLE base_handle_gpu;
-	if (!_device_impl->_gpu_view_heap.allocate_transient(desc.MipLevels * 2, base_handle, base_handle_gpu))
+	if (!get_device()->_gpu_view_heap.allocate_transient(desc.MipLevels * 2, base_handle, base_handle_gpu))			// VUGGER_ADDON
 		return;
 
-	for (uint32_t level = 0; level < desc.MipLevels; ++level, base_handle = _device_impl->offset_descriptor_handle(base_handle, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV))
+	for (uint32_t level = 0; level < desc.MipLevels; ++level, base_handle = get_device()->offset_descriptor_handle(base_handle, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV))			// VUGGER_ADDON
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc;
 		srv_desc.Format = convert_format(api::format_to_default_typed(convert_format(desc.Format)));
@@ -744,9 +753,9 @@ void reshade::d3d12::command_list_impl::generate_mipmaps(api::resource_view srv)
 		srv_desc.Texture2D.PlaneSlice = 0;
 		srv_desc.Texture2D.ResourceMinLODClamp = 0.0f;
 
-		_device_impl->_orig->CreateShaderResourceView(resource, &srv_desc, base_handle);
+		get_device()->_orig->CreateShaderResourceView(resource, &srv_desc, base_handle);				// VUGGER_ADDON
 	}
-	for (uint32_t level = 1; level < desc.MipLevels; ++level, base_handle = _device_impl->offset_descriptor_handle(base_handle, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV))
+	for (uint32_t level = 1; level < desc.MipLevels; ++level, base_handle = get_device()->offset_descriptor_handle(base_handle, 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV))			// VUGGER_ADDON
 	{
 		D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 		uav_desc.Format = convert_format(api::format_to_default_typed(convert_format(desc.Format)));
@@ -754,15 +763,15 @@ void reshade::d3d12::command_list_impl::generate_mipmaps(api::resource_view srv)
 		uav_desc.Texture2D.MipSlice = level;
 		uav_desc.Texture2D.PlaneSlice = 0;
 
-		_device_impl->_orig->CreateUnorderedAccessView(resource, nullptr, &uav_desc, base_handle);
+		get_device()->_orig->CreateUnorderedAccessView(resource, nullptr, &uav_desc, base_handle);			// VUGGER_ADDON
 	}
 
-	const auto view_heap = _device_impl->_gpu_view_heap.get();
+	const auto view_heap = get_device()->_gpu_view_heap.get();				// VUGGER_ADDON
 	if (_current_descriptor_heaps[0] != view_heap && _current_descriptor_heaps[1] != view_heap)
 		_orig->SetDescriptorHeaps(1, &view_heap);
 
-	_orig->SetComputeRootSignature(_device_impl->_mipmap_signature.get());
-	_orig->SetPipelineState(_device_impl->_mipmap_pipeline.get());
+	_orig->SetComputeRootSignature(get_device()->_mipmap_signature.get());			// VUGGER_ADDON
+	_orig->SetPipelineState(get_device()->_mipmap_pipeline.get());					// VUGGER_ADDON
 
 	D3D12_RESOURCE_BARRIER transition = { D3D12_RESOURCE_BARRIER_TYPE_TRANSITION };
 	transition.Transition.pResource = resource;
@@ -780,9 +789,9 @@ void reshade::d3d12::command_list_impl::generate_mipmaps(api::resource_view srv)
 		_orig->SetComputeRoot32BitConstants(0, 2, dimensions, 0);
 
 		// Bind next higher mipmap level as input
-		_orig->SetComputeRootDescriptorTable(1, _device_impl->offset_descriptor_handle(base_handle_gpu, level - 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		_orig->SetComputeRootDescriptorTable(1, get_device()->offset_descriptor_handle(base_handle_gpu, level - 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));							// VUGGER_ADDON
 		// There is no UAV for level 0, so substract one
-		_orig->SetComputeRootDescriptorTable(2, _device_impl->offset_descriptor_handle(base_handle_gpu, desc.MipLevels + level - 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		_orig->SetComputeRootDescriptorTable(2, get_device()->offset_descriptor_handle(base_handle_gpu, desc.MipLevels + level - 1, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));			// VUGGER_ADDON
 
 		_orig->Dispatch(std::max(1u, (width + 7) / 8), std::max(1u, (height + 7) / 8), 1);
 
@@ -884,4 +893,15 @@ void reshade::d3d12::command_list_impl::insert_debug_marker(const char *label, c
 //
 //	_orig->ExecuteCommandLists(count, temp_command_lists);
 //}
+
+reshade::d3d12::sampler_impl::sampler_impl(reshade::d3d12::device_impl *device, const reshade::api::sampler_desc &desc, D3D12_CPU_DESCRIPTOR_HANDLE sampler)
+	: api_object_impl(sampler.ptr, device, desc)
+{
+}
+
+reshade::d3d12::device_impl *reshade::d3d12::sampler_impl::get_device()
+{
+	return static_cast<reshade::d3d12::device_impl *>(_device);
+}
+
 // VUGGER_ADDON: END

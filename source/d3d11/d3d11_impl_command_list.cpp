@@ -38,7 +38,8 @@ void reshade::d3d11::pipeline_impl::apply(ID3D11DeviceContext *ctx, api::pipelin
 }
 
 reshade::d3d11::command_list_impl::command_list_impl(device_impl *device, ID3D11CommandList *cmd_list) :
-	api_object_impl(cmd_list), _device_impl(device)
+	api_object_impl(cmd_list, device)		// VUGGER_ADDON
+
 {
 #if RESHADE_ADDON
 	invoke_addon_event<addon_event::init_command_list>(this);
@@ -51,10 +52,11 @@ reshade::d3d11::command_list_impl::~command_list_impl()
 #endif
 }
 
-reshade::api::device *reshade::d3d11::command_list_impl::get_device()
-{
-	return _device_impl;
-}
+// VUGGER_ADDON
+//reshade::api::device *reshade::d3d11::command_list_impl::get_device()
+//{
+//	return _device_impl;
+//}
 
 // VUGGER_ADDON: TODO: REMOVE
 //void reshade::d3d11::command_list_impl::barrier(uint32_t count, const reshade::api::resource *, const reshade::api::resource_usage *old_states, const reshade::api::resource_usage *new_states)
@@ -747,7 +749,7 @@ void reshade::d3d11::device_context_impl::barrier(uint32_t count, const api::res
 	}
 	if (transitions_away_from_unordered_access_usage)
 	{
-		const D3D_FEATURE_LEVEL feature_level = _device_impl->_orig->GetFeatureLevel();
+		const D3D_FEATURE_LEVEL feature_level = get_device()->_orig->GetFeatureLevel();			// VUGGER_ADDON
 		const UINT max_uav_bindings =
 			feature_level >= D3D_FEATURE_LEVEL_11_1 ? D3D11_1_UAV_SLOT_COUNT :
 			feature_level == D3D_FEATURE_LEVEL_11_0 ? D3D11_PS_CS_UAV_REGISTER_COUNT :
@@ -883,32 +885,30 @@ void reshade::d3d11::device_context_impl::bind_scissor_rects(uint32_t first, uin
 	_orig->RSSetScissorRects(count, reinterpret_cast<const D3D11_RECT *>(rects));
 }
 
-void reshade::d3d11::device_context_impl::bind_samplers(api::shader_stage stages, uint32_t first, uint32_t count, const api::sampler *samplers)
+// VUGGER_ADDON
+void reshade::d3d11::device_context_impl::bind_samplers(api::shader_stage stages, uint32_t first, uint32_t count, api::sampler *const *samplers)
 {
 	assert(count <= D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT);
 
-#ifndef _WIN64
-	temp_mem<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> sampler_ptrs_mem(count);
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> sampler_ptrs;
 	for (uint32_t i = 0; i < count; ++i)
-		sampler_ptrs_mem[i] = reinterpret_cast<ID3D11SamplerState *>(samplers[i].handle);
-	const auto sampler_ptrs = sampler_ptrs_mem.p;
-#else
-	const auto sampler_ptrs = reinterpret_cast<ID3D11SamplerState *const *>(samplers);
-#endif
+		sampler_ptrs[i] = static_cast<const reshade::d3d11::sampler_impl *>(samplers[i])->_orig;
 
 	if ((stages & api::shader_stage::vertex) == api::shader_stage::vertex)
-		_orig->VSSetSamplers(first, count, sampler_ptrs);
+		_orig->VSSetSamplers(first, count, sampler_ptrs.data());
 	if ((stages & api::shader_stage::hull) == api::shader_stage::hull)
-		_orig->HSSetSamplers(first, count, sampler_ptrs);
+		_orig->HSSetSamplers(first, count, sampler_ptrs.data());
 	if ((stages & api::shader_stage::domain) == api::shader_stage::domain)
-		_orig->DSSetSamplers(first, count, sampler_ptrs);
+		_orig->DSSetSamplers(first, count, sampler_ptrs.data());
 	if ((stages & api::shader_stage::geometry) == api::shader_stage::geometry)
-		_orig->GSSetSamplers(first, count, sampler_ptrs);
+		_orig->GSSetSamplers(first, count, sampler_ptrs.data());
 	if ((stages & api::shader_stage::pixel) == api::shader_stage::pixel)
-		_orig->PSSetSamplers(first, count, sampler_ptrs);
+		_orig->PSSetSamplers(first, count, sampler_ptrs.data());
 	if ((stages & api::shader_stage::compute) == api::shader_stage::compute)
-		_orig->CSSetSamplers(first, count, sampler_ptrs);
+		_orig->CSSetSamplers(first, count, sampler_ptrs.data());
 }
+// VUGGER_ADDON
+
 void reshade::d3d11::device_context_impl::bind_shader_resource_views(api::shader_stage stages, uint32_t first, uint32_t count, const api::resource_view *views)
 {
 	assert(count <= D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT);
@@ -1041,13 +1041,13 @@ void reshade::d3d11::device_context_impl::push_constants(api::shader_stage stage
 		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-		if (FAILED(_device_impl->_orig->CreateBuffer(&desc, nullptr, &_push_constants)))
+		if (FAILED(get_device()->_orig->CreateBuffer(&desc, nullptr, &_push_constants)))			// VUGGER_ADDON
 		{
 			LOG(ERROR) << "Failed to create push constant buffer!";
 			return;
 		}
 
-		_device_impl->set_resource_name({ reinterpret_cast<uintptr_t>(_push_constants.get()) }, "Push constants");
+		get_device()->set_resource_name({ reinterpret_cast<uintptr_t>(_push_constants.get()) }, "Push constants");		// VUGGER_ADDON
 
 		_push_constants_size = count;
 	}
@@ -1104,7 +1104,7 @@ void reshade::d3d11::device_context_impl::push_descriptors(api::shader_stage sta
 	switch (update.type)
 	{
 	case api::descriptor_type::sampler:
-		bind_samplers(stages, first, update.count, static_cast<const api::sampler *>(update.descriptors));
+		bind_samplers(stages, first, update.count, static_cast<api::sampler *const *>(update.descriptors));			// VUGGER_ADDON
 		break;
 	case api::descriptor_type::shader_resource_view:
 		bind_shader_resource_views(stages, first, update.count, static_cast<const api::resource_view *>(update.descriptors));

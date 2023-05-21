@@ -6,7 +6,7 @@
 #include <vector>
 #include <limits>
 #include <cassert>
-#include "reshade_api_pipeline.hpp"
+#include "reshade_api_device.hpp"		// VUGGER_ADDON
 #include "d3d12_impl_type_convert.hpp"
 
 // {B2257A30-4014-46EA-BD88-DEC21DB6A02B}

@@ -8,7 +8,7 @@
 
 
 reshade::d3d11::device_context_impl::device_context_impl(device_impl *device, ID3D11DeviceContext *context) :
-	api_object_impl(context), _device_impl(device)
+	api_object_impl(context, device)			// VUGGER_ADDON
 {
 	context->QueryInterface(&_annotations);
 
@@ -27,10 +27,12 @@ reshade::d3d11::device_context_impl::~device_context_impl()
 #endif
 }
 
-reshade::api::device *reshade::d3d11::device_context_impl::get_device()
-{
-	return _device_impl;
-}
+// VUGGER_ADDON:
+//reshade::api::device *reshade::d3d11::device_context_impl::get_device()
+//{
+//	return _device_impl;
+//}
+// VUGGER_ADDON:
 
 reshade::api::command_list *reshade::d3d11::device_context_impl::get_immediate_command_list()
 {
@@ -56,7 +58,7 @@ void reshade::d3d11::device_context_impl::finish_command_list(api::command_list 
 	{
 		assert(native_command_list != nullptr);
 
-		command_list_impl* command_list_proxy = new command_list_impl(_device_impl, native_command_list);
+		command_list_impl* command_list_proxy = new command_list_impl(get_device(), native_command_list);		// VUGGER_ADDON
 		*command_list = command_list_proxy;
 	}
 }

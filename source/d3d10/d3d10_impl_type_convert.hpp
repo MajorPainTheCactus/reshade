@@ -106,7 +106,7 @@ namespace reshade::d3d10
 	auto convert_primitive_topology(D3D10_PRIMITIVE_TOPOLOGY value) -> api::primitive_topology;
 	auto convert_query_type(api::query_type value) -> D3D10_QUERY;
 
-	inline auto to_handle(ID3D10SamplerState *ptr) { return api::sampler { reinterpret_cast<uintptr_t>(ptr) }; }
+	//inline auto to_handle(ID3D10SamplerState *ptr) { return api::sampler { reinterpret_cast<uintptr_t>(ptr) }; }		// VUGGER_ADDON
 	inline auto to_handle(ID3D10Resource *ptr) { return api::resource { reinterpret_cast<uintptr_t>(ptr) }; }
 	inline auto to_handle(ID3D10View *ptr) { return api::resource_view { reinterpret_cast<uintptr_t>(ptr) }; }
 	inline auto to_handle(ID3D10InputLayout *ptr) { return api::pipeline { reinterpret_cast<uintptr_t>(ptr) }; }

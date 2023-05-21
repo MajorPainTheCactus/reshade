@@ -771,7 +771,7 @@ namespace reshade::api
 		/// <summary>
 		/// Sampler to sampler the shader resource view with.
 		/// </summary>
-		sampler sampler = { 0 };
+		sampler* sampler = nullptr;		// VUGGER_ADDON
 		/// <summary>
 		/// Shader resource view.
 		/// </summary>

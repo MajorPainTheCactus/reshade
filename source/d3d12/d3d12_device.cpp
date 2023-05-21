@@ -811,7 +811,8 @@ void    STDMETHODCALLTYPE D3D12Device::CreateSampler(const D3D12_SAMPLER_DESC *p
 	_orig->CreateSampler(pDesc, DestDescriptor);
 
 #if RESHADE_ADDON
-	const reshade::api::sampler descriptor_value = { DestDescriptor.ptr };
+	assert(0 && "TODO: Fix me");
+	reshade::api::sampler* descriptor_value = reinterpret_cast<reshade::api::sampler *>(DestDescriptor.ptr);
 
 	reshade::invoke_addon_event<reshade::addon_event::init_sampler>(this, desc, descriptor_value);
 #endif

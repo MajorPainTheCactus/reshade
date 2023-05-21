@@ -144,7 +144,7 @@
       <SDLCheck>true</SDLCheck>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_VERBOSE_LOG;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_VERBOSE_LOG;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -178,7 +178,7 @@
       <SDLCheck>true</SDLCheck>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_VERBOSE_LOG;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_VERBOSE_LOG;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -214,7 +214,7 @@
       <SDLCheck>true</SDLCheck>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;D3D_DEBUG_INFO;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;D3D_DEBUG_INFO;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -246,7 +246,7 @@
       <SDLCheck>true</SDLCheck>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;D3D_DEBUG_INFO;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;D3D_DEBUG_INFO;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -279,7 +279,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -321,7 +321,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -363,7 +363,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -403,7 +403,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_TEST_APPLICATION;RESHADE_VERBOSE_LOG;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -443,7 +443,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_ADDON_LITE;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_ADDON_LITE;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -488,7 +488,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalIncludeDirectories>res;source;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RESHADE_FX;VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_ADDON_LITE;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VUGGER_ADDON=1;RESHADE_GUI;RESHADE_ADDON;RESHADE_ADDON_LITE;_HAS_EXCEPTIONS=0;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4351;26812;28251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -554,7 +554,9 @@
     </ClCompile>
     <ClCompile Include="source\addon.cpp" />
     <ClCompile Include="source\addon_manager.cpp" />
-    <ClCompile Include="source\d2d1\d2d1.cpp" />
+    <ClCompile Include="source\d2d1\d2d1.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d10\d3d10.cpp" />
     <ClCompile Include="source\d3d10\d3d10_device.cpp" />
     <ClCompile Include="source\d3d10\d3d10_impl_command_list.cpp">
@@ -596,22 +598,44 @@
     <ClCompile Include="source\d3d12\d3d12_pipeline_library.cpp" />
     <ClCompile Include="source\d3d12\d3d12_pix.cpp" />
     <ClCompile Include="source\d3d12\d3d12_resource.cpp" />
-    <ClCompile Include="source\d3d9\d3d9.cpp" />
+    <ClCompile Include="source\d3d9\d3d9.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d9\d3d9_device.cpp">
       <DisableSpecificWarnings Condition="'$(Configuration)'=='Debug App'">4458;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="source\d3d9\d3d9_impl_command_list.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_impl_command_queue.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_impl_device.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_impl_state_block.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_impl_swapchain.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_impl_type_convert.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_internal.cpp" />
-    <ClCompile Include="source\d3d9\d3d9_pix.cpp" />
+    <ClCompile Include="source\d3d9\d3d9_impl_command_list.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_impl_command_queue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_impl_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_impl_state_block.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_impl_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_impl_type_convert.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_internal.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\d3d9\d3d9_pix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\d3d9\d3d9_resource.cpp">
       <DisableSpecificWarnings Condition="'$(Configuration)'=='Debug App'">4458;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="source\d3d9\d3d9_swapchain.cpp" />
+    <ClCompile Include="source\d3d9\d3d9_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\dll_log.cpp" />
     <ClCompile Include="source\dll_main.cpp" />
     <ClCompile Include="source\dll_main_test_app.cpp">
@@ -633,35 +657,78 @@
       <AdditionalOptions Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Release Signed' Or '$(Configuration)'=='Release App'">
       </AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="source\opengl\opengl_hooks.cpp" />
-    <ClCompile Include="source\opengl\opengl_hooks_ffp.cpp" />
-    <ClCompile Include="source\opengl\opengl_hooks_wgl.cpp" />
-    <ClCompile Include="source\opengl\opengl_impl_command_list.cpp" />
-    <ClCompile Include="source\opengl\opengl_impl_command_queue.cpp" />
-    <ClCompile Include="source\opengl\opengl_impl_device.cpp" />
-    <ClCompile Include="source\opengl\opengl_impl_state_block.cpp" />
-    <ClCompile Include="source\opengl\opengl_impl_swapchain.cpp" />
-    <ClCompile Include="source\opengl\opengl_impl_type_convert.cpp" />
-    <ClCompile Include="source\openvr\openvr.cpp" />
-    <ClCompile Include="source\openvr\openvr_impl_swapchain.cpp" />
+    <ClCompile Include="source\opengl\opengl_hooks.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_hooks_ffp.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_hooks_wgl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_impl_command_list.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_impl_command_queue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_impl_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_impl_state_block.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_impl_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\opengl\opengl_impl_type_convert.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\openvr\openvr.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\openvr\openvr_impl_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\process_utils.cpp" />
     <ClCompile Include="source\runtime.cpp" />
     <ClCompile Include="source\runtime_api.cpp" />
     <ClCompile Include="source\runtime_gui.cpp" />
-    <ClCompile Include="source\runtime_gui_vr.cpp" />
+    <ClCompile Include="source\runtime_gui_vr.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\runtime_update_check.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_hooks.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_hooks_cmd.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_hooks_device.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_hooks_instance.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_impl_command_list.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_impl_command_list_immediate.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_impl_command_queue.cpp" />
+    <ClCompile Include="source\vulkan\vulkan_hooks.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_hooks_cmd.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_hooks_device.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_hooks_instance.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_impl_command_list.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_impl_command_list_immediate.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_impl_command_queue.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\vulkan\vulkan_impl_device.cpp">
       <PreprocessorDefinitions>VMA_IMPLEMENTATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="source\vulkan\vulkan_impl_swapchain.cpp" />
-    <ClCompile Include="source\vulkan\vulkan_impl_type_convert.cpp" />
+    <ClCompile Include="source\vulkan\vulkan_impl_swapchain.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\vulkan\vulkan_impl_type_convert.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\windows\dinput.cpp" />
     <ClCompile Include="source\windows\dinput8.cpp" />
     <ClCompile Include="source\windows\user32.cpp" />

@@ -3608,7 +3608,8 @@ bool reshade::runtime::init_imgui_resources()
 {
 	const bool has_combined_sampler_and_view = _device->check_capability(api::device_caps::sampler_with_resource_view);
 
-	if (_imgui_sampler_state == 0)
+	// VUGGER ADDON:
+	if (_imgui_sampler_state == nullptr)
 	{
 		api::sampler_desc sampler_desc = {};
 		sampler_desc.filter = api::filter_mode::min_mag_mip_point; // VUGGER ADDON: api::filter_mode::min_mag_mip_linear;
@@ -3616,12 +3617,14 @@ bool reshade::runtime::init_imgui_resources()
 		sampler_desc.address_v = api::texture_address_mode::clamp;
 		sampler_desc.address_w = api::texture_address_mode::clamp;
 
-		if (!_device->create_sampler(sampler_desc, &_imgui_sampler_state))
+		_imgui_sampler_state = _device->create_sampler(sampler_desc);
+		if (_imgui_sampler_state == nullptr)
 		{
 			LOG(ERROR) << "Failed to create ImGui sampler object!";
 			return false;
 		}
 	}
+	// VUGGER ADDON:
 
 	if (_imgui_pipeline_layout == 0)
 	{
@@ -3879,7 +3882,7 @@ void reshade::runtime::render_imgui_draw_data(api::command_list *cmd_list, ImDra
 			const api::resource_view srv = { (uint64_t)cmd.TextureId };
 			if (has_combined_sampler_and_view)
 			{
-				api::sampler_with_resource_view sampler_and_view = { _imgui_sampler_state, srv };
+				api::sampler_with_resource_view sampler_and_view = { _imgui_sampler_state.get(), srv };				// VUGGER_ADDON
 				cmd_list->push_descriptors(api::shader_stage::pixel, _imgui_pipeline_layout, 0, api::descriptor_set_update { {}, 0, 0, 1, api::descriptor_type::sampler_with_resource_view, &sampler_and_view });
 			}
 			else
@@ -3914,8 +3917,10 @@ void reshade::runtime::destroy_imgui_resources()
 		_imgui_num_vertices[i] = 0;
 	}
 
-	_device->destroy_sampler(_imgui_sampler_state);
-	_imgui_sampler_state = {};
+	// VUGGER_ADDON
+	_device->destroy_sampler(_imgui_sampler_state.get());
+	_imgui_sampler_state = nullptr;
+	// VUGGER_ADDON
 	_device->destroy_pipeline(_imgui_pipeline);
 	_imgui_pipeline = {};
 	_device->destroy_pipeline_layout(_imgui_pipeline_layout);

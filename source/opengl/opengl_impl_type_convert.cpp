@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "reshade_api_pipeline.hpp"
+#include "reshade_api_device.hpp"			// VUGGER_ADDON
 #include <vector>
 #include <limits>
 #include "opengl_impl_type_convert.hpp"

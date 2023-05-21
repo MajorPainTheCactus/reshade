@@ -182,6 +182,17 @@ struct DECLSPEC_UUID("27B0246B-2152-4D42-AD11-32489472238F") D3D11DeviceContext 
 
 	bool check_and_upgrade_interface(REFIID riid);
 
+	// VUGGER_ADDON
+	void init();
+
+	reshade::api::sampler *const *get_vs_samplers() const override final { return m_vs_samplers.data(); }
+	reshade::api::sampler *const *get_hs_samplers() const override final { return m_hs_samplers.data(); }
+	reshade::api::sampler *const *get_ds_samplers() const override final { return m_ds_samplers.data(); }
+	reshade::api::sampler *const *get_gs_samplers() const override final { return m_gs_samplers.data(); }
+	reshade::api::sampler *const *get_ps_samplers() const override final { return m_ps_samplers.data(); }
+	reshade::api::sampler *const *get_cs_samplers() const override final { return m_cs_samplers.data(); }
+	// VUGGER_ADDON
+
 #if RESHADE_ADDON && !RESHADE_ADDON_LITE
 	void invoke_bind_samplers_event(reshade::api::shader_stage stage, UINT first, UINT count, ID3D11SamplerState *const *objects);
 	void invoke_bind_shader_resource_views_event(reshade::api::shader_stage stage, UINT first, UINT count, ID3D11ShaderResourceView *const *objects);
@@ -194,17 +205,31 @@ struct DECLSPEC_UUID("27B0246B-2152-4D42-AD11-32489472238F") D3D11DeviceContext 
 	D3D11Device *const _device;
 
 	// VUGGER ADDON
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> vs_shader_resource_views;
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> hs_shader_resource_views;
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> ds_shader_resource_views;
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> gs_shader_resource_views;
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> ps_shader_resource_views;
-	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> cs_shader_resource_views;
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_native_vs_samplers;
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_native_hs_samplers;
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_native_ds_samplers;
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_native_gs_samplers;
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_native_ps_samplers;
+	std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_native_cs_samplers;
 
-	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> ps_unordered_access_views;
-	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> cs_unordered_access_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_vs_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_hs_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_ds_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_gs_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_ps_shader_resource_views;
+	std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_cs_shader_resource_views;
 
-	std::array<ID3D11RenderTargetView *, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> render_target_views;
-	ID3D11DepthStencilView * depth_stencil_view = nullptr;
+	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_ps_unordered_access_views;
+	std::array<ID3D11UnorderedAccessView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> m_native_cs_unordered_access_views;
+
+	std::array<ID3D11RenderTargetView *, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT> m_native_render_target_views;
+	ID3D11DepthStencilView *m_native_depth_stencil_view = nullptr;
+
+	std::array<reshade::api::sampler*, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_vs_samplers;
+	std::array<reshade::api::sampler*, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_hs_samplers;
+	std::array<reshade::api::sampler*, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_ds_samplers;
+	std::array<reshade::api::sampler*, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_gs_samplers;
+	std::array<reshade::api::sampler*, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_ps_samplers;
+	std::array<reshade::api::sampler*, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> m_cs_samplers;
 	// VUGGER ADDON
 };

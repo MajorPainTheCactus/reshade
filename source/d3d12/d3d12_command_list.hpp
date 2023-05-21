@@ -121,6 +121,15 @@ struct DECLSPEC_UUID("479B29E3-9A2C-11D0-B696-00A0C903487A") D3D12GraphicsComman
 
 	bool check_and_upgrade_interface(REFIID riid);
 
+	// VUGGER_ADDON
+	reshade::api::sampler *const *get_vs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_hs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_ds_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_gs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_ps_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	reshade::api::sampler *const *get_cs_samplers() const override final { assert(0 && "TODO"); return nullptr; }
+	// VUGGER_ADDON
+
 	ULONG _ref = 1;
 	unsigned int _interface_version = 0;
 	D3D12Device *const _device;

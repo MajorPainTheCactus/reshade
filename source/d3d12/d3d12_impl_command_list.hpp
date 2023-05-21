@@ -18,7 +18,7 @@ namespace reshade::d3d12
 		command_list_impl(device_impl *device, ID3D12GraphicsCommandList *cmd_list);
 		~command_list_impl();
 
-		api::device *get_device() final;
+		device_impl *get_device();			// VUGGER_ADDON
 
 		void barrier(uint32_t count, const api::resource *resources, const api::resource_usage *old_states, const api::resource_usage *new_states) final;
 
@@ -75,7 +75,7 @@ namespace reshade::d3d12
 		// VUGGER_ADDON: END
 
 	protected:
-		device_impl *const _device_impl;
+		//device_impl *const _device_impl;			// VUGGER_ADDON
 		bool _has_commands = false;
 
 		// Currently bound root signature (graphics at index 0, compute at index 1)
@@ -83,4 +83,19 @@ namespace reshade::d3d12
 		// Currently bound descriptor heaps (there can only be one of each shader visible type, so a maximum of two)
 		ID3D12DescriptorHeap *_current_descriptor_heaps[2] = {};
 	};
+
+	// VUGGER_ADDON:
+	struct sampler_impl : public api::api_object_impl<SIZE_T, api::sampler>
+	{
+		explicit sampler_impl(device_impl *device, const reshade::api::sampler_desc &desc, D3D12_CPU_DESCRIPTOR_HANDLE sampler);
+		virtual ~sampler_impl() {}
+
+		virtual void override(api::sampler *sampler)
+		{
+			_orig = { reinterpret_cast<SIZE_T>(reinterpret_cast<sampler_impl *>(sampler)) };
+		}
+
+		device_impl *get_device();
+	};
+	// VUGGER_ADDON:
 }

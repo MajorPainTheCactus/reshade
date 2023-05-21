@@ -24,7 +24,7 @@
 	constexpr bool operator==(type lhs, uint32_t rhs) { return static_cast<uint32_t>(lhs) == rhs; } \
 	constexpr bool operator!=(type lhs, uint32_t rhs) { return static_cast<uint32_t>(lhs) != rhs; }
 
-#include "reshade_api_format.hpp"
+//#include "reshade_api_format.hpp"	// VUGGER_ADDON:
 
 namespace vugger
 {
@@ -139,7 +139,40 @@ namespace reshade::api
 	/// An opaque handle to a sampler state object.
 	/// <para>Depending on the render API this can be a pointer to a 'ID3D10SamplerState', 'ID3D11SamplerState' or a 'D3D12_CPU_DESCRIPTOR_HANDLE' (to a sampler descriptor) or 'VkSampler' handle.</para>
 	/// </summary>
-	RESHADE_DEFINE_HANDLE(sampler);
+	//RESHADE_DEFINE_HANDLE(sampler);
+
+	// VUGGER_ADDON:
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(sampler, device_object)
+	{
+		sampler(device* device, const reshade::api::sampler_desc& desc)
+			: device_object(device, reshade::api::object_type::sampler), m_desc(desc)
+		{
+			m_id = compute_crc32(reinterpret_cast<const uint8_t*>(&desc), sizeof(reshade::api::sampler_desc));
+		}
+		 
+		virtual ~sampler() {}
+
+		virtual void override(reshade::api::sampler* sampler) = 0;
+
+		virtual const char *get_name() override final
+		{
+			device_object::get_name(get_native(), "sampler");
+
+			return m_name.c_str();
+		}
+
+		virtual void gui() override final
+		{
+
+		}
+
+		const reshade::api::sampler_desc &get_desc() const { return m_desc; }
+
+	protected:
+
+		reshade::api::sampler_desc	m_desc;
+	};
+	// VUGGER_ADDON:
 
 	/// <summary>
 	/// The available memory mapping access types.
@@ -415,6 +448,120 @@ namespace reshade::api
 	/// <para>Depending on the render API this can be a pointer to a 'IDirect3DResource9', 'ID3D10View' or 'ID3D11View' object, or a 'D3D12_CPU_DESCRIPTOR_HANDLE' (to a view descriptor) or 'VkImageView' handle.</para>
 	/// </summary>
 	RESHADE_DEFINE_HANDLE(resource_view);
+
+	// VUGGER_ADDON:
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(_resource_view, device_object)
+	{
+		virtual ~_resource_view() {}
+
+		const reshade::api::resource_view_desc &get_desc() const { return m_desc; }
+
+	protected:
+		_resource_view(device * device, reshade::api::object_type object_type, const reshade::api::resource_view_desc & desc)
+			: device_object(device, object_type), m_desc(desc)
+		{
+			m_id = compute_crc32(reinterpret_cast<const uint8_t *>(&desc), sizeof(reshade::api::resource_view_desc));
+		}
+
+		reshade::api::resource_view_desc	m_desc;
+	};
+
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(shader_resource_view, _resource_view)
+	{
+		shader_resource_view(device * device, const reshade::api::resource_view_desc & desc)
+			: _resource_view(device, reshade::api::object_type::shader_resource_view, desc)
+		{
+			m_id = compute_crc32(reinterpret_cast<const uint8_t *>(&desc), sizeof(reshade::api::resource_view_desc));
+		}
+
+		virtual ~shader_resource_view() {}
+
+		virtual void override(reshade::api::resource_view view) = 0;
+
+		virtual const char *get_name() override final
+		{
+			device_object::get_name(get_native(), "shader_resource_view");
+
+			return m_name.c_str();
+		}
+
+		virtual void gui() override final {}
+
+		vugger::shader_resource_view *_proxy = nullptr;
+	};
+
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(unordered_access_view, _resource_view)
+	{
+		unordered_access_view(device * device, const reshade::api::resource_view_desc & desc)
+			: _resource_view(device, reshade::api::object_type::unordered_access_view, desc)
+		{
+			m_id = compute_crc32(reinterpret_cast<const uint8_t *>(&desc), sizeof(reshade::api::resource_view_desc));
+		}
+
+		virtual ~unordered_access_view() {}
+
+		virtual void override(reshade::api::resource_view view) = 0;
+
+		virtual const char *get_name() override final
+		{
+			device_object::get_name(get_native(), "unordered_access_view");
+
+			return m_name.c_str();
+		}
+
+		virtual void gui() override final {}
+
+		vugger::unordered_access_view *_proxy = nullptr;
+	};
+
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(render_target_view, _resource_view)
+	{
+		render_target_view(device * device, const reshade::api::resource_view_desc & desc)
+			: _resource_view(device, reshade::api::object_type::render_target_view, desc)
+		{
+			m_id = compute_crc32(reinterpret_cast<const uint8_t *>(&desc), sizeof(reshade::api::resource_view_desc));
+		}
+
+		virtual ~render_target_view() {}
+
+		virtual void override(reshade::api::resource_view view) = 0;
+
+		virtual const char *get_name() override final
+		{
+			device_object::get_name(get_native(), "render_target_view");
+
+			return m_name.c_str();
+		}
+
+		virtual void gui() override final {}
+
+		vugger::render_target_view *_proxy = nullptr;
+	};
+
+	RESHADE_DEFINE_INTERFACE_WITH_BASE(depth_stencil_view, _resource_view)
+	{
+		depth_stencil_view(device * device, const reshade::api::resource_view_desc & desc)
+			: _resource_view(device, reshade::api::object_type::depth_stencil_view, desc)
+		{
+			m_id = compute_crc32(reinterpret_cast<const uint8_t *>(&desc), sizeof(reshade::api::resource_view_desc));
+		}
+
+		virtual ~depth_stencil_view() {}
+
+		virtual void override(reshade::api::resource_view view) = 0;
+
+		virtual const char *get_name() override final
+		{
+			device_object::get_name(get_native(), "depth_stencil_view");
+
+			return m_name.c_str();
+		}
+
+		virtual void gui() override final {}
+
+		vugger::depth_stencil_view *_proxy = nullptr;
+	};
+	// VUGGER_ADDON:
 
 	/// <summary>
 	/// Describes a region inside a subresource.
